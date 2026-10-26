@@ -1,0 +1,572 @@
+{
+  "source_sha": "12f17862cf6fccc106c8d3d82ee03458dfb8f3fe",
+  "starting_head": "1a27aa4c75b07c5bf9de5cd288aacf97b840f9d0",
+  "verdict": "OFFLINE_REGRESSION_AND_POSTGRES_13Q_PASS__PYTHON312_SCHEMA_DEPENDENCY_BLOCKED",
+  "no_live_generation_provider_calls": true,
+  "live_calls": 0,
+  "live_tokens": 0,
+  "live_cost_usd": 0,
+  "production_deployments": 0,
+  "publication_operations": 0,
+  "generated_at": "2026-10-26T05:06:26.336862+00:00",
+  "suites": {
+    "python314": {
+      "source_sha": "12f17862cf6fccc106c8d3d82ee03458dfb8f3fe",
+      "passed": 2157,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 24,
+      "failures": [],
+      "collection_errors": [],
+      "skips": [
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[prompt-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[campaign]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[run]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[parent]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[section]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[artifact]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_completed_attempt_replay",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[REPORTED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[ESTIMATED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[REPORTED-100-100]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[ESTIMATED-100-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[UNKNOWN-0-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_unresolved_reservation_survives_restart_and_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_exact_accepted_references_and_stale_dependency_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_real_cas_conflict_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_stale_epoch_fencing_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_cancelled_job_run_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_crash_before_commit_draft_only_no_accepted_head",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_crash_after_commit_lost_ack_and_idempotent_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_accepted_passage_resume_zero_regeneration",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_rg10_provider_record_integrity::test_historical_forensic_vs_behavioral_reexecution_workflow_separation",
+          "reason": "Historical raw_responses directory not present on this machine."
+        }
+      ],
+      "elapsed_seconds": 255.226
+    },
+    "python312": {
+      "source_sha": "2524ef5fc5aaaf25bb77e5ce34a511cbc7159137",
+      "passed": 2101,
+      "failed": 0,
+      "errors": 12,
+      "skipped": 24,
+      "failures": [],
+      "collection_errors": [
+        {
+          "nodeid": "::tests.test_rg02_traces",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg02_views",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg03_uncertainty",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg05_s04_output_and_usage",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg06_s01_blueprint_and_rule_pack",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg06_s03_candidate_and_reference",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg07_phase_integration",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg07_s01_paired_assignments",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg07_s02_configuration_a",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg07_s03_configuration_b",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg07_s04_configuration_c",
+          "message": "collection failure"
+        },
+        {
+          "nodeid": "::tests.test_rg07_s05_ledger_and_denominators",
+          "message": "collection failure"
+        }
+      ],
+      "skips": [
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[prompt-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[retry-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[three-attempts-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_prompt_retry_admission_and_unknown_replay[reasoning-postgres]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[campaign]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[run]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[parent]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[section]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_concurrent_near_cap_admission[artifact]",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r01_pre_dispatch_reservations::test_r01_real_postgres_completed_attempt_replay",
+          "reason": "docker exam-database not running"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[REPORTED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_overrun_is_durable_idempotent_and_blocks_dispatch[ESTIMATED]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[REPORTED-100-100]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[ESTIMATED-100-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_usage_distinctions_do_not_refund_uncertain_tokens[UNKNOWN-0-500]",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r02_reconciliation::test_r02_unresolved_reservation_survives_restart_and_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_exact_accepted_references_and_stale_dependency_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_real_cas_conflict_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_stale_epoch_fencing_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_cancelled_job_run_rejection",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_crash_before_commit_draft_only_no_accepted_head",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_crash_after_commit_lost_ack_and_idempotent_replay",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_r04_passage_checkpoint::test_r04_accepted_passage_resume_zero_regeneration",
+          "reason": "exam-service live process not reachable on port 5099"
+        },
+        {
+          "nodeid": "tests.test_rg10_provider_record_integrity::test_historical_forensic_vs_behavioral_reexecution_workflow_separation",
+          "reason": "Historical raw_responses directory not present on this machine."
+        }
+      ],
+      "elapsed_seconds": 356.528
+    },
+    "phase14_actual_disposable_postgres_producer": {
+      "total": "1",
+      "executed": "1",
+      "passed": "1",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0",
+      "source_sha": "12f17862cf6fccc106c8d3d82ee03458dfb8f3fe"
+    }
+  },
+  "phase14_capture_provenance_note": "The exact event replayed inside pytest was archived from the earlier isolated producer invocation; its recorded HEAD was 1a27aa4 with uncommitted corrections. That immutable replay input is preserved. The real producer was independently rerun successfully at the final source SHA.",
+  "shared_caps_file_sha256": "da9f7fc617fc704157e2da649f02f28e82975f583d59d9e6834efd95353030c7",
+  "python312_provenance_note": "This run preceded the final harness-only concurrent-grant test commit. Production Python, collected tests and service code are identical; 56 schema-dependent cases could not collect. --continue-on-collection-errors executes independent cases, not a full PASS.",
+  "python_versions": {
+    "host": "3.14.8",
+    "container": "3.12.15",
+    "container_image": "eea0685d6d99",
+    "host_jsonschema": "4.26.0",
+    "host_rpds_py": "2026.9.1 (cp314 native extension; unusable on cp312)"
+  },
+  "irreducible_offline_dependency": "A genuine CPython 3.12-compatible rpds-py wheel/native extension, or complete rpds/PyO3 offline source/build closure. Existing jsonschema/referencing Python code is available, but importing referencing fails at rpds.rpds. No compatible artifact was found in inspected host caches/environments or 115 cached AI/generation images; no network downloads or validator substitutions used.",
+  "postgres_crash_matrix": [
+    {
+      "boundary": "accepted",
+      "run_id": "section1_fixture_b55f4eaad4ea4f96963f375e25051671",
+      "dotnet": {
+        "total": "55",
+        "executed": "55",
+        "passed": "55",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "physical_calls": 40,
+      "mandatory_passes": 78,
+      "accepted_heads": 13,
+      "fresh_service_and_database_restart": true,
+      "negative_gates": [
+        "budget",
+        "unknown_no_redispatch",
+        "epoch_takeover_fencing",
+        "competing_parent_grants"
+      ],
+      "artifact_integrity_and_dependency_closure": "PASS",
+      "allocations_equal_saved_profile": "PASS"
+    },
+    {
+      "boundary": "generation",
+      "run_id": "section1_fixture_298264a5d6a2437fbd6584865e227608",
+      "dotnet": {
+        "total": "55",
+        "executed": "55",
+        "passed": "55",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "physical_calls": 40,
+      "mandatory_passes": 78,
+      "accepted_heads": 13,
+      "fresh_service_and_database_restart": false,
+      "negative_gates": [
+        "budget",
+        "unknown_no_redispatch",
+        "epoch_takeover_fencing",
+        "competing_parent_grants"
+      ],
+      "artifact_integrity_and_dependency_closure": "PASS",
+      "allocations_equal_saved_profile": "PASS"
+    },
+    {
+      "boundary": "evaluation",
+      "run_id": "section1_fixture_56d9878c859a4e4d959498a1734dbfc7",
+      "dotnet": {
+        "total": "55",
+        "executed": "55",
+        "passed": "55",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "physical_calls": 40,
+      "mandatory_passes": 78,
+      "accepted_heads": 13,
+      "fresh_service_and_database_restart": false,
+      "negative_gates": [
+        "budget",
+        "unknown_no_redispatch",
+        "epoch_takeover_fencing",
+        "competing_parent_grants"
+      ],
+      "artifact_integrity_and_dependency_closure": "PASS",
+      "allocations_equal_saved_profile": "PASS"
+    },
+    {
+      "boundary": "repair",
+      "run_id": "section1_fixture_e210701516e844208d5be8095abe9b8a",
+      "dotnet": {
+        "total": "55",
+        "executed": "55",
+        "passed": "55",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "physical_calls": 42,
+      "mandatory_passes": 78,
+      "accepted_heads": 13,
+      "fresh_service_and_database_restart": true,
+      "negative_gates": [
+        "budget",
+        "unknown_no_redispatch",
+        "epoch_takeover_fencing",
+        "competing_parent_grants"
+      ],
+      "artifact_integrity_and_dependency_closure": "PASS",
+      "allocations_equal_saved_profile": "PASS"
+    },
+    {
+      "boundary": "finalization",
+      "run_id": "section1_fixture_20217d33b3f841adb25161541aaaa720",
+      "dotnet": {
+        "total": "55",
+        "executed": "55",
+        "passed": "55",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "physical_calls": 40,
+      "mandatory_passes": 78,
+      "accepted_heads": 13,
+      "fresh_service_and_database_restart": false,
+      "negative_gates": [
+        "budget",
+        "unknown_no_redispatch",
+        "epoch_takeover_fencing",
+        "competing_parent_grants"
+      ],
+      "artifact_integrity_and_dependency_closure": "PASS",
+      "allocations_equal_saved_profile": "PASS"
+    }
+  ],
+  "database_resource": {
+    "resource": "section1-pipeline-postgres-5dd0367d",
+    "id": "c98f51520c0cd5a4dd94c9e96294d18ac0c230e530939630eeadb1e52dd26473",
+    "labels": {
+      "purpose": "section1-scripted-pipeline",
+      "session": "5dd0367d"
+    },
+    "network_id": "8d52448246ead2642fd46d95facfb28a37a483f8f6dd9750016eb28d9869de23",
+    "internal": true,
+    "volume": "section1-pipeline-data-5dd0367d",
+    "database": "section1_pipeline",
+    "source_sha": "12f17862cf6fccc106c8d3d82ee03458dfb8f3fe"
+  },
+  "source_file_sha256": {
+    "services/exam-service.Tests/Section1ExecutionPolicySnapshotTests.cs": "91775071d5722b18095ff0e335daa80624290c9f68f31bf5d59c5922b49c1250",
+    "services/exam-service.Tests/Section1OperationAuthorityTests.cs": "8e61778f28e93b6ceb66347996188b350bd006db77c666de79b1e88802e9fa5e",
+    "services/exam-service.Tests/Section1PostgresPipelineTests.cs": "104f1e9362fff8589b993a66274547f2ad5ccb8f652e84baa7543fc6f665f950",
+    "services/exam-service/Features/ReadingPaper/BenchmarkCampaignService.cs": "a3e0fb021c6e9ff2fc4e2cf105e2dde06507734b47ac312b3e519d4e5fe116de",
+    "services/exam-service/Features/ReadingPaper/CheckpointService.cs": "39a13b03487ed59465e8051ba199df724a9a14e576b69a1f6b25db7359fbefb4",
+    "services/exam-service/Features/ReadingPaper/Contracts/CheckpointContracts.cs": "9f806ca98c54fcb39bf7beeee4cf6034712f180ff8518de6aa7f78455e6be2c2",
+    "services/exam-service/Features/ReadingPaper/ReadingPaperEndpoints.cs": "ce5221060734cb2962e9ae44ed970977f58afd740c349a766f5261c8bb12f5cd",
+    "services/exam-service/Features/ReadingPaper/ReadingPaperExecutionSnapshot.cs": "846827905091b11be0b4197d6b77b817fe071d615ce4764ffc59fa2f10e9f6dd",
+    "services/exam-service/Features/ReadingPaper/ReadingPaperWorker.cs": "935a1e2ad55418409df24488cb5ef9e91ac03895876d22b724557665b7bdca2e",
+    "services/generation-service/app/evaluators/blinded_judge.py": "197310f7ac52758129bb02c042885d5b10043c3977c0353098c930209890bfb5",
+    "services/generation-service/app/loop/runtime.py": "18f3ab8bbafbcf4766d4dba7c9bf711a91c886bff3fafc12e3cb6463b1e817c5",
+    "services/generation-service/app/providers/gateway.py": "b11da0429d2cc63bdb7247e9a0873e015e323247f016a48b2966a1ac1252aac5",
+    "services/generation-service/app/providers/replay.py": "f82b49f95fc5c56720024383e7c2e3fbb80527bf500039c2cca8daec14faa3f6",
+    "services/generation-service/app/repair/diagnostic_planner.py": "2c94b20197a62fd3ee1c3528807e25c9292b5566876701b4012f434528605613",
+    "services/generation-service/app/repair/question.py": "dd4d824c4b1b2c35908617890373524c5bf0ff36b76b5aafed1940c40ad8edd8",
+    "services/generation-service/app/stage_executor.py": "9a804060002d9aae09f40fefa0ab1a7b1fdba0539eabf340bb7a1ec18030d32b",
+    "services/generation-service/tests/offline_support/dns_fixtures.py": "3eac97a22d1c96571bf9fda42c6a268d7db9249eac12d977cb958cd314f85f71",
+    "services/generation-service/tests/offline_support/run_section1_postgres.py": "8ae027fb95a6c6f7e9e50138981bed8938702f49b9c9e7525ba3d62504178c3c",
+    "services/generation-service/tests/offline_support/sitecustomize.py": "ba25abf0cb535da761bf1cedbbdb7ee086641c56a3204147e04b11d2b9eb5852",
+    "services/generation-service/tests/section1_postgres_driver.py": "220234d9ab181657fa69a9c47038470a432c1c9eb13acfaeca9f22bb626783f7",
+    "services/generation-service/tests/test_durable_evaluation_recovery.py": "6d9a5e6187905bab0721832cdf5c29178b49ee409dfc113071d370dad4f37a7b",
+    "services/generation-service/tests/test_extractor.py": "c7779dc9a776e3de24a60e8e46137bb59405b8716ea69c2a50d0c464a7c6f5c2",
+    "services/generation-service/tests/test_hybrid_offline_replays.py": "6535853e3d28663b0a4c1215aa8ee71bd8f9fd1130c4b488654dacf48a2018e9",
+    "services/generation-service/tests/test_hybrid_question_repair_integration.py": "26db8ead872124e161c45242794ca3842f25091cbac9ad1d25d84bc887eb70d1",
+    "services/generation-service/tests/test_minimax_provider_routing.py": "5793cdad002d90beed0a815e88d18383671eaec35d992c13a943c27a94c08705",
+    "services/generation-service/tests/test_offline_guard.py": "7a033153bcfc5a3b4080c06069593ecef226ea682cc7d7840694dd26cc0fadea",
+    "services/generation-service/tests/test_orphan_wrapper_recovery.py": "944584e5c88e5aecda883c290299038b4c8d8f3625b8c83b8cdcf883a6e72b96",
+    "services/generation-service/tests/test_passage_blueprint_grounding_gate.py": "82fc878d5fbf78466ee4f88954014f1537756fdc31a1b98901510f77abf93d67",
+    "services/generation-service/tests/test_passage_parent_wall_reservation.py": "6f517e8d19202e4e6ed8d4bf5b2006faa08bd50eb7fbda99bf881b16f44803b1",
+    "services/generation-service/tests/test_phase14_offline_capture_contract.py": "94cb074ad08233428c966625414b65845a5fa82fd129fc925f963eddfaf3e6e5",
+    "services/generation-service/tests/test_r01_pre_dispatch_reservations.py": "f76754b795e091a6885440ac49fa3d2f9e1fd91c46c768c707c154990db87f84",
+    "services/generation-service/tests/test_reading_stage_executor.py": "e6fdbb3cfc1386635187ce82dea26689d50afadd66ed3b81f56462b644474c3f",
+    "services/generation-service/tests/test_repair_duplicate_diagnostics.py": "a18dd6184297f369b5b028ac90191eaba7c4d6d630cc2d4deeaac265ce0ac44d",
+    "services/generation-service/tests/test_rg10_campaign_readiness_integrity.py": "6f5d42eb668076ef4a6a8bbe1051e5b743dd3762a54bd8ff2935a266b96d2ee5",
+    "services/generation-service/tests/test_rg10_corpus_disjointness_and_readiness.py": "c0da8da0319317020825358b0afc8632cfcf9c7801b33547e68f4c9006ba4bb4",
+    "services/generation-service/tests/test_t00_policies.py": "7198f955e561070d07cce1beffb6fd812743b282d589cb7879f5fe625970b978",
+    "services/generation-service/tests/test_t03_providers.py": "ab5867d27d0f6432b7ad14ee7c3395f023391e202fa8a468ae6f7604f6412d8d",
+    "services/generation-service/tests/test_t13_endpoints.py": "5ad77c90dbbbc6a1df6bc98af562d637cd220e1161453efe0f8b971e0b18a9e1",
+    "services/generation-service/tests/test_t14_harness_integration.py": "2ca96e624986e22738e872aa271ccaae260bfe14c53b7250242891ff0cc5cf03",
+    "services/generation-service/tests/test_t15_cleanup_and_adapters.py": "20f59c03f704756b597d9f879ae92649d30df6b3c962c29e6575b8b108b40fea",
+    "services/generation-service/tests/test_tfng_semantic_contract_and_m3_repair.py": "2959e66c2b74ff3e6b60f9a6a66880b121b7ee1c9c9d37fb1ee0bae7c93f4274",
+    "services/generation-service/tests/test_unified_pipeline_execution.py": "3802b1d45111000d20d56fd1523895699d95b02600a673f80963b2630b484692",
+    "services/generation-service/tests/unified/mock_fixtures.py": "c40a59a5344807fa34cd2b62efddffd3827f4075228fe75c8a34a310cd57c4de",
+    "services/generation-service/tests/unified/test_admin_job_cli.py": "4ced32ab69a319dc05734b841092d0754c5fc7acfce7ee63e18360dafee55467",
+    "services/generation-service/tests/unified/test_content_generation_correctness_gates.py": "bb06c40381e63d501fe0b1a5d34ed06f6fbdce6a252b572cf7f6109a9f20442e",
+    "services/generation-service/tests/unified/test_duplicate_candidate_diversity_offline.py": "56e64456225030d859546cdc4992faef2388cf9a1d47271ebce115295c25911f",
+    "services/generation-service/tests/unified/test_negative_correctness_suite.py": "a3949f5b91cf44bae1ec5ced80c5a321db56ae7636c50300a15b349dc8a7e415",
+    "services/generation-service/tests/unified/test_not_given_autonomous_generation.py": "81140b3e08616ea990b7073af8112166a210ed499f63fd5864e904a25626b52f"
+  },
+  "artifact_sha256": {
+    "reports/section1_autonomous_resolution/full314.xml": "cb55dfef77cbb62020d7111c9322975d2022aa79347ea4a77d9f55ad2e1f160e",
+    "reports/section1_autonomous_resolution/full312.xml": "3b31644acbe5cb7df04b78c90abb82547d10e9f49984b417adf969bf2add50c4",
+    "reports/section1_autonomous_resolution/phase14.trx": "d5f9f267a0ddbaada980505cf376fcd4ac1de476f32943724aa7518b1b4b88c5",
+    "reports/section1_autonomous_resolution/phase14-outbox.json": "a8b1bca78543329b7bad98565d5225ed5498842eec27de798c09a126dee898a8",
+    "reports/section1_autonomous_resolution/dotnet-accepted-integration.trx": "af4ce3457d806bad55ef93d87bbcfcb42a42c43c08fc13999d5d1a3e602cb806",
+    "reports/section1_autonomous_resolution/dotnet-accepted-restart.trx": "92dd914074cb15499eeaed2c2720545f5ee2cffaf99f5bf2712468c64317ffeb",
+    "reports/section1_autonomous_resolution/dotnet-generation-integration.trx": "86c5037c546ac783b261b86aa489b28e0b597116700fa0b17893ee1d58806ed4",
+    "reports/section1_autonomous_resolution/dotnet-evaluation-integration.trx": "ce2914b8223b74d2aa9fc267b2fa7163c835ef484cc6d7c6ae4280e72457b97f",
+    "reports/section1_autonomous_resolution/dotnet-repair-integration.trx": "106fc4e58508c76567339fb522d6805a7872882ef9dabf86f75283d1999c91f9",
+    "reports/section1_autonomous_resolution/dotnet-repair-restart.trx": "f5cbcc95cb107e8aeffa34dbf2bd9cf91cf5acc4d68514ed9a74873837681db9",
+    "reports/section1_autonomous_resolution/dotnet-finalization-integration.trx": "99fa837ddd36dc9b09628e2512bef761f808838608e169203e4297a539ccf0e9",
+    "reports/section1_autonomous_resolution/postgres_acceptance.json": "687ed8839821d8865d07484bff55d3ed3de0acdb1310cfc28e1589c214dff52f"
+  },
+  "suite_scope": {
+    "python_excluded_module": "tests/test_t09_real_postgres_durability.py (unsafe legacy shared-database autouse fixtures; replaced target gate runs separately against verified owned server, not counted as tested)",
+    "python_existing_optional_skips": 24,
+    "new_skips_or_xfails_added": 0,
+    "phase14_python_mode": "Replays exact hash-checked event exported from the separately passed real PostgreSQL .NET producer test; not a fresh DB producer invocation inside pytest."
+  },
+  "safety_and_limitations": [
+    "Scripted transport and authored pre-commit blueprint inputs exercise real pipeline, validators, HTTP checkpoint service and PostgreSQL; not LIVE/model-quality acceptance.",
+    "Legacy runs without the newly pinned execution-policy carrier require explicit migration; no historical run/profile is mutated or silently filled from defaults.",
+    "Negative fixtures and failed investigative runs deliberately retain uncertain/reserved operations in the isolated DB. Zero unresolved applies to successful paths only.",
+    "The initially dirty tracked canonical_40_question_acceptance_bundle.json was not committed or reset; test-generated churn remains outside source commits.",
+    "Existing NuGet security advisories (Microsoft.OpenApi/OpenTelemetry) remain; no dependency downloads or deployment authorized.",
+    "Subagent provider usage limit interrupted PostgreSQL worker and reviewer; parent recovered implementation from retained transcript after reboot removed /tmp, then executed final gates directly."
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "payload": {
+    "runId": "run_6a3aa6400f7f40e89bf3e513a870c9a1",
+    "examId": "85da65a2-55cb-4900-8796-14abcd9eba20",
+    "comment": "Clarified prompt wording regarding primordial gas composition.",
+    "reasons": [
+      "ambiguity",
+      "unsupported_claim"
+    ],
+    "diffJson": "{\"difficulty\":{\"before\":2,\"after\":3},\"promptMd\":{\"before\":\"What were primordial gas clouds theoretically hypothesized to contain?\",\"after\":\"What were primordial gas clouds theoretically hypothesized to contain? (Refined)\"},\"explanationMd\":{\"before\":\"Explanation for Q17 with verified evidence.\\n\\nEvidence: \\u201Cprimordial cosmic gas clouds consisted almost exclusively of hydrogen and neutral helium\\u201D\",\"after\":\"Refined explanation detailing hydrogen and neutral helium evidence.\"}}",
+    "editorId": "editor-admin-test",
+    "optionId": null,
+    "sectionId": "a66ad4b9-3c10-4f22-88a6-2fe8c1b117b9",
+    "timestamp": "2026-10-26T04:05:58.7001274Z",
+    "actionType": "UPDATE",
+    "artifactId": "art_q_17",
+    "editorRole": "ADMIN",
+    "feedbackId": "fb-0ab3bcd3f04847adae672685e4c9469a",
+    "questionId": "0a9bd808-fb55-4c6e-b470-78a9168ba441",
+    "idempotencyKey": "idemp-q17-prompt-001",
+    "targetEntityId": "0a9bd808-fb55-4c6e-b470-78a9168ba441",
+    "artifactVersion": 1,
+    "afterContentHash": "9af6e223f88c9481b5da6259dcf5775d92315865f20effc1efe5a6ba61ceb24e",
+    "afterPayloadJson": "{\"idx\":17,\"type\":\"MULTIPLE_CHOICE_SINGLE\",\"skill\":\"READING\",\"difficulty\":3,\"promptMd\":\"What were primordial gas clouds theoretically hypothesized to contain? (Refined)\",\"explanationMd\":\"Refined explanation detailing hydrogen and neutral helium evidence.\",\"imageUrl\":null,\"blankAcceptTexts\":null,\"blankAcceptRegex\":null,\"matchPairs\":null,\"orderCorrects\":null,\"shortAnswerAcceptTexts\":null,\"shortAnswerAcceptRegex\":null}",
+    "downstreamImpact": [
+      "QuestionChanged",
+      "RequiresRecheck",
+      "InvalidatesRunEvaluation"
+    ],
+    "targetEntityType": "QUESTION",
+    "beforeContentHash": "a96fc71021117e2c3bfe8d12d9b75c90c1bc7ce237eda0211d012316eba5b136",
+    "beforePayloadJson": "{\"idx\":17,\"type\":\"MULTIPLE_CHOICE_SINGLE\",\"skill\":\"READING\",\"difficulty\":2,\"promptMd\":\"What were primordial gas clouds theoretically hypothesized to contain?\",\"explanationMd\":\"Explanation for Q17 with verified evidence.\\n\\nEvidence: \\u201Cprimordial cosmic gas clouds consisted almost exclusively of hydrogen and neutral helium\\u201D\",\"imageUrl\":null,\"blankAcceptTexts\":null,\"blankAcceptRegex\":null,\"matchPairs\":null,\"orderCorrects\":null,\"shortAnswerAcceptTexts\":null,\"shortAnswerAcceptRegex\":null}"
+  },
+  "source_mode": "DISPOSABLE_POSTGRES_OUTBOX",
+  "source_sha": "1a27aa4c75b07c5bf9de5cd288aacf97b840f9d0",
+  "container": "langfens-autonomous-phase14",
+  "owner": "pi-autonomous-20261025",
+  "database": "exam_test_phase14_lineage",
+  "dotnet_test": "T14_01_EditGeneratedExam_CapturesExactLineageDiffHashesAndOutbox",
+  "payload_sha256": "847164fe9444c92b3a1d0d74a0cd44e56f2e768cfb51d3ee518bc9bfb334aae9"
+}
