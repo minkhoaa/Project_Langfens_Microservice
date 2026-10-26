@@ -229,25 +229,33 @@ class MockProvider(BaseProvider):
             if isinstance(outcome, (int, float)) and outcome > 0:
                 await asyncio.sleep(outcome)
 
-        # Check explicit scripted responses
-        if request.operation_id in self.scripted_responses:
-            data = self.scripted_responses[request.operation_id]
+        # Gateway provider calls use durable physical-attempt IDs. Scripts are
+        # authored against the stable logical operation ID, so strip that suffix.
+        operation_id = request.operation_id or ""
+        logical_operation_id = re.sub(r":attempt:\d+$", "", operation_id)
+        if operation_id in self.scripted_responses:
+            data = self.scripted_responses[operation_id]
+        elif logical_operation_id in self.scripted_responses:
+            data = self.scripted_responses[logical_operation_id]
         elif (request.artifact_id or "") in self.scripted_responses and request.capability == Capability.GENERATE_JSON:
             data = self.scripted_responses[request.artifact_id]
-            if isinstance(data, dict):
-                cands = data.get("candidates") or []
-                if isinstance(cands, list) and cands and isinstance(cands[0], dict):
-                    q_num = cands[0].get("questionNumber") or cands[0].get("number")
-                    if q_num is not None:
-                        self._last_questions[int(q_num)] = cands[0]
-                elif data.get("statement") or data.get("prompt"):
-                    q_num = data.get("questionNumber") or data.get("number")
-                    if q_num is not None:
-                        self._last_questions[int(q_num)] = data
         elif request.capability.value in self.scripted_responses:
             data = self.scripted_responses[request.capability.value]
         else:
             data = self._generate_default_response(request)
+
+        if request.capability == Capability.GENERATE_JSON and isinstance(data, dict):
+            candidates = data.get("candidates") or []
+            candidate = next((c for c in candidates if isinstance(c, dict)), None) if isinstance(candidates, list) else None
+            candidate = candidate or data
+            question_number = candidate.get("questionNumber") or candidate.get("number")
+            if question_number is None:
+                artifact_match = re.fullmatch(r"question:.+:(\d+)", request.artifact_id or "")
+                question_number = int(artifact_match.group(1)) if artifact_match else None
+            if question_number is not None and (candidate.get("statement") or candidate.get("prompt")):
+                normalized_candidate = dict(candidate)
+                normalized_candidate.setdefault("questionNumber", int(question_number))
+                self._last_questions[int(question_number)] = normalized_candidate
 
         raw_text = json.dumps(data, ensure_ascii=False)
         tokens = max(10, len(raw_text) // 4)

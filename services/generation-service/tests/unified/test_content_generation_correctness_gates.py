@@ -46,6 +46,15 @@ from tests.unified.mock_fixtures import (
 from tests.unified.test_section_standalone import _setup_standalone_prerequisites
 
 
+def _bound_claim_for_question(source_ref: SourceRef, blueprint_env: ArtifactEnvelope, section_id: int, question_number: int) -> dict[str, Any]:
+    section = next(s for s in blueprint_env.payload["sections"] if s["sectionId"] == section_id)
+    slot = next(s for s in section["questionSlots"] if s["questionNumber"] == question_number)
+    claim_id = (slot.get("claimRefIds") or [None])[0]
+    claim = next((c for c in source_ref.evidence.payload["claims"] if c["claimId"] == claim_id), None)
+    assert claim is not None, f"Blueprint slot Q{question_number} has no matching verified claim"
+    return claim
+
+
 # ─── Gate 1: Committed passage originates from provider response ─────────────
 
 @pytest.mark.asyncio
@@ -227,10 +236,11 @@ async def test_gate_3_generated_questions_originate_from_parsed_provider_candida
         client, context, 1, source_input, policy
     )
 
-    # Script candidate for Question 1 with distinctive custom statement and explanation
-    distinct_statement = "PROVENANCE_Q1_STATEMENT: Timber-revetted drainage canals formed an intentional engineering network."
-    quote_in_passage = "Excavations at lakeside settlements revealed complex networks of timber-revetted drainage canals, raised agricultural terraces, and subterranean storage pits lined with charred birch bark."
-    explanation = "The passage explicitly documents timber-revetted drainage canals as part of deliberate settlement engineering."
+    # Script a distinctive candidate grounded in the immutable claim allocated to Q1.
+    q1_claim = _bound_claim_for_question(source_ref, blueprint_env, 1, 1)
+    quote_in_passage = q1_claim["text"]
+    distinct_statement = f"PROVENANCE_Q1_STATEMENT: {q1_claim['text']}"
+    explanation = f"The allocated passage claim explicitly supports this statement: {q1_claim['text']}"
 
     q1_candidate = {
         "candidates": [
@@ -340,22 +350,23 @@ async def test_gate_4b_mcq_duplicate_options_rejected() -> None:
         client, context, 2, source_input, policy
     )
 
-    # Script Question 14 (MCQ) with duplicate options A and B
-    quote_in_s2 = "Marine biogeochemical cycles in oligotrophic oceanic gyres are governed by stoichiometric ratios of carbon, nitrogen, and phosphorus established by Alfred Redfield in nineteen thirty-four."
+    # Keep the candidate provenance-valid so the duplicate-option evaluator is reached.
+    q14_claim = _bound_claim_for_question(source_ref, blueprint_env, 2, 14)
+    quote_in_s2 = q14_claim["text"]
     bad_mcq_candidate = {
         "candidates": [
             {
                 "questionNumber": 14,
-                "prompt": "Which primary factor governs marine biogeochemical cycles?",
+                "prompt": "Which statement is supported by the passage?",
                 "options": [
-                    "A. Stoichiometric ratios of carbon, nitrogen, and phosphorus",
-                    "B. Stoichiometric ratios of carbon, nitrogen, and phosphorus",  # Duplicate option
-                    "C. Uncalibrated acoustic resonance",
-                    "D. Lunar tidal amplitude variation",
+                    f"A. {q14_claim['text']}",
+                    f"B. {q14_claim['text']}",  # Duplicate option
+                    "C. The passage explicitly states the opposite condition.",
+                    "D. The passage provides no information about this topic.",
                 ],
                 "correctOption": "A",
                 "evidenceQuote": quote_in_s2,
-                "explanation": "Stoichiometric ratios govern marine biogeochemical cycles as noted in text.",
+                "explanation": f"The passage supports the selected option: {q14_claim['text']}",
             }
         ]
     }
@@ -400,15 +411,16 @@ async def test_gate_5a_blind_solver_disagreement_blocks_acceptance() -> None:
         client, context, 1, source_input, policy
     )
 
-    # Author generates question with answer TRUE
-    quote = "Archaeological and paleoecological investigations across temperate river basins demonstrate that early agrarian communities actively modified local hydrology to cultivate wetland cereals."
+    # Author generates a TRUE question tied to the immutable Q1 blueprint claim.
+    q1_claim = _bound_claim_for_question(source_ref, blueprint_env, 1, 1)
+    quote = q1_claim["text"]
     provider.script_response(f"question:{run_id}:1", {
         "candidates": [{
             "questionNumber": 1,
-            "statement": "Early communities actively modified local hydrology for cereal cultivation.",
+            "statement": q1_claim["text"],
             "answer": "TRUE",
             "evidenceQuote": quote,
-            "explanation": "The passage confirms early communities modified local hydrology for wetland cereals.",
+            "explanation": f"The allocated claim supports this true statement: {q1_claim['text']}",
         }]
     })
 
@@ -463,14 +475,16 @@ async def test_gate_5b_adversary_ambiguity_blocks_acceptance() -> None:
         client, context, 1, source_input, policy
     )
 
-    quote = "Archaeological and paleoecological investigations across temperate river basins demonstrate that early agrarian communities actively modified local hydrology to cultivate wetland cereals."
+    q1_claim = _bound_claim_for_question(source_ref, blueprint_env, 1, 1)
+    quote = q1_claim["text"]
+    ambiguous_statement = f"It is clear that {q1_claim['text']}"
     provider.script_response(f"question:{run_id}:1", {
         "candidates": [{
             "questionNumber": 1,
-            "statement": "Early communities actively modified local hydrology for cereal cultivation.",
+            "statement": ambiguous_statement,
             "answer": "TRUE",
             "evidenceQuote": quote,
-            "explanation": "The passage confirms early communities modified local hydrology for wetland cereals.",
+            "explanation": f"The allocated claim supports this true statement: {q1_claim['text']}",
         }]
     })
 
@@ -499,6 +513,8 @@ async def test_gate_5b_adversary_ambiguity_blocks_acceptance() -> None:
         ],
     })
 
+    # Isolate evaluator rejection from hybrid repair-provider availability.
+    context = context.model_copy(update={"enable_hybrid_repair": False})
     runner = SectionRunner(client, gateway)
     with pytest.raises(EvaluationRejectedError) as exc_info:
         await runner.run(

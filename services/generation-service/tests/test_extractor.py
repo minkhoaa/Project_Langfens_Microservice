@@ -19,6 +19,7 @@ from app.extractor import (
     is_safe_url,
 )
 from app.main import app
+from tests.offline_support.dns_fixtures import public_dns
 
 
 def make_words(count: int, topic: str = "science") -> str:
@@ -156,7 +157,7 @@ class TestSSRFProtection:
         assert not is_safe_url("ftp://example.com/file")
         assert not is_safe_url("gopher://example.com")
 
-    def test_allows_public_urls(self):
+    def test_allows_public_urls(self, public_dns):
         assert is_safe_url("https://example.com/article")
         assert is_safe_url("https://www.nature.com/articles/d41586-024-00001-w")
 
@@ -228,7 +229,7 @@ class TestIngestSource:
         with pytest.raises(SourceError, match="restricted, private, or invalid"):
             await ingest_source(payload="http://127.0.0.1:8080/secret", source_type="url")
 
-    async def test_ingest_url_mocked_fetch(self):
+    async def test_ingest_url_mocked_fetch(self, public_dns):
         html_payload = f"""
         <html><head><title>Renewable Energy</title></head>
         <body><p>{make_words(620, 'wind turbines')}</p></body></html>
@@ -239,8 +240,7 @@ class TestIngestSource:
             text=html_payload,
             request=httpx.Request("GET", "https://example.org/article"),
         )
-        with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response), \
-             patch("app.extractor.is_safe_url", return_value=True):
+        with patch("httpx.AsyncClient.get", new_callable=AsyncMock, return_value=mock_response):
             result = await ingest_source(payload="https://example.org/article", source_type="url")
             assert result["sourceType"] == "url"
             assert result["title"] == "Renewable Energy"

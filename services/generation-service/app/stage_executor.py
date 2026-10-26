@@ -254,6 +254,22 @@ class StageExecutor:
                 if snapshot.policy_hash != self.context.policy_hash:
                     raise PolicyHashMismatchError(artifact_id, "durable cursor policy hash differs")
             else:
+                if "policy" in body:
+                    loop_cursor = body.get("cursor")
+                    if not isinstance(loop_cursor, dict):
+                        raise ValueError("invalid loop cursor payload")
+                    if loop_cursor.get("currentState") == LoopState.COMPLETED.value:
+                        head = self._head(state, artifact_id)
+                        current_ref = body.get("currentRef")
+                        if (
+                            head is None
+                            or current_ref is None
+                            or ArtifactRef.model_validate(current_ref) != head.to_ref()
+                        ):
+                            raise ArtifactReuseRejectedError(
+                                artifact_id,
+                                "completed loop cursor does not reference the exact authoritative head",
+                            )
                 head = self._head(state, artifact_id)
                 cur_state = StageState.ACCEPTED if head else StageState.RUNNING
                 stored_evals = tuple(e for e in state.evaluations or () if e.target_ref.artifact_id == artifact_id)
@@ -311,10 +327,13 @@ class StageExecutor:
 
     @staticmethod
     def _unknowns(state: ResumeStateResult, artifact_id: str) -> tuple[str, ...]:
-        return tuple(op.operationId for op in state.operations or ()
+        from app.providers.replay import known_wrapper_responses
+        operations = state.operations or ()
+        return tuple(op.operationId for op in operations
                      if op.artifactId == artifact_id
                      and op.status.upper() not in ("COMPLETED", "FAILED", "CANCELLED")
-                     and not (op.operationType == "CHECKPOINT_COMMIT" and op.status.upper() == "RESERVED"))
+                     and not (op.operationType == "CHECKPOINT_COMMIT" and op.status.upper() == "RESERVED")
+                     and known_wrapper_responses(operations, op.operationId) is None)
 
     async def _api(self, artifact_id: str, action: Callable[[], Awaitable[Any]]) -> Any:
         try:

@@ -246,6 +246,18 @@ async def test_question_item_repair_and_stagnation_ladder():
     executor = StageExecutor(client, context, policy, required_evaluator_ids=("eval_question_structure",))
 
     passage_text = "The deep oceanic trench contains distinct hydrothermal vent ecosystems supported by chemosynthetic bacteria."
+    # A question repair requires real immutable passage/blueprint parents even
+    # when the repair callback itself is deterministic and performs no transport.
+    passage = ArtifactEnvelope.create(
+        artifact_id=f"passage:{run_id}:1", artifact_type=ArtifactType.PASSAGE,
+        run_id=run_id, payload={"passage": passage_text}, producer_version="1.0.0",
+    )
+    blueprint = ArtifactEnvelope.create(
+        artifact_id=f"blueprint:{run_id}", artifact_type=ArtifactType.EXAM_BLUEPRINT,
+        run_id=run_id, payload={"fixture": "surgical-repair-parent"}, producer_version="1.0.0",
+    )
+    for parent in (passage, blueprint):
+        client.heads[(run_id, parent.artifact_id)] = parent
 
     attempt_count = 0
     repair_count = 0
@@ -304,7 +316,7 @@ async def test_question_item_repair_and_stagnation_ladder():
     committed_env = await executor.execute(
         artifact_id=q_art_id,
         artifact_type=ArtifactType.QUESTION,
-        parents=(),
+        parents=(passage.to_ref(), blueprint.to_ref()),
         generate=generate_flawed_question,
         evaluate=evaluate_flawed_question,
         section_id=1,

@@ -615,10 +615,13 @@ async def test_12_section_runner_execution_with_not_given_question():
         client, context, 1, source_input, policy
     )
 
-    # Passage contains standard West African iron smelting content
-    # Script Question 1 as a valid NOT_GIVEN item
-    topical_anchor = "Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape."
-    ng_stmt = "Archaeologists discovered iron smelting mining shafts deeper than thirty meters across the surveyed landscape."
+    # Bind the scripted absence assessment to this run's immutable blueprint,
+    # rather than an unrelated historical passage or a randomly selected claim.
+    slot = blueprint_env.payload["sections"][0]["questionSlots"][0]
+    claim_id = slot["claimRefIds"][0]
+    bound_claim = next(c for c in source_ref.evidence.payload["claims"] if c["claimId"] == claim_id)
+    topical_anchor = bound_claim["text"]
+    ng_stmt = "The archaeological research project was financed by merchant guilds."
     q1_op_id = f"op:{run_id}:question:1:1_1"
     provider.script_response(
         q1_op_id,
@@ -629,12 +632,12 @@ async def test_12_section_runner_execution_with_not_given_question():
                     "answer": "NOT_GIVEN",
                     "absenceAssessment": {
                         "assessmentId": f"abs_{run_id}_1",
-                        "claimOrTopic": "Shaft depth across the surveyed landscape",
-                        "absenceReason": "The passage discusses surface smelting patterns but completely omits underground shaft depths.",
+                        "claimOrTopic": "Financing of the archaeological research",
+                        "absenceReason": "The passage describes archaeological findings but supplies no information about research financing or merchant guilds.",
                         "topicalContextSpan": topical_anchor,
                         "absenceConfirmed": True,
                     },
-                    "explanation": "The passage discusses methodological patterns of smelting sites but makes no mention of shaft depths.",
+                    "explanation": "The passage reports archaeological findings but provides no information about research financing.",
                 }
             ]
         },
@@ -644,7 +647,7 @@ async def test_12_section_runner_execution_with_not_given_question():
         {
             "questionNumber": 1,
             "normalizedAnswer": "NOT_GIVEN",
-            "justification": "The passage discusses smelting patterns but never mentions mining shaft depth.",
+            "justification": "The passage reports archaeological findings but never identifies a source of research financing.",
             "citedSpans": [{"spanText": topical_anchor}],
             "selfReportedConfidence": 0.95,
         },

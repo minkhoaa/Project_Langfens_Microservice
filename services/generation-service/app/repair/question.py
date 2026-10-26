@@ -389,6 +389,11 @@ class QuestionItemRepairer(BaseRepairer):
                             raise RepairJustificationError(
                                 f"Question {q_num_val} M3-assisted repair regeneration failed to produce compliant candidate"
                             )
+                        # One new candidate is one immutable repair version. Other
+                        # diagnostics refer to the old candidate: rerun mandatory
+                        # evaluators, never reuse this version's paid operation IDs
+                        # with a mutated prompt or synthesize resolved issues here.
+                        break
                     elif iss.proposed_repair:
                         if not iss.evidence or len(iss.evidence.strip()) < 5 or (passage_text and iss.evidence.strip() not in passage_text):
                             raise RepairJustificationError(

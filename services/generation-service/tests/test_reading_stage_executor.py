@@ -43,7 +43,7 @@ class Context:
 def evaluation(artifact, status=EvaluationStatus.PASS, evaluator_id="required"):
     return EvaluationResult(
         evaluationId=f"evaluation:{artifact.artifact_id}:{artifact.version}:{status.value}",
-        evaluatorId=evaluator_id, evaluatorVersion="test-v1", targetRef=artifact.to_ref(),
+        evaluatorId=evaluator_id, evaluatorVersion="1.0.0", targetRef=artifact.to_ref(),
         inputDependencyRefs=list(artifact.parent_refs), status=status,
     )
 
@@ -90,16 +90,30 @@ class Authority:
             envelopeJson=artifact.model_dump_json(by_alias=True),
         )
 
-    async def resume_state_async(self, run_id):
+    def resume_state(self, run_id):
+        from app.config import cap_snapshot_json, cap_snapshot_sha256
+        from app.loop.policy import LoopPolicy
+
+        profile = LoopPolicy.from_pinned_execution_policy(
+            SimpleNamespace(hash=self.policy_hash),
+        ).cap_profile_snapshot
+        profile_json = cap_snapshot_json(profile)
         return ResumeStateResult(
             runId=run_id, jobId=self.context.job_id, epoch=self.epoch, status=self.status,
             engineVersion="unified-v1", schemaVersion="1.0.0", policyVersion="v1",
             policyHash=self.policy_hash,
+            budgetProfileJson=profile_json,
+            budgetProfileSha256=cap_snapshot_sha256(profile),
+            budgetProfileVersion=profile["profileVersion"],
+            budgetProfileSource=profile["profileSource"],
             artifacts=[self.info(a) for a in self.heads.values()],
             draftArtifacts=[self.info(a) for a in self.drafts.values()],
             loopCursors=list(self.cursors.values()), evaluations=list(self.evaluations),
             operations=list(self.operations.values()),
         )
+
+    async def resume_state_async(self, run_id):
+        return self.resume_state(run_id)
 
     def save_loop_cursor(self, request):
         self.fence(request)
@@ -116,7 +130,7 @@ class Authority:
         self.cursors = {**self.cursors, request.artifactId: ack}
         return ack
 
-    async def grant_operation_async(self, request):
+    def grant_operation(self, request):
         self.fence(request)
         old = self.operations.get(request.operationId)
         if old and old.requestHash != request.requestHash:
@@ -127,6 +141,7 @@ class Authority:
                 status="RESERVED", artifactId=request.artifactId, requestHash=request.requestHash,
                 tokenReservation=request.tokenReservation, tokensUsed=0,
                 wallTimeReservationSeconds=request.wallTimeReservationSeconds, wallTimeUsedSeconds=0,
+                parentOperationId=request.parentOperationId, sectionId=request.sectionId,
             )
             self.operations = {**self.operations, op.operationId: op}
         self.grants = [*self.grants, request]
@@ -136,6 +151,28 @@ class Authority:
             wallTimeReservationSeconds=request.wallTimeReservationSeconds,
             grantedAt=NOW, isReplay=old is not None,
         )
+
+    async def grant_operation_async(self, request):
+        return self.grant_operation(request)
+
+    def reconcile_operation(self, request):
+        self.fence(request)
+        operation = self.operations.get(request.operationId)
+        if operation is None:
+            raise CheckpointApiError(404, "operation not found")
+        self.operations = {**self.operations, operation.operationId: operation.model_copy(update={
+            "status": "COMPLETED", "tokensUsed": request.tokensUsed,
+            "wallTimeUsedSeconds": request.wallTimeUsedSeconds,
+            "resultRefJson": request.resultRefJson,
+            "promptTokensUsed": request.promptTokensUsed,
+            "completionTokensUsed": request.completionTokensUsed,
+            "reasoningTokensUsed": request.reasoningTokensUsed,
+            "accountingType": request.accountingType,
+        })}
+        return SimpleNamespace(status="COMPLETED", reservationBreached=False, budgetBreachDetected=False)
+
+    async def reconcile_operation_async(self, request):
+        return self.reconcile_operation(request)
 
     def ack(self, request):
         artifact = request.artifact
@@ -149,7 +186,7 @@ class Authority:
             version=artifact.version, contentHash=artifact.content_hash, serverTimestampUtc=NOW,
         )
 
-    async def save_draft_checkpoint_async(self, request):
+    def save_draft_checkpoint(self, request):
         self.fence(request)
         key = (request.artifact.artifact_id, request.artifact.version)
         old = self.drafts.get(key)
@@ -162,7 +199,10 @@ class Authority:
             raise Crash()
         return ack
 
-    async def commit_checkpoint_async(self, request):
+    async def save_draft_checkpoint_async(self, request):
+        return self.save_draft_checkpoint(request)
+
+    def commit_checkpoint(self, request):
         self.fence(request)
         if self.crash_commit:
             self.crash_commit = False
@@ -182,8 +222,14 @@ class Authority:
         self.commits = [*self.commits, request]
         return self.ack(request)
 
+    async def commit_checkpoint_async(self, request):
+        return self.commit_checkpoint(request)
+
     def state(self, artifact_id="passage"):
-        return json.loads(self.cursors[artifact_id].stateJson)["state"]
+        payload = json.loads(self.cursors[artifact_id].stateJson)
+        if "state" in payload:
+            return payload["state"]
+        return payload["cursor"]["currentState"]
 
     def executor(self):
         return StageExecutor(self, self.context, SimpleNamespace(hash=self.policy_hash),
@@ -205,9 +251,11 @@ async def test_accepts_draft_and_charges_no_provider_tokens_for_stage_operations
     store = Authority()
     artifact = await execute(store)
     assert artifact.version == 1
-    assert store.state() == StageState.ACCEPTED.value
+    assert store.state() == "COMPLETED"
     assert store.drafts[("passage", 1)] == artifact
-    assert all(g.operationType == "CHECKPOINT_COMMIT" and g.tokenReservation == 0 for g in store.grants)
+    commit_grants = [g for g in store.grants if g.operationType == "CHECKPOINT_COMMIT"]
+    assert commit_grants and all(g.tokenReservation == 0 for g in commit_grants)
+    assert not any(g.operationType == "PROVIDER_CALL" for g in store.grants)
     assert all(c.tokensUsed == 0 for c in store.commits)
 
 
@@ -227,21 +275,20 @@ async def test_empty_or_malformed_evaluations_never_pass(results):
 
 
 @pytest.mark.asyncio
-async def test_rejected_evaluation_is_durable_and_retry_increments_all_draft_revisions():
+async def test_rejected_evaluation_is_durable_across_bounded_generation_retries():
     store = Authority()
 
     async def fail(artifact):
         return [evaluation(artifact, EvaluationStatus.FAIL)]
 
-    for version in (1, 2):
-        with pytest.raises(EvaluationRejectedError) as rejected:
-            await execute(store, evaluate=fail)
-        assert rejected.value.artifact.version == version
-        assert rejected.value.evaluations[0].status == EvaluationStatus.FAIL
-        assert json.loads(store.cursors["passage"].stateJson)["evaluations"][0]["status"] == "FAIL"
-    accepted = await execute(store)
-    assert accepted.version == 3
+    with pytest.raises(EvaluationRejectedError) as rejected:
+        await execute(store, evaluate=fail)
+    assert rejected.value.artifact.version == 3
+    assert rejected.value.evaluations[0].status == EvaluationStatus.FAIL
+    assert json.loads(store.cursors["passage"].stateJson)["evaluations"][0]["status"] == "FAIL"
+    assert store.state() == "FAILED"
     assert sorted(v for _, v in store.drafts) == [1, 2, 3]
+    assert not store.commits
 
 
 @pytest.mark.asyncio
@@ -309,10 +356,14 @@ async def test_crash_after_draft_resumes_evaluation_without_regeneration(crash_p
     with pytest.raises(Crash):
         await execute(store, generate=counted)
     assert (await store.executor().classify_recovery("passage")).kind == RecoveryKind.RESUME_EVALUATION
+    if crash_point == "crash_commit":
+        evaluation_ops = [op for op in store.operations.values() if op.operationType == "EVALUATE"]
+        assert evaluation_ops and all(op.status == "COMPLETED" and op.resultRefJson for op in evaluation_ops)
+        assert not store.evaluations  # evaluations are durable on the operation before head commit
     artifact = await execute(store, generate=counted)
     assert artifact.version == 1
     assert calls == [1]
-    assert store.state() == "ACCEPTED"
+    assert store.state() == "COMPLETED"
 
 
 @pytest.mark.asyncio
@@ -334,7 +385,7 @@ async def test_different_scopes_do_not_contend():
     store = Authority()
     results = await asyncio.gather(execute(store, artifact_id="one"), execute(store, artifact_id="two"))
     assert {a.artifact_id for a in results} == {"one", "two"}
-    assert store.state("one") == store.state("two") == "ACCEPTED"
+    assert store.state("one") == store.state("two") == "COMPLETED"
 
 
 @pytest.mark.asyncio
@@ -398,7 +449,12 @@ async def test_accepted_cursor_hash_corruption_is_not_reused():
     store = Authority()
     await execute(store)
     cursor = store.cursors["passage"]
-    state = json.loads(cursor.stateJson) | {"acceptedHash": "b" * 64}
+    state = json.loads(cursor.stateJson)
+    state["currentRef"] = state["currentRef"] | {"contentHash": "b" * 64}
     store.cursors = {"passage": cursor.model_copy(update={"stateJson": json.dumps(state)})}
-    with pytest.raises(ArtifactReuseRejectedError):
-        await execute(store)
+
+    async def forbidden(version):
+        pytest.fail("a corrupt durable cursor must block generation")
+
+    with pytest.raises(ArtifactReuseRejectedError, match="completed loop cursor"):
+        await execute(store, generate=forbidden)

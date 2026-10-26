@@ -75,8 +75,38 @@ def mock_exam_server():
     port = server.server_port
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    yield f"http://127.0.0.1:{port}", MockExamHandler
-    server.shutdown()
+    try:
+        yield f"http://127.0.0.1:{port}", MockExamHandler
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+
+def _cli_env(base_url):
+    guard_dir = Path(__file__).resolve().parents[1] / "offline_support"
+    return {
+        **os.environ,
+        "JWT_SIGNING_KEY": TEST_JWT_SECRET,
+        "EXAM_SERVICE_URL": base_url,
+        "OFFLINE_GUARD_ALLOW_LOOPBACK": base_url.removeprefix("http://"),
+        "PYTHONPATH": os.pathsep.join((str(guard_dir), os.environ.get("PYTHONPATH", ""))),
+        "NO_PROXY": "127.0.0.1",
+    }
+
+
+def test_cli_default_offline_guard_denies_even_local_server(mock_exam_server):
+    base_url, handler = mock_exam_server
+    script = Path(__file__).resolve().parents[4] / "run_e2e_admin_job.py"
+    env = _cli_env(base_url)
+    env.pop("OFFLINE_GUARD_ALLOW_LOOPBACK")
+    res = subprocess.run(
+        [sys.executable, str(script), "--mode", "resume", "--job-id", handler.job_id, f"--base-url={base_url}"],
+        capture_output=True, text=True, env=env, timeout=5,
+    )
+    assert res.returncode != 0
+    assert "OFFLINE_GUARD: TCP connections forbidden" in res.stderr
+    assert handler.requests_log == []
 
 
 def test_cli_help_displays_modes():
@@ -94,7 +124,7 @@ def test_regression_h_no_explicit_mode_creates_no_job(mock_exam_server):
     base_url, handler = mock_exam_server
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     res = subprocess.run([sys.executable, str(script), f"--base-url={base_url}"], capture_output=True, text=True, env=env)
     # Must fail or require explicit mode, and create ZERO network requests to create a job
@@ -107,7 +137,7 @@ def test_regression_a_new_plus_offline_zero_mutating_requests(mock_exam_server):
     base_url, handler = mock_exam_server
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     # Test via --offline flag
     res1 = subprocess.run([sys.executable, str(script), "--mode", "new", "--offline", f"--base-url={base_url}"], capture_output=True, text=True, env=env)
@@ -128,7 +158,7 @@ def test_regression_b_resume_plus_offline_failed_zero_post(mock_exam_server):
     handler.job_status = "Failed"
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     # Running resume with offline on Failed job must NOT issue POST /retry
     res = subprocess.run(
@@ -138,8 +168,11 @@ def test_regression_b_resume_plus_offline_failed_zero_post(mock_exam_server):
         env=env,
         timeout=5,
     )
-    post_requests = [r for r in handler.requests_log if r["method"] == "POST"]
-    assert len(post_requests) == 0, f"Expected ZERO POST requests in offline resume on Failed job, got: {post_requests}"
+    assert res.returncode == 1
+    assert "Job reached terminal status: Failed" in res.stdout
+    assert "Skipping POST /retry" in res.stdout
+    assert handler.requests_log
+    assert all(r["method"] == "GET" for r in handler.requests_log)
 
 
 def test_regression_c_resume_plus_offline_needs_sources_zero_post(mock_exam_server):
@@ -147,7 +180,7 @@ def test_regression_c_resume_plus_offline_needs_sources_zero_post(mock_exam_serv
     handler.job_status = "NeedsSources"
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     res = subprocess.run(
         [sys.executable, str(script), "--mode", "resume", "--job-id", handler.job_id, "--offline", f"--base-url={base_url}"],
@@ -156,8 +189,10 @@ def test_regression_c_resume_plus_offline_needs_sources_zero_post(mock_exam_serv
         env=env,
         timeout=5,
     )
-    post_requests = [r for r in handler.requests_log if r["method"] == "POST"]
-    assert len(post_requests) == 0, f"Expected ZERO POST requests for NeedsSources, got: {post_requests}"
+    assert res.returncode == 1
+    assert "Job reached terminal status: NeedsSources" in res.stdout
+    assert handler.requests_log
+    assert all(r["method"] == "GET" for r in handler.requests_log)
 
 
 def test_regression_d_monitor_get_only(mock_exam_server):
@@ -165,7 +200,7 @@ def test_regression_d_monitor_get_only(mock_exam_server):
     handler.job_status = "Completed"
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     res = subprocess.run(
         [sys.executable, str(script), "--mode", "monitor", "--job-id", handler.job_id, f"--base-url={base_url}"],
@@ -185,7 +220,7 @@ def test_regression_e_completed_no_retry(mock_exam_server):
     handler.job_status = "Completed"
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     res = subprocess.run(
         [sys.executable, str(script), "--mode", "resume", "--job-id", handler.job_id, f"--base-url={base_url}"],
@@ -203,7 +238,7 @@ def test_regression_f_invalid_uuid_zero_network_mutation(mock_exam_server):
     base_url, handler = mock_exam_server
     repo_root = Path(__file__).resolve().parents[4]
     script = repo_root / "run_e2e_admin_job.py"
-    env = {**os.environ, "JWT_SIGNING_KEY": TEST_JWT_SECRET, "EXAM_SERVICE_URL": base_url}
+    env = _cli_env(base_url)
 
     res = subprocess.run(
         [sys.executable, str(script), "--mode", "resume", "--job-id", "not-a-valid-uuid", f"--base-url={base_url}"],

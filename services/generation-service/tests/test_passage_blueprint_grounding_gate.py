@@ -585,7 +585,7 @@ async def test_11_existing_hybrid_m3_repair_path_continues_for_genuine_semantic_
     """Test 11: Genuine semantic failures (e.g. ambiguity) invoke M3 repair planning when hybrid enabled."""
     from app.repair.question import QuestionItemRepairer
     from tests.test_hybrid_offline_replays import HistoricalReplayTransportProvider, make_replay_context, make_replay_artifact
-    from tests.test_t03_providers import MockCheckpointClient
+    from tests.test_t03_providers import MockCheckpointClient, seed_repair_parent
 
     from app.providers.retry import RetryPolicy
 
@@ -615,6 +615,10 @@ async def test_11_existing_hybrid_m3_repair_path_continues_for_genuine_semantic_
         scope=IssueScope.QUESTION,
     )
 
+    await seed_repair_parent(
+        client, run_id=context.run_id, operation_id="intent_hybrid_test", artifact_id=artifact.artifact_id,
+        section_id=context.section_id, lease_owner=context.authority.lease_owner,
+    )
     repaired_env = await repairer.repair(context, artifact, [issue], "intent_hybrid_test", 2)
     assert repaired_env.version == 2
     assert repaired_env.payload["questionNumber"] == 2

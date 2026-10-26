@@ -149,10 +149,12 @@ def _make_passage_runtime(policy: LoopPolicy | None = None, store: CheckpointCli
 
 
 def test_passage_generate_parent_reservation_sized_for_up_to_three_calls():
-    """Passage GENERATE parent reservation must account for at most 3 bounded calls (3 * 180s = 540s)."""
+    """Passage GENERATE parent covers up to three child reservations under the pinned cap."""
     runtime = _make_passage_runtime()
     intent = runtime._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
-    assert intent.wall_time_reservation_seconds == 540.0
+    per_call_cap = min(runtime.policy.operation_wall_reservation_seconds, 180.0)
+    expected = min(3 * per_call_cap, runtime.policy.max_wall_time_seconds)
+    assert intent.wall_time_reservation_seconds == expected
     assert intent.operation_type == "GENERATE"
 
 def test_evaluate_and_repair_reservations_remain_unchanged():
@@ -189,9 +191,9 @@ def test_question_generate_parent_reservation_sized_for_candidate_loop():
         evaluators=[],
         persistence_client=MockDurableStore("run_test_q_wall"),
     )
-    # 1. Under nominal production settings (policy wall res = 180.0s), parent is capped to 120.0s
+    # The parent cannot exceed either the pinned operation cap or the 120s child ceiling.
     q_intent = runtime._intent("GENERATE", version=1, tokens=5000, identity="1.0.0", extra={})
-    assert q_intent.wall_time_reservation_seconds == 120.0
+    assert q_intent.wall_time_reservation_seconds == min(policy.operation_wall_reservation_seconds, 120.0)
 
     # 2. When policy is configured for 60.0s, parent mirrors child at 60.0s
     policy_60 = policy.model_copy(update={"operation_wall_reservation_seconds": 60.0})
@@ -254,7 +256,7 @@ def test_passage_generate_reservation_respects_finite_caps():
     intent_very_tight = runtime_very_tight._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
     assert intent_very_tight.wall_time_reservation_seconds == 45.0
 
-    # 3. Unlimited run mode (max_wall_time_seconds = -1.0) -> nominal 540.0s
+    # 3. Unlimited run mode remains bounded by three per-call reservations.
     policy_unlimited = LoopPolicy.from_settings().model_copy(update={
         "max_wall_time_seconds": -1.0,
         "max_total_calls": -1,
@@ -262,14 +264,17 @@ def test_passage_generate_reservation_respects_finite_caps():
     })
     runtime_unlimited = _make_passage_runtime(policy=policy_unlimited)
     intent_unlimited = runtime_unlimited._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
-    assert intent_unlimited.wall_time_reservation_seconds == 540.0
+    assert intent_unlimited.wall_time_reservation_seconds == 3 * min(
+        policy_unlimited.operation_wall_reservation_seconds, 180.0
+    )
 
 def test_two_sequential_provider_calls_fit_inside_generate_when_permitted_by_caps():
-    """Two sequential provider calls inside one GENERATE must fit when parent reservation is sized for 3 calls at 180s."""
+    """Two sequential provider calls fit within the parent and pinned operation wall caps."""
     store = MockDurableStore("run_demo", artifact_wall_cap=600.0, section_wall_cap=900.0)
     runtime = _make_passage_runtime(store=store)
 
-    # 1. Parent GENERATE is granted with 540s reservation
+    child_wall = min(runtime.policy.operation_wall_reservation_seconds, 180.0)
+    # 1. Parent GENERATE covers three child reservations under the selected profile.
     parent_intent = runtime._intent("GENERATE", version=1, tokens=40000, identity="2.0.0", extra={})
     parent_grant = store.grant_operation(OperationGrantRequest(
         runId="run_demo", epoch=1, leaseOwner=uuid4(),
@@ -278,36 +283,36 @@ def test_two_sequential_provider_calls_fit_inside_generate_when_permitted_by_cap
         wallTimeReservationSeconds=parent_intent.wall_time_reservation_seconds,
         artifactId="art_passage_s2",
     ))
-    assert parent_grant.wallTimeReservationSeconds == 540.0
+    assert parent_grant.wallTimeReservationSeconds == 3 * child_wall
 
-    # 2. Child 1 (initial generation): reserves 180s
+    # 2. Child 1 (initial generation) reserves one pinned child-call allowance.
     ch1 = store.grant_operation(OperationGrantRequest(
         runId="run_demo", epoch=1, leaseOwner=uuid4(),
         operationId="op_ch1", operationType="PROVIDER_CALL",
         requestHash="hash_ch1", tokenReservation=15000,
-        wallTimeReservationSeconds=180.0,
+        wallTimeReservationSeconds=child_wall,
         artifactId="art_passage_s2",
         parentOperationId=parent_intent.operation_id,
     ))
-    assert ch1.wallTimeReservationSeconds == 180.0
+    assert ch1.wallTimeReservationSeconds == child_wall
 
-    # Child 1 completes and reconciles, using 72.0s
-    store.reconcile_operation("op_ch1", wall_time_used=72.0, tokens_used=8285)
+    # Child 1 completes and reconciles using part of its bounded allowance.
+    first_call_wall = child_wall / 2
+    store.reconcile_operation("op_ch1", wall_time_used=first_call_wall, tokens_used=8285)
 
-    # 3. Child 2 (word-count guard re-ask): reserves 180s under the same parent GENERATE
-    # With parent reservation = 540s, child allocated is 72.0s + 180.0s = 252.0s <= 540.0s -> MUST FIT!
+    # 3. Child 2 can use the remaining parent allowance without exceeding the cap.
     ch2 = store.grant_operation(OperationGrantRequest(
         runId="run_demo", epoch=1, leaseOwner=uuid4(),
         operationId="op_ch2", operationType="PROVIDER_CALL",
         requestHash="hash_ch2", tokenReservation=15000,
-        wallTimeReservationSeconds=180.0,
+        wallTimeReservationSeconds=child_wall,
         artifactId="art_passage_s2",
         parentOperationId=parent_intent.operation_id,
     ))
-    assert ch2.wallTimeReservationSeconds == 180.0
+    assert ch2.wallTimeReservationSeconds == child_wall
 
-    # Child 2 completes and reconciles using 68.0s
-    store.reconcile_operation("op_ch2", wall_time_used=68.0, tokens_used=8500)
+    # Child 2 completes inside its reservation.
+    store.reconcile_operation("op_ch2", wall_time_used=child_wall / 2, tokens_used=8500)
     # Two sequential calls completed successfully within parent GENERATE's wall time and token reservations.
     assert len(store.operations) == 3  # parent + ch1 + ch2
 def test_provider_call_exceeding_parent_cap_rejected():
@@ -398,7 +403,7 @@ def test_question_candidate_child_call_fits_inside_parent_reservation():
         authority=AuthorityGrant(leaseOwner=owner, epoch=1),
         budgetTracker=BudgetTracker(),
     )
-    policy = LoopPolicy.from_settings()
+    policy = LoopPolicy.from_settings().model_copy(update={"operation_wall_reservation_seconds": 180.0})
     runtime = BoundedLoopRuntime(
         context=context,
         policy=policy,

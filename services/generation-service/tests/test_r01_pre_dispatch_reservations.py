@@ -24,7 +24,7 @@ from app.persistence.models import (
 )
 from app.providers.adapters.minimax import MiniMaxProvider
 from app.providers.adapters.openai_compatible import OpenAICompatibleProvider
-from app.providers.errors import BudgetExhaustedError, ProviderUnavailableError
+from app.providers.errors import BudgetExhaustedError, ProviderError, ProviderUnavailableError
 from app.providers.gateway import ProviderGateway
 from app.providers.models import Capability, ChatMessage, ProviderRequest
 from app.providers.registry import ProviderRegistry
@@ -110,7 +110,7 @@ async def _operations(client, run_id):
 @pytest.mark.parametrize("authority", ["memory", "postgres"])
 @pytest.mark.parametrize("scenario", ["prompt", "retry", "three-attempts", "reasoning"])
 async def test_r01_prompt_retry_admission_and_unknown_replay(authority, scenario):
-    """Prompt/reasoning headroom and each retry must be granted before its wire call."""
+    """Headroom is admitted before dispatch; unknown outcomes retain one grant without retries."""
     calls = []
     async def route(wire_request):
         return await transport(wire_request)
@@ -119,11 +119,13 @@ async def test_r01_prompt_retry_admission_and_unknown_replay(authority, scenario
         provider = _provider(http_client, reasoning=scenario == "reasoning")
         request = _request()
         bound = provider.conservative_token_reservation(request)
-        cap = {"prompt": request.max_tokens, "reasoning": 8192,
+        cap = {"prompt": request.max_tokens, "reasoning": bound - 1,
                "retry": 2 * bound - 1, "three-attempts": 3 * bound}[scenario]
         client, run_id, owner, campaign_id = await _authority(authority, cap)
         request = request.model_copy(update={"run_id": run_id})
-        expected_calls = {"prompt": 0, "reasoning": 0, "retry": 1, "three-attempts": 3}[scenario]
+        # A 503 cannot prove the provider did not execute the request. Neither
+        # spare budget nor a three-attempt policy authorizes another paid call.
+        expected_calls = {"prompt": 0, "reasoning": 0, "retry": 1, "three-attempts": 1}[scenario]
 
         async def transport(wire_request):
             attempt = len(calls) + 1
@@ -136,7 +138,7 @@ async def test_r01_prompt_retry_admission_and_unknown_replay(authority, scenario
 
 
         gateway = _gateway(provider, client)
-        error = ProviderUnavailableError if scenario == "three-attempts" else BudgetExhaustedError
+        error = ProviderUnavailableError if expected_calls else BudgetExhaustedError
         with pytest.raises(error):
             await gateway.execute(request, epoch=1, lease_owner=owner)
         assert len(calls) == expected_calls
@@ -147,7 +149,9 @@ async def test_r01_prompt_retry_admission_and_unknown_replay(authority, scenario
         }
         # A new gateway/client must not charge or redispatch retained attempts.
         replay_client = client if authority == "memory" else CheckpointClient(base_url=REAL_SERVICE_URL, internal_api_key=REAL_API_KEY)
-        with pytest.raises(error):
+        replay_error = ProviderError if expected_calls else BudgetExhaustedError
+        replay_message = "UNKNOWN_OUTCOME.*requires reconciliation" if expected_calls else "Budget cap exceeded"
+        with pytest.raises(replay_error, match=replay_message):
             await _gateway(provider, replay_client).execute(request, epoch=1, lease_owner=owner)
         assert len(calls) == expected_calls
         assert await _operations(replay_client, run_id) == persisted

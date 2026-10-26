@@ -23,7 +23,8 @@ repo_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-from app.contracts.research import ExecutionStatus, OutputAvailability
+from app.contracts.research import ExecutionStatus, GenerationResult, NeutralOutput, OutputAvailability
+from app.evaluators.independent import NeutralEvaluatorV2_7
 from app.experiment.campaign_manifest import CampaignManifestBuilder
 from app.experiment.campaign_readiness import (
     CampaignReadinessAuditor,
@@ -35,7 +36,8 @@ from app.experiment.freeze_manifest import (
     ProviderFreezeManager,
     SamplingParameters,
 )
-from app.experiment.preregistration import PreregisteredAnalysisPlan
+from app.experiment.ledger import AttemptRecord, ExperimentReplayLedger
+from app.experiment.scoring import score_campaign_output
 
 
 @pytest.fixture
@@ -54,6 +56,65 @@ def auditor() -> CampaignReadinessAuditor:
     return CampaignReadinessAuditor(repo_root)
 
 
+@pytest.fixture
+def synthetic_ledger(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path) -> Path:
+    """Test-only evidence: no provider dispatches, campaign results or human ratings."""
+    ledger = ExperimentReplayLedger()
+    ledger.freeze_assignments(test_registry.assignments)
+    for task in test_registry.reading_tasks + test_registry.grammar_tasks:
+        ledger.bind_fixture(task.dataset_item_id, hashlib.sha256(task.model_dump_json().encode("utf-8")).hexdigest())
+
+    for index, assignment in enumerate(test_registry.assignments):
+        normalized = index == 0
+        attempt = AttemptRecord(
+            attempt_id=f"synthetic-attempt-{index:03d}",
+            assignment_id=assignment.assignment_id,
+            dataset_item_id=assignment.dataset_item_id,
+            configuration_id=assignment.configuration_id,
+            attempt_number=assignment.attempt_number,
+            execution_status=ExecutionStatus.COMPLETED if normalized else ExecutionStatus.FAILED_VALIDATION,
+            output_availability=OutputAvailability.NORMALIZED if normalized else OutputAvailability.NONE,
+            failure_code=None if normalized else "SYNTHETIC_VALIDATION_FAILURE",
+            usage_call_count=0,
+            provenance={"test_only": True},
+            is_terminal=True,
+        )
+        ledger.record_attempt(attempt)
+        if normalized:
+            result = GenerationResult(
+                run_id="synthetic-readiness-unit-test",
+                dataset_item_id=assignment.dataset_item_id,
+                configuration_id=assignment.configuration_id,
+                task_type="READING_SINGLE_PASSAGE",
+                execution_status=attempt.execution_status,
+                output_availability=attempt.output_availability,
+                generated_content=NeutralOutput(
+                    context_text="This is synthetic unit-test content. The test lamp is blue.",
+                    question_groups=[{"group_id": "synthetic-group", "question_ids": ["synthetic-question"]}],
+                    questions=[{
+                        "question_id": "synthetic-question", "question_type": "TFNG",
+                        "text": "The test lamp is blue.", "instructions": "Choose TRUE, FALSE or NOT GIVEN.",
+                    }],
+                ),
+            )
+            ledger.record_output(attempt.attempt_id, result)
+            ledger.record_evaluation(attempt.attempt_id, score_campaign_output(result, NeutralEvaluatorV2_7()))
+
+    path = tmp_path / "synthetic_ledger.json"
+    path.write_text(json.dumps(ledger.snapshot_payload()), encoding="utf-8")
+    # Every negative mutation starts from proven, complete accounting evidence.
+    roster = auditor.audit_roster_and_denominators(test_registry, ledger_path_override=path)
+    assert roster.status == "VERIFIED"
+    assert roster.ledger_comparison_count == 168
+    assert roster.ledger_mismatches == roster.fingerprint_mismatches == 0
+    accounting = auditor.audit_failure_and_uncertainty(ledger_path_override=path)
+    assert accounting.status == "VERIFIED"
+    assert accounting.zero_silent_drops is True
+    assert accounting.runtime_observed["terminal_attempts"] == 168
+    assert accounting.unresolved_attempts == []
+    return path
+
+
 # =========================================================================
 # 1. Negative Tests for Corrupt Raw Records
 # =========================================================================
@@ -65,7 +126,9 @@ def test_corrupt_json_raw_record_fails_closed(auditor: CampaignReadinessAuditor,
     corrupt_file = raw_dir / "bad_syntax.json"
     corrupt_file.write_text("{this is not valid json", encoding="utf-8")
 
-    check = auditor.audit_raw_response_preservation(execution_dir_override=tmp_path)
+    check = auditor.audit_raw_response_preservation(
+        execution_dir_override=tmp_path, ledger_path_override=tmp_path / "absent_ledger.json",
+    )
     assert check.total_raw_responses_on_disk == 1
     assert check.valid_records_count == 0
     assert check.invalid_records_count == 1
@@ -86,7 +149,9 @@ def test_missing_required_fields_in_raw_record_fails_closed(auditor: CampaignRea
         # missing prompt_sha256 and tokens
     }), encoding="utf-8")
 
-    check = auditor.audit_raw_response_preservation(execution_dir_override=tmp_path)
+    check = auditor.audit_raw_response_preservation(
+        execution_dir_override=tmp_path, ledger_path_override=tmp_path / "absent_ledger.json",
+    )
     assert check.invalid_records_count == 1
     assert check.valid_records_count == 0
     assert check.status == "FAIL"
@@ -107,7 +172,9 @@ def test_raw_record_content_hash_mismatch_fails_closed(auditor: CampaignReadines
         "tokens": {"total": 50},
     }), encoding="utf-8")
 
-    check = auditor.audit_raw_response_preservation(execution_dir_override=tmp_path)
+    check = auditor.audit_raw_response_preservation(
+        execution_dir_override=tmp_path, ledger_path_override=tmp_path / "absent_ledger.json",
+    )
     assert check.invalid_records_count == 1
     assert check.valid_records_count == 0
     assert check.status == "FAIL"
@@ -129,7 +196,9 @@ def test_raw_record_invalid_telemetry_fails_closed(auditor: CampaignReadinessAud
         "tokens": {"total": 10},
     }), encoding="utf-8")
 
-    check = auditor.audit_raw_response_preservation(execution_dir_override=tmp_path)
+    check = auditor.audit_raw_response_preservation(
+        execution_dir_override=tmp_path, ledger_path_override=tmp_path / "absent_ledger.json",
+    )
     assert check.invalid_records_count == 1
     assert check.status == "FAIL"
 
@@ -150,7 +219,9 @@ def test_missing_ledger_referenced_raw_record_detected(auditor: CampaignReadines
         ]
     }), encoding="utf-8")
 
-    check = auditor.audit_raw_response_preservation(ledger_path_override=fake_ledger)
+    check = auditor.audit_raw_response_preservation(
+        execution_dir_override=tmp_path, ledger_path_override=fake_ledger,
+    )
     assert check.missing_records_count >= 1
     assert check.status == "FAIL"
 
@@ -189,14 +260,13 @@ def test_tampered_prompt_template_hash_returns_hold(auditor: CampaignReadinessAu
 # 3. Negative Tests for Broken Assignment Identities
 # =========================================================================
 
-def test_roster_count_mismatch_fails_closed(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path):
+def test_roster_count_mismatch_fails_closed(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path, synthetic_ledger: Path):
     """Ledger containing only 167 assignments fails closed."""
     fake_ledger = tmp_path / "ledger_167.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        real_ledger = json.load(f)
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
     # Remove one assignment
-    real_ledger["assignments"] = real_ledger["assignments"][:167]
-    fake_ledger.write_text(json.dumps(real_ledger), encoding="utf-8")
+    ledger_data["assignments"] = ledger_data["assignments"][:167]
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
 
     check = auditor.audit_roster_and_denominators(test_registry, ledger_path_override=fake_ledger)
     assert check.is_roster_deterministic is False
@@ -204,13 +274,13 @@ def test_roster_count_mismatch_fails_closed(auditor: CampaignReadinessAuditor, t
     assert check.ledger_mismatches >= 1
 
 
-def test_assignment_field_mismatch_fails_closed(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path):
+def test_assignment_field_mismatch_fails_closed(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path, synthetic_ledger: Path):
     """Assignment configuration_id mismatch (e.g., A mutated to B) fails closed."""
     fake_ledger = tmp_path / "ledger_mutated.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        real_ledger = json.load(f)
-    real_ledger["assignments"][0]["configuration_id"] = "B"  # was "A"
-    fake_ledger.write_text(json.dumps(real_ledger), encoding="utf-8")
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
+    original_arm = ledger_data["assignments"][0]["configuration_id"]
+    ledger_data["assignments"][0]["configuration_id"] = "B" if original_arm != "B" else "A"
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
 
     check = auditor.audit_roster_and_denominators(test_registry, ledger_path_override=fake_ledger)
     assert check.is_roster_deterministic is False
@@ -218,14 +288,13 @@ def test_assignment_field_mismatch_fails_closed(auditor: CampaignReadinessAudito
     assert check.ledger_mismatches >= 1
 
 
-def test_task_canonical_fingerprint_mismatch_fails_closed(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path):
+def test_task_canonical_fingerprint_mismatch_fails_closed(auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path, synthetic_ledger: Path):
     """Mutated task content fingerprint in ledger fixture_hashes fails closed."""
     fake_ledger = tmp_path / "ledger_bad_fp.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        real_ledger = json.load(f)
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
     # Corrupt fingerprint for final-reading-001
-    real_ledger["fixture_hashes"]["final-reading-001"] = "0000000000000000000000000000000000000000000000000000000000000000"
-    fake_ledger.write_text(json.dumps(real_ledger), encoding="utf-8")
+    ledger_data["fixture_hashes"]["final-reading-001"] = "0000000000000000000000000000000000000000000000000000000000000000"
+    fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
 
     check = auditor.audit_roster_and_denominators(test_registry, ledger_path_override=fake_ledger)
     assert check.fingerprint_mismatches >= 1
@@ -253,9 +322,9 @@ def test_holdout_family_contamination_in_benchmark_fails_closed(auditor: Campaig
 # 4. Executable Fail-Closed Uncertainty and Failure Accounting
 # =========================================================================
 
-def test_executable_fail_closed_evaluations(auditor: CampaignReadinessAuditor):
+def test_executable_fail_closed_evaluations(auditor: CampaignReadinessAuditor, synthetic_ledger: Path):
     """Verify executable fail-closed accounting: UNCERTAIN, FAIL, TIMED_OUT, missing output evaluate to 0.0."""
-    check = auditor.audit_failure_and_uncertainty()
+    check = auditor.audit_failure_and_uncertainty(ledger_path_override=synthetic_ledger)
 
     assert check.status == "VERIFIED"
     assert check.evaluator_uncertain_verdict_supported is True
@@ -272,6 +341,23 @@ def test_executable_fail_closed_evaluations(auditor: CampaignReadinessAuditor):
     assert impl["missing_output_yields_non_pass"] is True
     assert impl["provider_fallback_forbidden"] is True
     assert impl["post_hoc_endpoint_switching_forbidden"] is True
+
+
+def test_missing_ledger_fails_closed_despite_executable_policy_checks(
+    auditor: CampaignReadinessAuditor, test_registry: FinalDatasetRegistry, tmp_path: Path,
+):
+    missing_ledger = tmp_path / "absent_ledger.json"
+    assert not missing_ledger.exists()
+    check = auditor.audit_failure_and_uncertainty(ledger_path_override=missing_ledger)
+    assert all(check.implementation_tested.values())
+    assert check.zero_silent_drops is False
+    assert check.runtime_observed == {}
+    assert check.status == "FAIL"
+    roster = auditor.audit_roster_and_denominators(test_registry, ledger_path_override=missing_ledger)
+    assert roster.is_roster_deterministic is False
+    assert roster.ledger_comparison_count == 0
+    assert roster.ledger_mismatches == 168
+    assert roster.status == "FAIL"
 
 
 # =========================================================================
@@ -298,8 +384,23 @@ def test_dry_run_makes_strictly_zero_live_network_dispatches(auditor: CampaignRe
 # 6. Audit Provenance: Timestamps, SHA Tracking, and UNKNOWN Fallback
 # =========================================================================
 
-def test_provenance_timestamps_and_sha_tracking(auditor: CampaignReadinessAuditor):
-    """Evaluated timestamp must be genuine UTC at runtime, and SHAs must be distinct and non-fabricated."""
+def test_provenance_timestamps_and_sha_tracking(auditor: CampaignReadinessAuditor, monkeypatch):
+    """Preserve distinct Git provenance fields without requiring Git inside runtime images."""
+    from subprocess import CompletedProcess
+
+    # Synthetic Git outputs exercise the real resolver and report mapping. No
+    # hardcoded historical commit is substituted for actual missing Git evidence.
+    expected = {
+        ("services/generation-service/app/evaluators/independent.py",): "1" * 40,
+        ("generation_baseline/tools/check_campaign_readiness.py", "services/generation-service/app/experiment/campaign_readiness.py"): "2" * 40,
+        (): "3" * 40,
+    }
+    def git_result(command, **kwargs):
+        assert command[:5] == ["git", "log", "-n", "1", "--pretty=format:%H"]
+        assert kwargs["cwd"] == str(repo_root)
+        paths = tuple(command[6:]) if len(command) > 5 else ()
+        return CompletedProcess(command, 0, expected[paths], "")
+    monkeypatch.setattr("app.experiment.campaign_readiness.subprocess.run", git_result)
     report = auditor.run_readiness_audit()
 
     # Verify evaluated_at is a valid recent UTC ISO timestamp
@@ -307,9 +408,9 @@ def test_provenance_timestamps_and_sha_tracking(auditor: CampaignReadinessAudito
     assert dt.year >= 2026
 
     # Verify distinct SHA tracking
-    assert report.implementation_source_sha == "32cb85e514f881aef8a5366ea43eb67422012eaa"
-    assert len(report.audit_tool_sha) == 40
-    assert len(report.report_generated_from_sha) == 40
+    assert report.implementation_source_sha == "1" * 40
+    assert report.audit_tool_sha == "2" * 40
+    assert report.report_generated_from_sha == "3" * 40
     assert report.software_commit_sha == report.report_generated_from_sha
 
 
@@ -357,7 +458,9 @@ def test_git_unavailable_reports_unknown_without_fabricated_fallback(tmp_path: P
 # 7. Negative E2E Tests for Schema Mismatch & Pillar Failures (Bug 1)
 # =========================================================================
 
-def test_software_pillar_failure_produces_serializable_fail_report(auditor: CampaignReadinessAuditor, tmp_path: Path):
+def test_software_pillar_failure_produces_serializable_fail_report(
+    auditor: CampaignReadinessAuditor, tmp_path: Path, synthetic_ledger: Path, monkeypatch,
+):
     """When a software pillar fails (e.g. invalid raw responses), auditor produces a serializable FAIL report."""
     corrupt_exec_dir = tmp_path / "corrupt_execution"
     raw_dir = corrupt_exec_dir / "raw_responses"
@@ -365,7 +468,12 @@ def test_software_pillar_failure_produces_serializable_fail_report(auditor: Camp
     bad_rec = raw_dir / "bad.json"
     bad_rec.write_text("{broken json syntax", encoding="utf-8")
 
-    report = auditor.run_readiness_audit(execution_dir_override=corrupt_exec_dir)
+    blocked_stat = auditor.audit_statistical_plan().model_copy(update={"status": "BLOCKED"})
+    monkeypatch.setattr(auditor, "audit_statistical_plan", lambda: blocked_stat)
+    report = auditor.run_readiness_audit(
+        execution_dir_override=corrupt_exec_dir, ledger_path_override=synthetic_ledger,
+    )
+    assert report.statistical_analysis_plan.status == "BLOCKED"
 
     # Pillar failed
     assert report.raw_response_preservation.status == "FAIL"
@@ -383,14 +491,26 @@ def test_software_pillar_failure_produces_serializable_fail_report(auditor: Camp
     assert reconstructed.overall_campaign_readiness == "HOLD"
 
 
-def test_software_pillar_blocked_produces_serializable_blocked_report(auditor: CampaignReadinessAuditor, monkeypatch):
+def test_software_pillar_blocked_produces_serializable_blocked_report(
+    auditor: CampaignReadinessAuditor, monkeypatch, synthetic_ledger: Path, tmp_path: Path,
+):
     """When a software pillar is BLOCKED and none FAIL, overall software status is BLOCKED and serializable."""
-    # Mock one software pillar check to return BLOCKED
-    real_stat_check = auditor.audit_statistical_plan()
-    blocked_stat = real_stat_check.model_copy(update={"status": "BLOCKED"})
+    # Real synthetic accounting isolates aggregation from absent historical ledgers.
+    baseline = auditor.run_readiness_audit(
+        execution_dir_override=tmp_path, ledger_path_override=synthetic_ledger,
+    )
+    for pillar in (
+        baseline.dataset_readiness, baseline.version_readiness, baseline.roster_and_denominators,
+        baseline.raw_response_preservation, baseline.failure_and_uncertainty_accounting,
+        baseline.statistical_analysis_plan,
+    ):
+        assert pillar.status in {"VERIFIED", "HOLD"}
+    blocked_stat = baseline.statistical_analysis_plan.model_copy(update={"status": "BLOCKED"})
     monkeypatch.setattr(auditor, "audit_statistical_plan", lambda: blocked_stat)
 
-    report = auditor.run_readiness_audit()
+    report = auditor.run_readiness_audit(
+        execution_dir_override=tmp_path, ledger_path_override=synthetic_ledger,
+    )
     assert report.overall_software_readiness == "BLOCKED"
     assert any("Software readiness verification BLOCKED" in b for b in report.blockers)
 
@@ -406,17 +526,14 @@ def test_software_pillar_blocked_produces_serializable_blocked_report(auditor: C
 # 8. Negative Tests for Silent-Drop Attempt Reconciliation (Bug 2)
 # =========================================================================
 
-def test_attempt_lacking_documented_terminal_failure_code_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+def test_attempt_lacking_documented_terminal_failure_code_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path, synthetic_ledger: Path):
     """Attempt with failed status but missing failure_code is unresolved; check fails closed without VERIFIED."""
     fake_ledger = tmp_path / "ledger_missing_fail_code.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        ledger_data = json.load(f)
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
 
     # Strip failure_code from a failed attempt
-    for a in ledger_data["attempts"]:
-        if a.get("execution_status") == "FAILED_VALIDATION":
-            a["failure_code"] = None
-            break
+    failed_attempt = next(a for a in ledger_data["attempts"] if a["execution_status"] == "FAILED_VALIDATION")
+    failed_attempt["failure_code"] = None
 
     fake_ledger.write_text(json.dumps(ledger_data), encoding="utf-8")
     check = auditor.audit_failure_and_uncertainty(ledger_path_override=fake_ledger)
@@ -427,11 +544,10 @@ def test_attempt_lacking_documented_terminal_failure_code_reports_unresolved(aud
     assert any("lacks documented failure_code" in u for u in check.unresolved_attempts)
 
 
-def test_attempt_missing_expected_output_reference_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+def test_attempt_missing_expected_output_reference_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path, synthetic_ledger: Path):
     """Attempt claiming output_availability=NORMALIZED but missing from outputs dictionary is unresolved."""
     fake_ledger = tmp_path / "ledger_missing_output.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        ledger_data = json.load(f)
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
 
     # Delete output for the first attempt that has output
     target_att_id = next(iter(ledger_data["outputs"].keys()))
@@ -446,11 +562,10 @@ def test_attempt_missing_expected_output_reference_reports_unresolved(auditor: C
     assert any("attempt missing from outputs" in u for u in check.unresolved_attempts)
 
 
-def test_attempt_missing_expected_evaluation_reference_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+def test_attempt_missing_expected_evaluation_reference_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path, synthetic_ledger: Path):
     """Terminal attempt with normalized output missing evaluation reference in evaluations is unresolved."""
     fake_ledger = tmp_path / "ledger_missing_eval.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        ledger_data = json.load(f)
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
 
     # Remove an evaluation entry for a terminal attempt
     target_att_id = next(iter(ledger_data["evaluations"].keys()))
@@ -465,11 +580,10 @@ def test_attempt_missing_expected_evaluation_reference_reports_unresolved(audito
     assert any("missing evaluation reference" in u for u in check.unresolved_attempts)
 
 
-def test_assignment_missing_terminal_attempt_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path):
+def test_assignment_missing_terminal_attempt_reports_unresolved(auditor: CampaignReadinessAuditor, tmp_path: Path, synthetic_ledger: Path):
     """Assignment whose attempts were all non-terminal (silent drop before resolution) reports unresolved."""
     fake_ledger = tmp_path / "ledger_missing_terminal.json"
-    with open(repo_root / "generation_baseline" / ".execution" / "RG10" / "campaign_ledger.json") as f:
-        ledger_data = json.load(f)
+    ledger_data = json.loads(synthetic_ledger.read_text(encoding="utf-8"))
 
     # Mark terminal attempt of first assignment as non-terminal
     first_asg = ledger_data["assignments"][0]["assignment_id"]

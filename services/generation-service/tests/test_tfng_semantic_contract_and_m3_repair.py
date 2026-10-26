@@ -58,7 +58,10 @@ from app.repair.question import QuestionItemRepairer
 from app.section_runner import _parse_candidate_payload, CandidateRejectionError, CandidateRejectionReason
 
 
-SNAPSHOT_PATH = Path("reports/hybrid_single_section_answer_grounding_rerun_snapshot.json")
+SNAPSHOT_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "reports/hybrid_single_section_answer_grounding_rerun_snapshot.json"
+)
 
 
 def load_snapshot() -> dict[str, Any]:
@@ -120,11 +123,14 @@ def test_01_reproduce_q4_v1_v2_v3_lineage_and_calibration():
         producer_version="1.0.0",
         version=3,
     )
-    # Calibrated evaluator recognizes that lexical overlap != entailment: "specific challenges" is substantive & ungrounded
     results_v3 = evaluate_question(art_v3, passage_text, difficulty="FOUNDATION", siblings=())
     issues_v3 = [iss for r in results_v3 for iss in r.issues]
-    # Under calibrated evaluators, Q4 V3 passes as genuine NOT_GIVEN without false positive entailment
-    assert not any(i.code == IssueCode.TFNG_BOUNDARY_CONFLICT for i in issues_v3), f"Q4 V3 should pass, got issues: {issues_v3}"
+    # Current IELTS correctness requires a factual proposition. The historical
+    # meta-textual V3 cannot be grandfathered into acceptance or merely rekeyed.
+    assert any(
+        i.code == IssueCode.TFNG_BOUNDARY_CONFLICT and "factual proposition" in i.message
+        for i in issues_v3
+    ), f"Historical meta-textual Q4 V3 must remain rejected, got: {issues_v3}"
     assert not any(i.code == IssueCode.UNSUPPORTED_OR_CONTRADICTED_CLAIM for i in issues_v3)
 
 

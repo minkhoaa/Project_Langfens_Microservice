@@ -39,6 +39,13 @@ from tests.unified.mock_fixtures import (
 )
 
 
+def _bound_claim(source_ref: SourceRef, blueprint: ArtifactEnvelope, section_id: int, question_number: int) -> dict[str, Any]:
+    section = next(s for s in blueprint.payload["sections"] if s["sectionId"] == section_id)
+    slot = next(s for s in section["questionSlots"] if s["questionNumber"] == question_number)
+    claim_id = slot["claimRefIds"][0]
+    return next(c for c in source_ref.evidence.payload["claims"] if c["claimId"] == claim_id)
+
+
 def _make_tfng_slot(q_num: int, group_idx: int = 0, sec_id: int = 1) -> QuestionSlot:
     return QuestionSlot(
         questionNumber=q_num,
@@ -136,7 +143,7 @@ def test_duplicate_candidate_0_rejected_and_valid_candidate_1_selected():
     claims_map = {
         "claim:run_test:1:2": {
             "claimId": "claim:run_test:1:2",
-            "text": "Only a few sites are well preserved and well documented in West Africa.",
+            "text": "However, only a few of these sites are sufficiently well preserved, well documented, and well dated to allow for in-depth analysis of the historical dynamics and anthropological dimensions.",
         }
     }
 
@@ -170,10 +177,10 @@ def test_duplicate_candidate_0_rejected_and_valid_candidate_1_selected():
                 "explanation": "The passage confirms that only a few sites are well preserved and well documented.",
             },
             {
-                "statement": "Archaeological excavations at Didé West 1 identified extensive ancient slag mounds across three sectors.",
+                "statement": "Only a few sites are sufficiently well preserved and documented for in-depth analysis.",
                 "answer": "TRUE",
-                "evidenceQuote": "Archaeological excavations at Didé West 1 identified extensive ancient slag mounds across three sectors.",
-                "explanation": "The passage confirms excavations identified extensive ancient slag mounds across sectors.",
+                "evidenceQuote": "However, only a few of these sites are sufficiently well preserved, well documented, and well dated to allow for in-depth analysis of the historical dynamics and anthropological dimensions.",
+                "explanation": "The passage explicitly limits the well-preserved and documented sites to only a few.",
             },
         ]
     }
@@ -190,7 +197,7 @@ def test_duplicate_candidate_0_rejected_and_valid_candidate_1_selected():
     )
 
     assert selected["questionNumber"] == 2
-    assert selected["statement"] == "Archaeological excavations at Didé West 1 identified extensive ancient slag mounds across three sectors."
+    assert selected["statement"] == "Only a few sites are sufficiently well preserved and documented for in-depth analysis."
     assert selected["answer"] == "TRUE"
     assert selected["evidenceClaimRef"] == "claim:run_test:1:2"
 
@@ -347,9 +354,12 @@ async def test_section_runner_selects_candidate_1_when_candidate_0_is_duplicate(
         client, context, 1, source_input, policy
     )
 
-    quote = "Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape."
-    s1 = "The majority of iron production sites in West Africa are well preserved and well documented."
-    s2 = "Empirical analyses reinforced documented methodological patterns across surveyed landscapes."
+    q1_claim = _bound_claim(source_ref, blueprint_env, 1, 1)
+    q2_claim = _bound_claim(source_ref, blueprint_env, 1, 2)
+    quote1, quote2 = q1_claim["text"], q2_claim["text"]
+    quote = quote1
+    s1 = q1_claim["text"]
+    s2 = q2_claim["text"]
 
     # Script Question 1
     q1_op_id = f"op:{run_id}:question:1:1_1"
@@ -378,6 +388,7 @@ async def test_section_runner_selects_candidate_1_when_candidate_0_is_duplicate(
     )
 
     # Script Question 2: Candidate 0 duplicates Q1, Candidate 1 is novel
+    quote = quote2
     q2_op_id = f"op:{run_id}:question:2:1_1"
     provider.script_response(
         q2_op_id,
@@ -459,10 +470,13 @@ async def test_section_runner_all_candidates_duplicate_triggers_bounded_recovery
         client, context, 1, source_input, policy
     )
 
-    quote = "Subsequent empirical analyses reinforced this documented methodological pattern across the surveyed landscape."
-    s1 = "The majority of iron production sites in West Africa are well preserved and well documented."
-    s_dup_paraphrase = "The passage suggests that the majority of iron production sites in West Africa are well preserved and well documented."
-    s_recovered = "Empirical analyses reinforced documented methodological patterns across surveyed landscapes."
+    q1_claim = _bound_claim(source_ref, blueprint_env, 1, 1)
+    q2_claim = _bound_claim(source_ref, blueprint_env, 1, 2)
+    quote1, quote2 = q1_claim["text"], q2_claim["text"]
+    quote = quote1
+    s1 = q1_claim["text"]
+    s_dup_paraphrase = f"The passage suggests that {q1_claim['text']}"
+    s_recovered = q2_claim["text"]
 
     # Question 1: Scripted to return s1
     q1_op_id = f"op:{run_id}:question:1:1_1"
@@ -491,6 +505,7 @@ async def test_section_runner_all_candidates_duplicate_triggers_bounded_recovery
     )
 
     # Attempt 1 for Q2: All candidates duplicate Q1 (one exact, one paraphrase > 0.70 overlap)
+    quote = quote2
     q2_att1_op = f"op:{run_id}:question:2:1_1"
     provider.script_response(
         q2_att1_op,

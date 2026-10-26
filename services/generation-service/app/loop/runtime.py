@@ -96,8 +96,10 @@ class BoundedLoopRuntime:
         self._repair_attempts_this_generation = 0
         self._generated_versions = 0
         self._expected_head_version: int | None = None
+        self._expected_head_hash: str | None = None
         self._total_iterations = 0
         self._operations: dict[str, OperationResumeInfo] = {}
+        self._recovery_responses: dict[str, frozenset[str]] = {}
         self._drafts: dict[int, ArtifactEnvelope] = {}
         self._stored_evaluations: dict[tuple[str, int], EvaluationResult] = {}
         self._accepted_head: ArtifactEnvelope | None = None
@@ -197,6 +199,13 @@ class BoundedLoopRuntime:
                 self._repair_attempts_this_generation = payload.get("repairsSinceGeneration", 0)
                 self._generated_versions = payload.get("generatedVersions", 0)
                 self._expected_head_version = payload.get("expectedHeadVersion")
+                self._expected_head_hash = payload.get("expectedHeadHash")
+                if (
+                    self._expected_head_hash is None
+                    and self._accepted_head is not None
+                    and self._accepted_head.version == self._expected_head_version
+                ):
+                    self._expected_head_hash = self._accepted_head.content_hash
                 self._latest_evaluations = [EvaluationResult.model_validate(e) for e in payload.get("evaluations", [])]
                 self._latest_decision = (LoopDecision.model_validate(payload["decision"])
                                          if payload.get("decision") else None)
@@ -215,6 +224,10 @@ class BoundedLoopRuntime:
                         authority=self.context.authority,
                     )
             else:
+                # StageExecutor cursors use their own protocol payload, but share this
+                # durable CAS revision. Preserve it before writing a loop-format cursor.
+                self.context.cursor.revision = checkpoint.revision
+                self.context.cursor.last_operation_id = checkpoint.lastOperationId
                 # Legacy / StageExecutor cursor payload (protocolVersion, state, etc.)
                 if self._accepted_head is not None:
                     stored_evals_for_head = [
@@ -261,6 +274,7 @@ class BoundedLoopRuntime:
                 self.context.current_artifact = prior_head
                 self.context.accepted_artifact = prior_head
                 self._expected_head_version = prior_head.version
+                self._expected_head_hash = prior_head.content_hash
                 self._generated_versions = prior_head.version
                 self.context.budget_tracker.versions_used = max(
                     self.context.budget_tracker.versions_used, prior_head.version
@@ -271,6 +285,7 @@ class BoundedLoopRuntime:
                 self.context.current_artifact = prior_head
                 self.context.accepted_artifact = None
                 self._expected_head_version = prior_head.version
+                self._expected_head_hash = prior_head.content_hash
                 self._generated_versions = prior_head.version
                 self.context.budget_tracker.versions_used = max(
                     self.context.budget_tracker.versions_used, prior_head.version
@@ -283,6 +298,7 @@ class BoundedLoopRuntime:
                 self.context.current_artifact = prior_head
                 self.context.accepted_artifact = None
                 self._expected_head_version = prior_head.version
+                self._expected_head_hash = prior_head.content_hash
                 self._generated_versions = prior_head.version
                 self.context.budget_tracker.versions_used = max(
                     self.context.budget_tracker.versions_used, prior_head.version
@@ -294,6 +310,7 @@ class BoundedLoopRuntime:
                 self.context.current_artifact = draft_art
                 self.context.accepted_artifact = None
                 self._expected_head_version = self._accepted_head.version if self._accepted_head else None
+                self._expected_head_hash = self._accepted_head.content_hash if self._accepted_head else None
                 self._generated_versions = latest_draft_ver
                 self.context.budget_tracker.versions_used = max(
                     self.context.budget_tracker.versions_used, latest_draft_ver
@@ -304,6 +321,7 @@ class BoundedLoopRuntime:
                 self.context.current_artifact = prior_head
                 self.context.accepted_artifact = None
                 self._expected_head_version = prior_head.version
+                self._expected_head_hash = prior_head.content_hash
                 self._generated_versions = prior_head.version
                 self.context.budget_tracker.versions_used = max(
                     self.context.budget_tracker.versions_used, prior_head.version
@@ -381,6 +399,7 @@ class BoundedLoopRuntime:
                 self.context.current_artifact = self._accepted_head
                 self.context.accepted_artifact = None
                 self._expected_head_version = self._accepted_head.version
+                self._expected_head_hash = self._accepted_head.content_hash
                 self.context.cursor.current_state = (
                     LoopState.DRAFTING
                     if (self.context.input_dependencies != tuple(self._accepted_head.parent_refs)
@@ -519,6 +538,7 @@ class BoundedLoopRuntime:
             "repairsSinceGeneration": self._repair_attempts_this_generation,
             "generatedVersions": self._generated_versions,
             "expectedHeadVersion": self._expected_head_version,
+            "expectedHeadHash": self._expected_head_hash,
             "evaluations": [e.model_dump(mode="json", by_alias=True) for e in self._latest_evaluations],
             "decision": self._latest_decision.model_dump(mode="json", by_alias=True) if self._latest_decision else None,
             "journal": [e.model_dump(mode="json", by_alias=True) for e in self.journal.entries[-20:]],
@@ -644,6 +664,13 @@ class BoundedLoopRuntime:
                 if intent.operation_type == "CHECKPOINT_COMMIT" and op.status == "RESERVED":
                     # The journal is process-local, so the pre-crash intent is gone:
                     # re-record it so the ack below has an entry to close.
+                    self.journal.record_intent(intent, self.context.cursor.current_state)
+                    self.journal.mark_execution_started(intent.operation_id)
+                    return True
+                from app.providers.replay import known_wrapper_responses
+                known = known_wrapper_responses(tuple(self._operations.values()), intent.operation_id)
+                if known is not None:
+                    self._recovery_responses[intent.operation_id] = known
                     self.journal.record_intent(intent, self.context.cursor.current_state)
                     self.journal.mark_execution_started(intent.operation_id)
                     return True
@@ -919,7 +946,7 @@ class BoundedLoopRuntime:
         if not self._reserve(intent):
             return
         op = self._operations.get(intent.operation_id)
-        if op:
+        if op and op.status == "COMPLETED":
             outcome = json.loads(op.resultRefJson) if op.resultRefJson else None
             if isinstance(outcome, dict) and outcome.get("kind") == "CAPABILITY_FAILURE_V1":
                 if (outcome.get("operationId") != intent.operation_id
@@ -944,8 +971,13 @@ class BoundedLoopRuntime:
         else:
             t_draft_start = time.perf_counter()
             try:
-                art = (await self.repairer.repair(self.context, old, issues, intent.operation_id, version)
-                       if repair else await self.generator.generate(self.context, intent.operation_id, version))
+                from app.providers.replay import provider_replay_only
+                with provider_replay_only(self._recovery_responses.get(intent.operation_id)) as replay:
+                    art = (await self.repairer.repair(self.context, old, issues, intent.operation_id, version)
+                           if repair else await self.generator.generate(self.context, intent.operation_id, version))
+                if replay is not None and replay.failure:
+                    self._finish(LoopReason.UNKNOWN_OUTCOME, replay.failure)
+                    return
                 if repair:
                     for dep_ref in self.context.input_dependencies:
                         existing_dep = self.accepted_dependencies.get(dep_ref.artifact_id)
@@ -954,6 +986,9 @@ class BoundedLoopRuntime:
             except asyncio.CancelledError:
                 raise
             except Exception as error:
+                if intent.operation_id in self._recovery_responses:
+                    self._finish(LoopReason.UNKNOWN_OUTCOME, f"read-only capability recovery requires reconciliation: {error}")
+                    return
                 # P15: never swallow a repair failure. A repairer raising means the
                 # surgical path could not produce a compliant artifact for a *known*
                 # reason (e.g. RepairJustificationError: no passage-grounded span
@@ -1146,10 +1181,25 @@ class BoundedLoopRuntime:
             if not self._reserve(intent):
                 return
             op = self._operations.get(intent.operation_id)
-            if op:
+            if op and op.status == "COMPLETED":
                 result = self._stored_evaluations.get((evaluator.evaluator_id, art.version))
-                if result is None or result.evaluation_id not in (op.resultRefJson or ""):
-                    raise ValueError("Completed evaluation operation lacks matching durable result")
+                if not op.resultRefJson:
+                    raise ValueError("Completed evaluation operation lacks durable result JSON")
+                try:
+                    durable_result = EvaluationResult.model_validate_json(op.resultRefJson)
+                except Exception as error:
+                    raise ValueError("Completed evaluation operation has invalid durable result JSON") from error
+                if result is not None and result != durable_result:
+                    raise ValueError("Completed evaluation operation conflicts with the stored evaluation")
+                result = result or durable_result
+                if (
+                    result.evaluator_id != evaluator.evaluator_id
+                    or result.evaluator_version != evaluator.evaluator_version
+                    or result.target_ref != art.to_ref()
+                    or set(result.input_dependency_refs) != set(art.parent_refs)
+                ):
+                    raise ValueError("Completed evaluation operation result does not bind the exact target")
+                self._stored_evaluations[(evaluator.evaluator_id, art.version)] = result
                 self.journal.record_intent(intent, self.context.cursor.current_state)
             else:
                 t_eval_start = time.perf_counter()
@@ -1182,10 +1232,15 @@ class BoundedLoopRuntime:
                     effective_timeout = (
                         eval_timeout if self.policy.is_unlimited else min(eval_timeout, remaining_wall)
                     )
-                    result = await asyncio.wait_for(
-                        evaluator.evaluate(self.context, art, intent.operation_id),
-                        timeout=effective_timeout,
-                    )
+                    from app.providers.replay import provider_replay_only
+                    with provider_replay_only(self._recovery_responses.get(intent.operation_id)) as replay:
+                        result = await asyncio.wait_for(
+                            evaluator.evaluate(self.context, art, intent.operation_id),
+                            timeout=effective_timeout,
+                        )
+                    if replay is not None and replay.failure:
+                        self._finish(LoopReason.UNKNOWN_OUTCOME, replay.failure)
+                        return
                     if not isinstance(result, EvaluationResult) or result.evaluator_id != evaluator.evaluator_id or \
                        result.evaluator_version != evaluator.evaluator_version or result.target_ref != art.to_ref() or \
                        set(result.input_dependency_refs) != set(art.parent_refs):
@@ -1203,6 +1258,9 @@ class BoundedLoopRuntime:
                 except asyncio.CancelledError:
                     raise
                 except Exception as error:
+                    if intent.operation_id in self._recovery_responses:
+                        self._finish(LoopReason.UNKNOWN_OUTCOME, f"read-only evaluator recovery requires reconciliation: {error}")
+                        return
                     logger.error("Evaluator %s failed: %s: %s", evaluator.evaluator_id, type(error).__name__, error, exc_info=True)
                     result = self._error_evaluation(evaluator, art, intent,
                                                     f"Evaluator {evaluator.evaluator_id} error: {type(error).__name__}: {error}")
@@ -1257,6 +1315,7 @@ class BoundedLoopRuntime:
             if self.accept_head:
                 if self._accepted_head and self._accepted_head.version != art.version:
                     self._expected_head_version = self._accepted_head.version
+                    self._expected_head_hash = self._accepted_head.content_hash
                 self._checkpoint()
                 await self._accept(art)
                 return
@@ -1302,7 +1361,8 @@ class BoundedLoopRuntime:
                 return
         intent = self._intent("CHECKPOINT_COMMIT", art.version, 0, art.content_hash,
                               {"evaluations": [e.evaluation_id for e in self._latest_evaluations],
-                               "head": self._expected_head_version})
+                               "head": self._expected_head_version,
+                               "headHash": self._expected_head_hash})
         if not self._reserve(intent):
             return
         op = self._operations.get(intent.operation_id)
@@ -1325,6 +1385,7 @@ class BoundedLoopRuntime:
                     requestHash=intent.request_hash, artifact=art,
                     evaluations=self._latest_evaluations, decision=self._latest_decision,
                     expectedHeadVersion=self._expected_head_version,
+                    expectedHeadHash=self._expected_head_hash,
                 ))
             except CheckpointApiError as error:
                 if error.status_code == 409:
@@ -1339,6 +1400,8 @@ class BoundedLoopRuntime:
             if prev_art := self._drafts.get(v):
                 self.ledger_mgr.supersede_replaced_version(prev_art.to_ref(), art.to_ref())
         self._accepted_head = art
+        self._expected_head_version = art.version
+        self._expected_head_hash = art.content_hash
         self.context.cursor.advance(LoopState.COMPLETED, intent.operation_id, art.content_hash,
                                     art.version, art.content_hash)
         self._checkpoint(intent.operation_id)

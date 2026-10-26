@@ -4,6 +4,7 @@ Covers T03-01 through T03-07 deterministic fake transport/recordings,
 and T03-08 live smoke test check with credentials or explicit NOT_RUN_EXTERNAL.
 """
 import asyncio
+import hashlib
 import os
 import time
 from typing import Any, Dict, List, Optional
@@ -20,6 +21,8 @@ from app.persistence.models import (
     OperationGrantResult,
     OperationReconcileRequest,
     OperationReconcileResult,
+    OperationResumeInfo,
+    ResumeStateResult,
     SetBudgetAllocationsRequest,
     SetBudgetAllocationsResult,
     UnknownOutcomeAck,
@@ -91,6 +94,26 @@ class MockCheckpointClient(CheckpointClient):
                 scopeType="ARTIFACT", scopeId=f"questions_{sec}", parentScopeId=sec, tokenCap=18000, callCap=3, wallTimeCapSeconds=100
             )
 
+    async def resume_state_async(self, run_id: str) -> ResumeStateResult:
+        operations = [
+            OperationResumeInfo(
+                operationId=op["operationId"], operationType=op.get("operationType", "PROVIDER_CALL"),
+                status=op["status"], artifactId=op.get("artifactId"), sectionId=op.get("sectionId"),
+                requestHash=op["requestHash"], tokenReservation=op["tokenReservation"],
+                tokensUsed=op["tokensUsed"],
+                wallTimeReservationSeconds=op["wallTimeReservation"],
+                wallTimeUsedSeconds=op["wallTimeUsed"],
+                resultRefJson=op.get("resultRefJson"), parentOperationId=op.get("parentOperationId"),
+            )
+            for op in self.operations.values()
+            if op.get("runId", run_id) == run_id
+        ]
+        return ResumeStateResult(
+            runId=run_id, jobId=uuid4(), epoch=1, status="RUNNING",
+            engineVersion="mock", schemaVersion="1.0.0", policyVersion="v1",
+            operations=operations,
+        )
+
     async def grant_operation_async(self, request: OperationGrantRequest) -> OperationGrantResult:
         async with self._lock:
             # Check idempotency
@@ -120,9 +143,6 @@ class MockCheckpointClient(CheckpointClient):
                 if self.run_used_wall_time + request.wallTimeReservationSeconds > self.run_wall_time_cap:
                     raise CheckpointApiError(422, "Budget cap exceeded: wall time")
 
-                self.run_used_calls += 1
-                self.run_used_tokens += request.tokenReservation
-                self.run_used_wall_time += request.wallTimeReservationSeconds
 
             # Enforce section allocation if provided
             if request.sectionId:
@@ -154,8 +174,15 @@ class MockCheckpointClient(CheckpointClient):
                 if art_used + request.tokenReservation > art_alloc.tokenCap:
                     raise CheckpointApiError(422, f"Artifact budget exhausted: {request.artifactId}")
 
+            if not has_parent:
+                self.run_used_calls += 1
+                self.run_used_tokens += request.tokenReservation
+                self.run_used_wall_time += request.wallTimeReservationSeconds
+
             self.operations[request.operationId] = {
+                "runId": request.runId,
                 "operationId": request.operationId,
+                "operationType": request.operationType,
                 "requestHash": request.requestHash,
                 "status": "RESERVED",
                 "tokenReservation": request.tokenReservation,
@@ -213,6 +240,48 @@ class MockCheckpointClient(CheckpointClient):
                 reservationPreserved=True,
                 recordedAt=time.time(),
             )
+
+
+async def seed_repair_parent(
+    client: MockCheckpointClient,
+    *,
+    run_id: str,
+    operation_id: str,
+    artifact_id: str,
+    section_id: str,
+    lease_owner: UUID,
+    epoch: int = 1,
+) -> None:
+    """Create the durable parent authority required by nested repair-provider tests."""
+    client.allocations.setdefault(artifact_id, BudgetAllocationItem(
+        scopeType="ARTIFACT", scopeId=artifact_id, parentScopeId=section_id,
+        tokenCap=18_000, callCap=10, wallTimeCapSeconds=280,
+    ))
+    request = OperationGrantRequest(
+        runId=run_id, epoch=epoch, leaseOwner=lease_owner, operationId=operation_id,
+        operationType="REPAIR", requestHash=hashlib.sha256(operation_id.encode()).hexdigest(),
+        tokenReservation=1_000, wallTimeReservationSeconds=60.0,
+        sectionId=section_id, artifactId=artifact_id,
+    )
+    await client.grant_operation_async(request)
+
+
+@pytest.mark.asyncio
+async def test_rejected_scoped_grant_does_not_consume_run_budget():
+    client = MockCheckpointClient()
+    request = OperationGrantRequest(
+        runId="run_scope_rejection", epoch=1, leaseOwner=uuid4(), operationId="op_bad_scope",
+        operationType="PROVIDER_CALL", requestHash="a" * 64, tokenReservation=100,
+        wallTimeReservationSeconds=5.0, sectionId="missing_section",
+    )
+
+    with pytest.raises(CheckpointApiError, match="Section budget allocation"):
+        await client.grant_operation_async(request)
+
+    assert client.run_used_calls == 0
+    assert client.run_used_tokens == 0
+    assert client.run_used_wall_time == 0.0
+    assert "op_bad_scope" not in client.operations
 
 
 # ── Test T03-01: 429 + Retry-After longer than deadline ────────────────────────
@@ -279,8 +348,8 @@ async def test_t03_02_unauthorized_never_retried():
 
 
 @pytest.mark.asyncio
-async def test_t03_02_transient_retried_up_to_cap_and_counted():
-    """T03-02: Transient 5xx retried up to global 3-attempt ceiling and attempts are accurately counted."""
+async def test_t03_02_ambiguous_5xx_is_not_replayed_and_reservation_is_retained():
+    """T03-02: Ambiguous 5xx stops after one physical dispatch with its reservation intact."""
     registry = ProviderRegistry()
     mock_prov = FakeTransportProvider(name="mock_503")
     mock_prov.enqueue_fault(ProviderUnavailableError("Server error 503"))
@@ -305,9 +374,13 @@ async def test_t03_02_transient_retried_up_to_cap_and_counted():
         timeout_seconds=10.0,
     )
 
-    resp = await gateway.execute(req, epoch=1, lease_owner=uuid4())
-    assert resp.attempts_count == 3
-    assert len(mock_prov.recorded_calls) == 3
+    with pytest.raises(ProviderUnavailableError):
+        await gateway.execute(req, epoch=1, lease_owner=uuid4())
+    assert len(mock_prov.recorded_calls) == 1
+    assert len(client.unknown_outcomes) == 1
+    operation = client.operations[req.operation_id]
+    assert operation["status"] == "UNKNOWN_OUTCOME"
+    assert operation["tokenReservation"] > 0
 
 
 # ── Test T03-03: Defensive parser & schema validation ──────────────────────────
@@ -380,7 +453,9 @@ async def test_t03_04_cancellation_during_backoff():
     """T03-04: Cancelling task during backoff wait halts immediately and raises CancelledError."""
     registry = ProviderRegistry()
     mock_prov = FakeTransportProvider(name="mock_cancel")
-    mock_prov.enqueue_fault(ProviderUnavailableError("Unavailable"))
+    # A known 429 with no provider-side result is safe to retry; cancel while the
+    # bounded backoff is pending rather than retrying an ambiguous transport error.
+    mock_prov.enqueue_fault(RateLimitedError("Rate limited", retry_after_seconds=None))
 
     registry.register_provider(mock_prov, keys=["key_1"])
     client = MockCheckpointClient()
@@ -597,31 +672,10 @@ async def test_t03_reconciliation_failure_propagates_and_fails_closed():
 
 
 
-# ── Test T03-08: Live configured provider check or NOT_RUN_EXTERNAL ────────────
+# ── Test T03-08: Offline adapter contract; live smoke requires explicit opt-in ──
 
-@pytest.mark.asyncio
-async def test_t03_08_live_provider_smoke_or_not_run_external():
-    """T03-08: Live smoke test when credentials provided; explicit NOT_RUN_EXTERNAL when missing."""
-    minimax_key = os.environ.get("MINIMAX_API_KEY") or os.environ.get("MINIMAX_API_KEYS") or settings.minimax_api_key
-    groq_key = os.environ.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEYS") or settings.groq_api_key
-
-    if not minimax_key and not groq_key:
-        pytest.skip("NOT_RUN_EXTERNAL: No real MiniMax or Groq credentials configured in environment")
-
-    # If credentials exist, run minimal smoke test with small token limit
-    registry = ProviderRegistry()
-    registry.initialize_from_settings()
-
-    provider_name = "minimax" if minimax_key else "groq"
-    provider = registry.get_provider(provider_name)
-    assert provider is not None
-
-    key_info = await registry.get_next_key(provider_name)
-    if not key_info:
-        pytest.skip(f"NOT_RUN_EXTERNAL: Configured {provider_name} key not accessible")
-
-    api_key, _ = key_info
-    req = ProviderRequest(
+def _t03_smoke_request():
+    return ProviderRequest(
         capability=Capability.GENERATE_TEXT,
         messages=[ChatMessage(role="user", content="Reply with one word: ping")],
         operation_id=f"op_smoke_{uuid4().hex[:8]}",
@@ -629,12 +683,124 @@ async def test_t03_08_live_provider_smoke_or_not_run_external():
         timeout_seconds=15.0,
     )
 
-    try:
-        resp = await provider.call(req, api_key, deadline=time.time() + 15.0)
-        assert resp.raw_text.strip()
-        assert resp.usage.total_tokens > 0
-    except RateLimitedError as e:
-        pytest.skip(f"NOT_RUN_EXTERNAL: Provider quota/rate limit encountered ({e})")
+
+async def _t03_optional_live_smoke():
+    # Credentials are not consent to paid/external calls. No skip masks opt-in failures.
+    if os.environ.get("RUN_LIVE_PROVIDER_SMOKE") != "1":
+        return "NOT_RUN_EXTERNAL"
+    minimax_key = os.environ.get("MINIMAX_API_KEY") or os.environ.get("MINIMAX_API_KEYS") or settings.minimax_api_key
+    groq_key = os.environ.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEYS") or settings.groq_api_key
+    assert minimax_key or groq_key, "Live smoke opted in but no provider credentials configured"
+    provider_name = "minimax" if minimax_key else "groq"
+    registry = ProviderRegistry()
+    registry.initialize_from_settings()
+    provider = registry.get_provider(provider_name)
+    assert provider is not None, f"Live smoke provider {provider_name} not configured"
+    key_info = await registry.get_next_key(provider_name)
+    assert key_info, f"Live smoke {provider_name} key not accessible"
+    response = await provider.call(_t03_smoke_request(), key_info[0], deadline=time.time() + 15)
+    assert response.raw_text.strip()
+    assert response.usage.total_tokens > 0
+    assert response.usage.accounting_type == UsageAccountingType.REPORTED
+    return "PASS_LIVE"
+
+
+@pytest.mark.asyncio
+async def test_t03_08_live_provider_smoke_or_not_run_external(record_property):
+    """MockTransport validates SDK wiring, not live availability or credentials."""
+    import json
+
+    for adapter in (MiniMaxProvider, GroqProvider):
+        calls = []
+
+        def respond(request):
+            calls.append(request)
+            payload = json.loads(request.content)
+            assert request.url == "https://smoke.invalid/v1/chat/completions"
+            assert request.headers["authorization"] == "Bearer offline-smoke-key"
+            assert payload["max_tokens"] == 10
+            assert payload["messages"] == [{"role": "user", "content": "Reply with one word: ping"}]
+            return httpx.Response(200, json={
+                "id": "offline-smoke", "object": "chat.completion", "created": 0,
+                "model": payload["model"],
+                "choices": [{"index": 0, "message": {"role": "assistant", "content": "ping"}, "finish_reason": "stop"}],
+                "usage": {"prompt_tokens": 8, "completion_tokens": 1, "total_tokens": 9},
+            })
+
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
+            provider = adapter(base_url="https://smoke.invalid/v1", http_client=client)
+            response = await provider.call(_t03_smoke_request(), "offline-smoke-key", deadline=time.time() + 15)
+        assert len(calls) == 1
+        assert response.raw_text == "ping"
+        assert response.finish_reason == FinishReason.STOP
+        assert response.usage.total_tokens == 9
+        assert response.usage.accounting_type == UsageAccountingType.REPORTED
+    record_property("offline_adapter_contract", "PASS: MockTransport only")
+    record_property("live_provider_smoke", await _t03_optional_live_smoke())
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("opt_in", [None, "0", "true", "yes", "1 "])
+async def test_t03_08_credentials_never_imply_live_opt_in(monkeypatch, opt_in):
+    from unittest.mock import Mock
+
+    monkeypatch.setenv("MINIMAX_API_KEY", "configured-but-must-not-dispatch")
+    monkeypatch.setenv("GROQ_API_KEY", "configured-but-must-not-dispatch")
+    monkeypatch.delenv("RUN_LIVE_PROVIDER_SMOKE", raising=False)
+    if opt_in is not None:
+        monkeypatch.setenv("RUN_LIVE_PROVIDER_SMOKE", opt_in)
+    initialize = Mock(side_effect=AssertionError("Offline smoke must not initialize live providers"))
+    monkeypatch.setattr(ProviderRegistry, "initialize_from_settings", initialize)
+    assert await _t03_optional_live_smoke() == "NOT_RUN_EXTERNAL"
+    initialize.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_t03_08_live_opt_in_without_credentials_fails_not_skips(monkeypatch):
+    from unittest.mock import Mock
+
+    monkeypatch.setenv("RUN_LIVE_PROVIDER_SMOKE", "1")
+    for key in ("MINIMAX_API_KEY", "MINIMAX_API_KEYS", "GROQ_API_KEY", "GROQ_API_KEYS"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setattr(settings, "minimax_api_key", "")
+    monkeypatch.setattr(settings, "groq_api_key", "")
+    initialize = Mock()
+    monkeypatch.setattr(ProviderRegistry, "initialize_from_settings", initialize)
+    with pytest.raises(AssertionError, match="no provider credentials configured"):
+        await _t03_optional_live_smoke()
+    initialize.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("outcome", ["success", "missing-key", "rate-limited"])
+async def test_t03_08_explicit_live_opt_in_is_honest_without_live_calls(monkeypatch, outcome):
+    from unittest.mock import AsyncMock, Mock
+
+    monkeypatch.setenv("RUN_LIVE_PROVIDER_SMOKE", "1")
+    monkeypatch.setenv("MINIMAX_API_KEY", "offline-test-key")
+    monkeypatch.setattr(ProviderRegistry, "initialize_from_settings", lambda self: None)
+    provider = Mock()
+    provider.call = AsyncMock(return_value=ProviderResponse(
+        operation_id="offline-test", provider_name="minimax", model_name="offline-test",
+        raw_text="ping", finish_reason=FinishReason.STOP,
+        usage=UsageReport(total_tokens=9, accounting_type=UsageAccountingType.REPORTED),
+    ))
+    monkeypatch.setattr(ProviderRegistry, "get_provider", lambda self, name: provider)
+    monkeypatch.setattr(ProviderRegistry, "get_next_key", AsyncMock(
+        return_value=None if outcome == "missing-key" else ("offline-test-key", 0),
+    ))
+    if outcome == "rate-limited":
+        provider.call.side_effect = RateLimitedError("offline simulated quota failure")
+        with pytest.raises(RateLimitedError):
+            await _t03_optional_live_smoke()
+    elif outcome == "missing-key":
+        with pytest.raises(AssertionError, match="key not accessible"):
+            await _t03_optional_live_smoke()
+        provider.call.assert_not_awaited()
+    else:
+        assert await _t03_optional_live_smoke() == "PASS_LIVE"
+        provider.call.assert_awaited_once()
+
 # ── AUDIT-NESTED-RETRIES: Real SDK with Fake Transport Attempts Bounds ──────
 
 @pytest.mark.asyncio
@@ -704,8 +870,8 @@ async def test_audit_nested_retries_rate_limit_bounded_under_gateway():
 
 
 @pytest.mark.asyncio
-async def test_audit_nested_retries_server_error_bounded_under_gateway():
-    """AUDIT-NESTED-RETRIES: On 503 Server Error, total transport requests strictly match Gateway cap."""
+async def test_audit_ambiguous_server_error_stops_after_one_gateway_dispatch():
+    """An HTTP 503 has an unresolved provider outcome and is never blindly replayed."""
     transport_calls = 0
 
     def server_error_handler(request: httpx.Request) -> httpx.Response:
@@ -748,7 +914,12 @@ async def test_audit_nested_retries_server_error_bounded_under_gateway():
         with pytest.raises(ProviderUnavailableError):
             await gateway.execute(req, epoch=1, lease_owner=uuid4())
 
-        assert transport_calls == 3, f"Expected exactly 3 transport calls, got {transport_calls}"
+        assert transport_calls == 1, f"Ambiguous 503 must not be replayed; got {transport_calls} calls"
+        assert len(mock_checkpoint.unknown_outcomes) == 1
+        assert len(mock_checkpoint.operations) == 1
+        operation = next(iter(mock_checkpoint.operations.values()))
+        assert operation["status"] == "UNKNOWN_OUTCOME"
+        assert operation["tokenReservation"] > 0
 
 
 @pytest.mark.asyncio
@@ -801,8 +972,8 @@ async def test_audit_nested_retries_unauthorized_never_retried():
 
 
 @pytest.mark.asyncio
-async def test_audit_nested_retries_unknown_outcome_accounting():
-    """All attempts exhausted records UNKNOWN_OUTCOME without refunding/resetting token reservation."""
+async def test_audit_ambiguous_500_preserves_single_unknown_attempt_reservation():
+    """An ambiguous 500 records UNKNOWN_OUTCOME without refunding its token reservation."""
     mock_checkpoint = MockCheckpointClient()
     mock_transport = httpx.MockTransport(lambda req: httpx.Response(500, json={"error": "Server error"}))
     async with httpx.AsyncClient(transport=mock_transport) as http_client:
@@ -836,23 +1007,12 @@ async def test_audit_nested_retries_unknown_outcome_accounting():
         with pytest.raises(ProviderUnavailableError):
             await gateway.execute(req, epoch=1, lease_owner=uuid4())
 
-        # RetryPolicy(max_attempts=2) dispatches two genuinely billable provider calls
-        # (verified: 2 HTTP requests reach the transport), and ProviderGateway gives
-        # each attempt its own durable operation id `<operation_id>:attempt:<n>` with
-        # its own token reservation. Both attempts reach the provider and both end in
-        # an unknown outcome, so each must be recorded: collapsing them into one
-        # UNKNOWN_OUTCOME would leave attempt 2's reservation unreconciled and 325
-        # tokens of real spend missing from the audit. The original single-record
-        # expectation predates per-attempt operation ids (commit e96f71b).
         reserved_ops = [op for op in mock_checkpoint.operations.values()
                         if op["status"] != "COMPLETED"]
-        assert len(reserved_ops) == 2, "both retry attempts must hold their own reservation"
+        assert len(reserved_ops) == 1, "ambiguous transport outcome must not be replayed"
         recorded = {u.operationId for u in mock_checkpoint.unknown_outcomes}
         assert recorded == {op["operationId"] for op in reserved_ops}
-        # The parent operation id is recorded exactly once, not once per attempt.
-        assert len([u for u in mock_checkpoint.unknown_outcomes
-                    if u.operationId == op_id]) == 1
-        # Every reserved attempt kept its full reservation and was not reset to 0.
+        assert recorded == {op_id}
         assert all(op["tokensUsed"] == 0 for op in reserved_ops)
         assert all(op["tokenReservation"] > 0 for op in reserved_ops)
         assert mock_checkpoint.run_used_tokens == sum(

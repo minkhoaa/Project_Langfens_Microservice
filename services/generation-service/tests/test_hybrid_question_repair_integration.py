@@ -20,7 +20,7 @@ from app.providers.registry import ProviderRegistry
 from app.repair.base import RepairJustificationError
 from app.repair.contracts import RepairAction, RepairPlan
 from app.repair.question import QuestionItemRepairer
-from tests.test_t03_providers import MockCheckpointClient
+from tests.test_t03_providers import MockCheckpointClient, seed_repair_parent
 
 
 class RecordingHybridTransportProvider(BaseProvider):
@@ -210,6 +210,10 @@ async def test_semantic_adversary_issue_invokes_m3_and_regenerates_with_text01(h
         scope=IssueScope.QUESTION,
     )
 
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="intent_rep_ambiguous", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     repaired = await repairer.repair(
         context=ctx,
         artifact=artifact,
@@ -252,6 +256,10 @@ async def test_m3_planning_failure_fails_closed_without_uncontrolled_retries(hyb
         scope=IssueScope.QUESTION,
     )
 
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="intent_rep_fail_closed", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     with pytest.raises(RepairJustificationError, match="Claim preservation violated"):
         await repairer.repair(
             context=ctx,

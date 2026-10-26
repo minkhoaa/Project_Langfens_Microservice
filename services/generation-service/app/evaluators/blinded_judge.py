@@ -46,6 +46,19 @@ class BlindedJudgeVerdict(BaseModel):
     confidence_level: str = Field(default="HIGH", pattern="^(HIGH|MEDIUM|LOW|UNCERTAIN)$")
 
 
+def _boundary_stem_token(word: str) -> str:
+    """Normalize inflectional plurals before applying the shared light stemmer."""
+    token = word.lower()
+    if token.endswith(("ches", "shes", "sses", "xes", "zes")):
+        token = token[:-2]
+    elif token.endswith("ies") and len(token) > 4:
+        token = token[:-3] + "y"
+    elif token.endswith("s") and not token.endswith(("ss", "us", "is")):
+        token = token[:-1]
+    from app.evaluators.semantic import stem_token
+    return stem_token(token)
+
+
 class UncertaintyEscalationProtocol:
     """Explicit uncertainty escalation layer operating on source evidence and heuristic boundaries."""
     def __init__(
@@ -112,11 +125,10 @@ class UncertaintyEscalationProtocol:
         if "TFNG" in q_type and proposed.upper() in ("TRUE", "YES"):
             is_fabricated_quote = "not found in source passage" in (base_res.abstention_reason or "").lower()
             if not is_fabricated_quote:
-                from app.evaluators.semantic import stem_token
-                p_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", prompt.lower())} - {
+                p_stems = {_boundary_stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", prompt.lower())} - {
                     "statement", "according", "passage", "which", "following", "true", "false", "given", "than", "this", "that", "with", "from", "they", "have", "were"
                 }
-                r_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", passage_text.lower())}
+                r_stems = {_boundary_stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", passage_text.lower())}
                 shared_stems = p_stems & r_stems
                 has_unsupported_claim = "ungrounded claim: statement asserts unsupported facts" in (base_res.abstention_reason or "").lower()
                 if has_unsupported_claim and len(shared_stems) >= 3:
@@ -178,10 +190,9 @@ class UncertaintyEscalationProtocol:
             if contrast_match:
                 clause1 = passage_text[:contrast_match.start()]
                 clause2 = passage_text[contrast_match.end():]
-                from app.evaluators.semantic import stem_token
-                p_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", prompt.lower())}
-                c1_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", clause1.lower())}
-                c2_stems = {stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", clause2.lower())}
+                p_stems = {_boundary_stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", prompt.lower())}
+                c1_stems = {_boundary_stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", clause1.lower())}
+                c2_stems = {_boundary_stem_token(w) for w in re.findall(r"\b[a-zA-Z]{4,}\b", clause2.lower())}
                 c1_overlap = p_stems & (c1_stems - c2_stems)
                 c2_overlap = p_stems & (c2_stems - c1_stems)
                 if len(c1_overlap) >= 1 and len(c2_overlap) >= 2:

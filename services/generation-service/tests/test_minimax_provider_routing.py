@@ -139,8 +139,8 @@ async def test_minimax_only_request_blocks_groq_when_minimax_key_exhausted():
 
 
 @pytest.mark.asyncio
-async def test_minimax_only_request_blocks_groq_when_minimax_server_error_503():
-    """Prove that transient 503s on MiniMax exhaust retries without falling back to Groq."""
+async def test_minimax_only_request_blocks_groq_without_replaying_ambiguous_503():
+    """An ambiguous MiniMax 503 is reserved once and never falls back to Groq."""
     registry = ProviderRegistry()
     minimax_prov = RecordingTransportProvider(name="minimax")
     groq_prov = RecordingTransportProvider(name="groq")
@@ -172,9 +172,12 @@ async def test_minimax_only_request_blocks_groq_when_minimax_server_error_503():
     with pytest.raises((ProviderUnavailableError, ProviderError)):
         await gateway.execute(req, epoch=1, lease_owner=uuid4())
 
-    # MiniMax was retried up to max_attempts
-    assert len(minimax_prov.recorded_calls) == 2
-    # Groq MUST NOT be called
+    # A 503 may follow provider-side work, so its reservation remains unresolved
+    # and the request must not be replayed under a fresh physical-attempt ID.
+    assert len(minimax_prov.recorded_calls) == 1
+    assert len(client.unknown_outcomes) == 1
+    assert client.operations[req.operation_id]["status"] == "UNKNOWN_OUTCOME"
+    # Groq MUST NOT be called.
     assert len(groq_prov.recorded_calls) == 0
 
 
@@ -228,7 +231,7 @@ async def test_selecting_minimax_never_enables_unlimited_budget():
         checkpoint_client=client,
     )
 
-    # Request with wall_time_reservation_seconds = 0 or negative
+    # A finite positive wall reservation is mandatory even for a preferred provider.
     req = ProviderRequest(
         capability=Capability.GENERATE_JSON,
         messages=[ChatMessage(role="user", content="Generate Questions")],
@@ -236,11 +239,13 @@ async def test_selecting_minimax_never_enables_unlimited_budget():
         run_id="run_budget_cap_test",
         preferred_provider="minimax",
         allowed_providers=["minimax"],
-        wall_time_reservation_seconds=0.0,  # attempt to bypass
+        wall_time_reservation_seconds=10.0,
         timeout_seconds=10.0,
     )
 
     resp = await gateway.execute(req, epoch=1, lease_owner=uuid4())
     assert resp.provider_name == "minimax"
-    # Verify that the last attempt request had a positive wall time reservation restored
+    # Verify the durable attempt remained bounded by the finite caller reservation.
     assert len(minimax_prov.recorded_calls) == 1
+    attempt = client.operations["op_budget_cap_test"]
+    assert 0 < attempt["wallTimeReservation"] <= req.wall_time_reservation_seconds

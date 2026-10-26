@@ -11,6 +11,7 @@ Exercises the single path:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -32,7 +33,24 @@ from app.promotion.registry import PromptVersionRegistry
 
 
 def execute_and_fetch_generated_draft_edit_outbox_event() -> dict:
-    """Executes a generated Draft edit via .NET integration test and retrieves the exact committed outbox event."""
+    """Use an explicit captured event for offline replay, or execute the DB producer.
+
+    The replay file must be exported by the inspected .NET test on a disposable
+    database. This mode tests the consumer lifecycle, not a fresh PostgreSQL write.
+    """
+    capture_path = os.environ.get("PHASE14_OUTBOX_EVENT_FILE")
+    if capture_path:
+        from pathlib import Path
+        capture = json.loads(Path(capture_path).read_text(encoding="utf-8"))
+        assert capture["source_mode"] == "DISPOSABLE_POSTGRES_OUTBOX"
+        assert capture["dotnet_test"] == "T14_01_EditGeneratedExam_CapturesExactLineageDiffHashesAndOutbox"
+        payload = capture["payload"]
+        digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        assert digest == capture["payload_sha256"], "Captured PostgreSQL event was modified"
+        return payload
+    # Never silently invoke a destructive fixture against its hardcoded/shared
+    # fallback. The caller must explicitly select the already isolated database.
+    assert os.environ.get("READING_TEST_POSTGRES"), "Explicit disposable READING_TEST_POSTGRES required"
     host = os.environ.get("PGHOST", "localhost")
     port = os.environ.get("PGPORT", "5433")
     user = os.environ.get("PGUSER", "exam")
@@ -42,6 +60,7 @@ def execute_and_fetch_generated_draft_edit_outbox_event() -> dict:
     cmd_dotnet = [
         "dotnet", "test",
         os.path.join(repo_root, "services/exam-service.Tests/exam-service.Tests.csproj"),
+        "--no-restore",
         "--filter", "FullyQualifiedName~T14_01_EditGeneratedExam_CapturesExactLineageDiffHashesAndOutbox",
     ]
     res_dotnet = subprocess.run(cmd_dotnet, capture_output=True, text=True)

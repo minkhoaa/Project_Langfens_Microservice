@@ -23,6 +23,7 @@ from app.contracts.loop import DecisionType, LoopDecision, LoopReason, LoopState
 from app.contracts.section import SectionPayload, QuestionGroup
 from app.facade import GenerationFacade, get_generation_facade
 from app.loop.runtime import LoopResult
+from tests.offline_support.dns_fixtures import public_dns
 
 
 def test_t15_facade_canonical_ingestion_delegation():
@@ -121,7 +122,7 @@ def test_t15_real_source_pack_to_blueprint_lineage():
     assert bp_env.parent_refs[0].artifact_id == eg_env.artifact_id
     assert bp_env.parent_refs[0].content_hash == eg_env.content_hash
 
-def test_t15_living_adapters_import_integrity():
+def test_t15_living_adapters_import_integrity(public_dns):
     """T15-08: Living compatibility adapters in extractor.py, prompts.py, llm.py remain functional."""
     # Test extractor.py living adapter
     from app.extractor import is_safe_url, clean_html, detect_source_type, search_sources, fetch_source, ingest_source

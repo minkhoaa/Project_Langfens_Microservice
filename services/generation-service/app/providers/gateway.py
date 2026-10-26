@@ -320,6 +320,19 @@ class ProviderGateway:
                 artifactId=request.artifact_id,
                 parentOperationId=request.parent_operation_id,
             )
+            from app.providers.replay import current_replay_scope
+            replay_scope = current_replay_scope()
+            if replay_scope is not None:
+                if attempt_operation_id not in replay_scope.allowed:
+                    replay_scope.reject(f"uncommitted attempt {attempt_operation_id} cannot be dispatched")
+                if hasattr(self.checkpoint_client, "resume_state_async"):
+                    replay_state = await self.checkpoint_client.resume_state_async(request.run_id)
+                else:
+                    replay_state = self.checkpoint_client.resume_state(request.run_id)
+                persisted = next((op for op in replay_state.operations or () if op.operationId == attempt_operation_id), None)
+                if (persisted is None or persisted.status.upper() != "COMPLETED"
+                    or persisted.requestHash != attempt_hash or not persisted.resultRefJson):
+                    replay_scope.reject(f"attempt {attempt_operation_id} lacks an exact committed response")
             try:
                 grant = await self.checkpoint_client.grant_operation_async(grant_request)
             except CheckpointApiError as api_error:
@@ -339,6 +352,8 @@ class ProviderGateway:
                     operation_id=attempt_operation_id,
                 )
 
+            if replay_scope is not None and not grant.isReplay:
+                replay_scope.reject(f"attempt {attempt_operation_id} lost its terminal replay authority")
             if grant.isReplay:
                 status = grant.status.upper()
                 if status == "COMPLETED":

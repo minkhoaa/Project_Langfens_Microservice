@@ -21,7 +21,7 @@ from app.providers.registry import ProviderRegistry
 from app.repair.base import RepairJustificationError
 from app.repair.contracts import RepairAction, RepairPlan
 from app.repair.question import QuestionItemRepairer
-from tests.test_t03_providers import MockCheckpointClient
+from tests.test_t03_providers import MockCheckpointClient, seed_repair_parent
 
 
 PASSAGE_WEST_AFRICA = (
@@ -259,6 +259,10 @@ async def test_replay_ambiguous_answer_repaired_via_m3_plan():
         scope=IssueScope.QUESTION,
     )
 
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="rep_ambig_1", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     repaired = await repairer.repair(ctx, artifact, [issue], intent_id="rep_ambig_1", version=2)
 
     # 1. Verify M3 was consulted
@@ -297,6 +301,10 @@ async def test_replay_duplicate_prompt_repaired_via_regenerate_distinct():
         scope=IssueScope.QUESTION,
     )
 
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="rep_dup_5", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     repaired = await repairer.repair(ctx, artifact, [issue], intent_id="rep_dup_5", version=2)
 
     # Repaired artifact redirected to stone hoes / Sahel
@@ -370,6 +378,10 @@ async def test_replay_not_given_semantic_disagreement_repaired_via_m3():
         scope=IssueScope.QUESTION,
     )
 
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="rep_ng_4", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     repaired = await repairer.repair(ctx, artifact, [issue], intent_id="rep_ng_4", version=2)
 
     m3_calls = [c for c in provider.recorded_calls if c["pinned_model"] == "MiniMax-M3"]
@@ -454,11 +466,19 @@ async def test_comparative_baseline_blind_repair_vs_m3_assisted_repair():
 
     # 1. Baseline: M3 disabled -> fails closed because unconstrained candidate repeats ambiguous prompt
     provider.enable_m3_assistance = False
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="rep_base_fail", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     with pytest.raises(RepairJustificationError):
         await repairer.repair(ctx, artifact, [issue], intent_id="rep_base_fail", version=2)
 
     # 2. M3-assisted: M3 enabled -> succeeds
     provider.enable_m3_assistance = True
+    await seed_repair_parent(
+        client, run_id=ctx.run_id, operation_id="rep_m3_success", artifact_id=artifact.artifact_id,
+        section_id=ctx.section_id, lease_owner=ctx.authority.lease_owner,
+    )
     repaired = await repairer.repair(ctx, artifact, [issue], intent_id="rep_m3_success", version=2)
     assert "14th century" in repaired.payload["prompt"]
     assert repaired.payload["prompt"] != artifact.payload["prompt"]

@@ -10,6 +10,7 @@ Verifies:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -196,10 +197,13 @@ def test_pending_holdout_directory_reports_pending():
     assert "PENDING external human panel curation" in res["message"]
 
 
-def test_campaign_readiness_dry_run_covers_all_nine_areas():
+def test_campaign_readiness_dry_run_covers_all_nine_areas(tmp_path: Path):
     """POS: Campaign readiness dry-run covers all 9 required areas with 0 network calls."""
     auditor = CampaignReadinessAuditor()
-    report: CampaignReadinessReport = auditor.run_readiness_audit()
+    # Explicitly absent runtime evidence, independent of local campaign artifacts.
+    report: CampaignReadinessReport = auditor.run_readiness_audit(
+        execution_dir_override=tmp_path, ledger_path_override=tmp_path / "absent_ledger.json",
+    )
 
     assert report.is_dry_run is True
     # 1. Dataset identity & hashes
@@ -241,13 +245,23 @@ def test_campaign_readiness_dry_run_covers_all_nine_areas():
     assert report.human_panel_readiness.adjudication_workflow_available is False
 
     # 6. Raw response preservation
-    assert len(report.raw_response_preservation.raw_response_directories_found) > 0
-    assert report.raw_response_preservation.total_raw_responses_on_disk > 0
-    assert report.raw_response_preservation.status == "VERIFIED"
+    raw = report.raw_response_preservation
+    assert raw.raw_response_directories_found == []
+    assert raw.total_raw_responses_on_disk == 0
+    assert raw.valid_records_count == raw.invalid_records_count == raw.unverifiable_records_count == 0
+    assert raw.missing_records_count == 0
+    assert raw.sample_file_verified == ""
+    assert raw.telemetry_fields_verified == []
+    assert raw.status == "HOLD"
 
     # 7. Failure & uncertainty accounting
     assert report.failure_and_uncertainty_accounting.fail_closed_on_uncertain is True
     assert report.failure_and_uncertainty_accounting.missing_output_classified_as_fail is True
+    assert report.failure_and_uncertainty_accounting.zero_silent_drops is False
+    assert report.failure_and_uncertainty_accounting.status == "FAIL"
+    assert report.roster_and_denominators.status == "FAIL"
+    assert report.roster_and_denominators.ledger_comparison_count == 0
+    assert report.roster_and_denominators.ledger_mismatches == 168
 
     # 8. Statistical analysis plan
     assert report.statistical_analysis_plan.primary_endpoint == "independent_final_PASS / all_assigned"
@@ -256,7 +270,45 @@ def test_campaign_readiness_dry_run_covers_all_nine_areas():
     # 9. Overall readiness
     assert report.statistical_analysis_plan.status == "HOLD"
     assert report.statistical_analysis_plan.analysis_plan_md_exists is False
-    assert report.overall_software_readiness == "HOLD"
+    assert report.overall_software_readiness == "FAIL"
     assert report.overall_campaign_readiness == "HOLD"
-    assert len(report.blockers) == 4
-    assert len(report.actionable_resume_criteria) == 5
+    assert any("Software readiness verification FAILED" in blocker for blocker in report.blockers)
+    assert any("approved analysis and human-panel evidence" in blocker for blocker in report.blockers)
+    assert any("BLOCKED_EXTERNAL_QUOTA" in blocker for blocker in report.blockers)
+    assert any("null cryptographic seals" in blocker for blocker in report.blockers)
+    assert any("AWAITING_HUMAN_PANEL" in blocker for blocker in report.blockers)
+    assert any("quota" in criterion for criterion in report.actionable_resume_criteria)
+    assert any("Independent human panel" in criterion for criterion in report.actionable_resume_criteria)
+    assert any("Cryptographic SHA-256 seals" in criterion for criterion in report.actionable_resume_criteria)
+    assert any("Human review panel" in criterion for criterion in report.actionable_resume_criteria)
+    assert any("replacement analysis/handoff evidence" in criterion for criterion in report.actionable_resume_criteria)
+
+
+def test_synthetic_raw_response_preservation_verifies_complete_record(tmp_path: Path):
+    """Test-only raw evidence validates hashes and telemetry, not campaign approval."""
+    raw_dir = tmp_path / "raw_responses"
+    raw_dir.mkdir()
+    raw_text = "Synthetic unit-test response; not a provider or human-panel result."
+    record = {
+        "provider_request_id": "synthetic-request-001",
+        "prompt_sha256": hashlib.sha256(b"synthetic test prompt").hexdigest(),
+        "raw_text": raw_text,
+        "raw_text_sha256": hashlib.sha256(raw_text.encode("utf-8")).hexdigest(),
+        "latency_ms": 1.0,
+        "tokens": {"prompt": 3, "completion": 5, "total": 8},
+    }
+    raw_file = raw_dir / "synthetic.json"
+    raw_file.write_text(json.dumps(record), encoding="utf-8")
+    check = CampaignReadinessAuditor(REPO_ROOT).audit_raw_response_preservation(
+        execution_dir_override=tmp_path, ledger_path_override=tmp_path / "absent_ledger.json",
+    )
+    assert check.raw_response_directories_found == [str(raw_dir)]
+    assert check.total_raw_responses_on_disk == check.valid_records_count == 1
+    assert check.invalid_records_count == check.unverifiable_records_count == check.missing_records_count == 0
+    assert check.corrupt_files == check.invalid_details == []
+    assert check.sample_file_verified == str(raw_file)
+    assert set(check.telemetry_fields_verified) == {
+        "provider_request_id", "prompt_sha256", "raw_text_sha256", "latency_ms", "tokens",
+        "tokens_prompt_completion_total",
+    }
+    assert check.status == "VERIFIED"

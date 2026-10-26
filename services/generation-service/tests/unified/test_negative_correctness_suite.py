@@ -433,15 +433,19 @@ async def test_negative_crash_during_blind_solver_adversary_execution() -> None:
         client, context, 1, all_sources[0], policy
     )
 
-    # Inject failure on blind solver capability call
-    quote = "Archaeological and paleoecological investigations across temperate river basins demonstrate that early agrarian communities actively modified local hydrology to cultivate wetland cereals."
+    # Inject failure on blind solver only after a provenance-valid Q1 is generated.
+    section = next(s for s in blueprint_env.payload["sections"] if s["sectionId"] == 1)
+    q1_slot = next(s for s in section["questionSlots"] if s["questionNumber"] == 1)
+    q1_claim_id = q1_slot["claimRefIds"][0]
+    q1_claim = next(c for c in source_ref.evidence.payload["claims"] if c["claimId"] == q1_claim_id)
+    quote = q1_claim["text"]
     provider.script_response(f"question:{run_id}:1", {
         "candidates": [{
             "questionNumber": 1,
-            "statement": "Early communities modified local hydrology for cereal cultivation.",
+            "statement": q1_claim["text"],
             "answer": "TRUE",
             "evidenceQuote": quote,
-            "explanation": "Direct statement confirmed in paragraph one.",
+            "explanation": f"Directly supported by the immutable Q1 claim: {q1_claim['text']}",
         }]
     })
 

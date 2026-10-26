@@ -29,6 +29,7 @@ from app.pipeline import (
     validate_section,
 )
 from tests.test_pipeline import xml_with_license
+from tests.offline_support.dns_fixtures import public_dns
 
 # Anchor fixture paths to the repository root. A bare relative path resolves against
 # the pytest working directory (services/generation-service), so the corpus lookup
@@ -47,7 +48,7 @@ def test_t00_03_source_word_count_boundary():
     assert parsed["wordCount"] == 600
 
 
-def test_t00_03_ssrf_safety_boundary():
+def test_t00_03_ssrf_safety_boundary(public_dns):
     """Verify SSRF filters deny private/loopback/metadata endpoints and allow public domains."""
     denied = [
         "http://127.0.0.1:8080/secret",
