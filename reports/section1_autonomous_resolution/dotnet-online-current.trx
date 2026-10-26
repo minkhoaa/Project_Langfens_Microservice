@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="9793fde9-e554-4462-9b70-81c583864ff3" name="@khoa 2026-10-26 13:57:37" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-26T13:57:37.0537593+07:00" queuing="2026-10-26T13:57:37.0537593+07:00" start="2026-10-26T13:57:35.2089564+07:00" finish="2026-10-26T13:58:04.5176274+07:00" />
+  <TestSettings name="default" id="638c3dee-f484-4ed5-b05b-bdcb8bc0c1b7">
+    <Deployment runDeploymentRoot="_khoa_2026-10-26_13_57_37" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="c6b4e907-ec91-4162-9917-3fbb61410457" testId="6265fb69-c605-0b23-dbc3-90a7016304b7" testName="exam_service.Tests.Section1OperationAuthorityTests.Repair_M3_And_Text01_Share_60_Seconds_And_Terminal_Usage_Is_Immutable" computerName="khoa" duration="00:00:00.1017103" startTime="2026-10-26T13:57:37.7698163+07:00" endTime="2026-10-26T13:57:37.8718000+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c6b4e907-ec91-4162-9917-3fbb61410457" />
+    <UnitTestResult executionId="1000d352-7c32-4720-b49d-ae503cd92bb2" testId="0c872875-3e41-f1e1-f4fe-c380279ef03c" testName="exam_service.Tests.Section1OperationAuthorityTests.Historical_4k_Parent_Cannot_Authorize_7369_Token_Solver" computerName="khoa" duration="00:00:00.0876887" startTime="2026-10-26T13:57:37.5706712+07:00" endTime="2026-10-26T13:57:37.6584683+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1000d352-7c32-4720-b49d-ae503cd92bb2" />
+    <UnitTestResult executionId="62cb1776-897d-404c-a543-dac7234fce24" testId="9e6d463b-2033-e762-d6ad-f13522d5c8aa" testName="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Pinning_Policy_Cannot_Legitimize_Corrupt_Resource_Snapshot" computerName="khoa" duration="00:00:00.0055473" startTime="2026-10-26T13:57:35.7174555+07:00" endTime="2026-10-26T13:57:35.7259904+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="62cb1776-897d-404c-a543-dac7234fce24" />
+    <UnitTestResult executionId="f480f46f-f02e-41a6-83b3-11296a315688" testId="40dcca25-55cd-34c4-93f1-0a5a1106a60f" testName="exam_service.Tests.Section1OperationAuthorityTests.Uncertain_Completed_Usage_Cannot_Fund_Next_Child(accounting: &quot;ESTIMATED&quot;)" computerName="khoa" duration="00:00:00.1919824" startTime="2026-10-26T13:57:37.3781154+07:00" endTime="2026-10-26T13:57:37.5703974+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f480f46f-f02e-41a6-83b3-11296a315688" />
+    <UnitTestResult executionId="0edbfb6f-2fc8-4900-822a-1d8432ac14be" testId="e8e13f1e-7d7f-d2ea-9ff5-de9d6be36f58" testName="exam_service.Tests.Section1OperationAuthorityTests.Sequential_10k_Evaluation_Refunds_And_Counts_Only_Two_Physical_Calls" computerName="khoa" duration="00:00:01.5511247" startTime="2026-10-26T13:57:35.7191362+07:00" endTime="2026-10-26T13:57:37.2732333+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0edbfb6f-2fc8-4900-822a-1d8432ac14be" />
+    <UnitTestResult executionId="f431cfc6-abdd-44a9-9b12-9f2a1f2854ae" testId="687b9143-f0f1-ed2e-e4fc-db6ecec9f52e" testName="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Full_Custom_Policy_Is_Pinned_Before_First_Cursor_And_Rehydrates" computerName="khoa" duration="00:00:00.0022658" startTime="2026-10-26T13:57:35.7686355+07:00" endTime="2026-10-26T13:57:35.7705070+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f431cfc6-abdd-44a9-9b12-9f2a1f2854ae" />
+    <UnitTestResult executionId="76850f91-2f1d-429a-ac28-d5424fac8ad2" testId="744bf335-df62-094b-e867-735185cf94c3" testName="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;outer-hash&quot;)" computerName="khoa" duration="00:00:00.0368165" startTime="2026-10-26T13:57:35.7361877+07:00" endTime="2026-10-26T13:57:35.7627371+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76850f91-2f1d-429a-ac28-d5424fac8ad2" />
+    <UnitTestResult executionId="33fe586e-48d9-4211-8f59-c5d81f39b95f" testId="c63fd551-fd05-b616-8794-64cc08732104" testName="exam_service.Tests.Section1PostgresPipelineTests.Scripted_13Q_Pipeline_Recovers_After_Lost_Ack_And_Fences_Unsafe_Work" computerName="khoa" duration="00:00:26.5860031" startTime="2026-10-26T13:57:37.8745961+07:00" endTime="2026-10-26T13:58:04.4609868+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="33fe586e-48d9-4211-8f59-c5d81f39b95f" />
+    <UnitTestResult executionId="de3f1d7e-267b-4ce8-bbf3-a1def391031d" testId="51c73663-fbc6-edd4-dd52-4237dc0ee539" testName="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;missing&quot;)" computerName="khoa" duration="00:00:00.0000436" startTime="2026-10-26T13:57:35.7682848+07:00" endTime="2026-10-26T13:57:35.7683816+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="de3f1d7e-267b-4ce8-bbf3-a1def391031d" />
+    <UnitTestResult executionId="82d70eb3-42f2-45db-af36-e9152de8e575" testId="05029348-012a-0094-a729-11c36feba177" testName="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;hash&quot;)" computerName="khoa" duration="00:00:00.0050053" startTime="2026-10-26T13:57:35.7635504+07:00" endTime="2026-10-26T13:57:35.7677699+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="82d70eb3-42f2-45db-af36-e9152de8e575" />
+    <UnitTestResult executionId="be333b36-2c18-44b5-858d-9f4ebb8e691b" testId="dd575a24-40d6-ee87-450e-218a804929fe" testName="exam_service.Tests.Section1OperationAuthorityTests.Unknown_Timeout_Retains_Reservation_Across_Restart_And_Fences_New_Work" computerName="khoa" duration="00:00:00.1108490" startTime="2026-10-26T13:57:37.6586649+07:00" endTime="2026-10-26T13:57:37.7696535+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="be333b36-2c18-44b5-858d-9f4ebb8e691b" />
+    <UnitTestResult executionId="369c6176-8ff9-4e2a-a554-fc81503453a2" testId="2cdc3417-39cf-ad37-b2f7-e8a6dd9a257b" testName="exam_service.Tests.Section1OperationAuthorityTests.Uncertain_Completed_Usage_Cannot_Fund_Next_Child(accounting: &quot;UNKNOWN&quot;)" computerName="khoa" duration="00:00:00.1031466" startTime="2026-10-26T13:57:37.2745095+07:00" endTime="2026-10-26T13:57:37.3779848+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="369c6176-8ff9-4e2a-a554-fc81503453a2" />
+    <UnitTestResult executionId="58340e79-ee8c-4790-80b5-135f9d126317" testId="396e284b-b20d-09f8-94f0-ed4b63f662ba" testName="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;policy&quot;)" computerName="khoa" duration="00:00:00.0003484" startTime="2026-10-26T13:57:35.7679764+07:00" endTime="2026-10-26T13:57:35.7681252+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="58340e79-ee8c-4790-80b5-135f9d126317" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="exam_service.Tests.Section1PostgresPipelineTests.Scripted_13Q_Pipeline_Recovers_After_Lost_Ack_And_Fences_Unsafe_Work" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="c63fd551-fd05-b616-8794-64cc08732104">
+      <Execution id="33fe586e-48d9-4211-8f59-c5d81f39b95f" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1PostgresPipelineTests" name="Scripted_13Q_Pipeline_Recovers_After_Lost_Ack_And_Fences_Unsafe_Work" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1OperationAuthorityTests.Uncertain_Completed_Usage_Cannot_Fund_Next_Child(accounting: &quot;ESTIMATED&quot;)" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="40dcca25-55cd-34c4-93f1-0a5a1106a60f">
+      <Execution id="f480f46f-f02e-41a6-83b3-11296a315688" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1OperationAuthorityTests" name="Uncertain_Completed_Usage_Cannot_Fund_Next_Child" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;hash&quot;)" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="05029348-012a-0094-a729-11c36feba177">
+      <Execution id="82d70eb3-42f2-45db-af36-e9152de8e575" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1ExecutionPolicySnapshotTests" name="Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1OperationAuthorityTests.Uncertain_Completed_Usage_Cannot_Fund_Next_Child(accounting: &quot;UNKNOWN&quot;)" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="2cdc3417-39cf-ad37-b2f7-e8a6dd9a257b">
+      <Execution id="369c6176-8ff9-4e2a-a554-fc81503453a2" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1OperationAuthorityTests" name="Uncertain_Completed_Usage_Cannot_Fund_Next_Child" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1OperationAuthorityTests.Sequential_10k_Evaluation_Refunds_And_Counts_Only_Two_Physical_Calls" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="e8e13f1e-7d7f-d2ea-9ff5-de9d6be36f58">
+      <Execution id="0edbfb6f-2fc8-4900-822a-1d8432ac14be" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1OperationAuthorityTests" name="Sequential_10k_Evaluation_Refunds_And_Counts_Only_Two_Physical_Calls" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;policy&quot;)" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="396e284b-b20d-09f8-94f0-ed4b63f662ba">
+      <Execution id="58340e79-ee8c-4790-80b5-135f9d126317" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1ExecutionPolicySnapshotTests" name="Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Full_Custom_Policy_Is_Pinned_Before_First_Cursor_And_Rehydrates" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="687b9143-f0f1-ed2e-e4fc-db6ecec9f52e">
+      <Execution id="f431cfc6-abdd-44a9-9b12-9f2a1f2854ae" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1ExecutionPolicySnapshotTests" name="Full_Custom_Policy_Is_Pinned_Before_First_Cursor_And_Rehydrates" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;missing&quot;)" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="51c73663-fbc6-edd4-dd52-4237dc0ee539">
+      <Execution id="de3f1d7e-267b-4ce8-bbf3-a1def391031d" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1ExecutionPolicySnapshotTests" name="Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults(fault: &quot;outer-hash&quot;)" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="744bf335-df62-094b-e867-735185cf94c3">
+      <Execution id="76850f91-2f1d-429a-ac28-d5424fac8ad2" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1ExecutionPolicySnapshotTests" name="Missing_Or_Corrupt_Policy_Cannot_Adopt_Current_Defaults" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1OperationAuthorityTests.Unknown_Timeout_Retains_Reservation_Across_Restart_And_Fences_New_Work" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="dd575a24-40d6-ee87-450e-218a804929fe">
+      <Execution id="be333b36-2c18-44b5-858d-9f4ebb8e691b" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1OperationAuthorityTests" name="Unknown_Timeout_Retains_Reservation_Across_Restart_And_Fences_New_Work" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1ExecutionPolicySnapshotTests.Pinning_Policy_Cannot_Legitimize_Corrupt_Resource_Snapshot" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="9e6d463b-2033-e762-d6ad-f13522d5c8aa">
+      <Execution id="62cb1776-897d-404c-a543-dac7234fce24" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1ExecutionPolicySnapshotTests" name="Pinning_Policy_Cannot_Legitimize_Corrupt_Resource_Snapshot" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1OperationAuthorityTests.Historical_4k_Parent_Cannot_Authorize_7369_Token_Solver" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="0c872875-3e41-f1e1-f4fe-c380279ef03c">
+      <Execution id="1000d352-7c32-4720-b49d-ae503cd92bb2" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1OperationAuthorityTests" name="Historical_4k_Parent_Cannot_Authorize_7369_Token_Solver" />
+    </UnitTest>
+    <UnitTest name="exam_service.Tests.Section1OperationAuthorityTests.Repair_M3_And_Text01_Share_60_Seconds_And_Terminal_Usage_Is_Immutable" storage="/home/khoa/projects/langfens/project_langfens_microservice/services/exam-service.tests/bin/debug/net10.0/exam-service.tests.dll" id="6265fb69-c605-0b23-dbc3-90a7016304b7">
+      <Execution id="c6b4e907-ec91-4162-9917-3fbb61410457" />
+      <TestMethod codeBase="/home/khoa/Projects/langfens/Project_Langfens_Microservice/services/exam-service.Tests/bin/Debug/net10.0/exam-service.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="exam_service.Tests.Section1OperationAuthorityTests" name="Repair_M3_And_Text01_Share_60_Seconds_And_Terminal_Usage_Is_Immutable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6265fb69-c605-0b23-dbc3-90a7016304b7" executionId="c6b4e907-ec91-4162-9917-3fbb61410457" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0c872875-3e41-f1e1-f4fe-c380279ef03c" executionId="1000d352-7c32-4720-b49d-ae503cd92bb2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9e6d463b-2033-e762-d6ad-f13522d5c8aa" executionId="62cb1776-897d-404c-a543-dac7234fce24" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="40dcca25-55cd-34c4-93f1-0a5a1106a60f" executionId="f480f46f-f02e-41a6-83b3-11296a315688" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e8e13f1e-7d7f-d2ea-9ff5-de9d6be36f58" executionId="0edbfb6f-2fc8-4900-822a-1d8432ac14be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="687b9143-f0f1-ed2e-e4fc-db6ecec9f52e" executionId="f431cfc6-abdd-44a9-9b12-9f2a1f2854ae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="744bf335-df62-094b-e867-735185cf94c3" executionId="76850f91-2f1d-429a-ac28-d5424fac8ad2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c63fd551-fd05-b616-8794-64cc08732104" executionId="33fe586e-48d9-4211-8f59-c5d81f39b95f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="51c73663-fbc6-edd4-dd52-4237dc0ee539" executionId="de3f1d7e-267b-4ce8-bbf3-a1def391031d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="05029348-012a-0094-a729-11c36feba177" executionId="82d70eb3-42f2-45db-af36-e9152de8e575" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dd575a24-40d6-ee87-450e-218a804929fe" executionId="be333b36-2c18-44b5-858d-9f4ebb8e691b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2cdc3417-39cf-ad37-b2f7-e8a6dd9a257b" executionId="369c6176-8ff9-4e2a-a554-fc81503453a2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="396e284b-b20d-09f8-94f0-ed4b63f662ba" executionId="58340e79-ee8c-4790-80b5-135f9d126317" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="13" executed="13" passed="13" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.0.0+e341b939fe (64-bit .NET 10.0.10)
+[xUnit.net 00:00:00.07]   Discovering: exam-service.Tests
+[xUnit.net 00:00:00.12]   Discovered:  exam-service.Tests
+[xUnit.net 00:00:00.14]   Starting:    exam-service.Tests
+[xUnit.net 00:00:28.91]   Finished:    exam-service.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
