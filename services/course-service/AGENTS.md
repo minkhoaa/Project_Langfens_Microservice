@@ -1,8 +1,8 @@
 # Course service
-Owns courses, lessons, enrollments and learner progress in `Infrastructure/CourseDbContext.cs`.
+Courses, lessons, enrollments and progress; persistence: `Infrastructure/CourseDbContext.cs`.
 
-- `Features/{Admin,Public,User}Endpoint/` separates management, discovery and learner operations; extend the matching handler/service.
-- Preserve `AddCourseAuthorization()` tier policies and enrollment/progress access checks.
-- MassTransit is publisher-only here; broker configuration is not evidence of a consumer/queue convention.
-- Keep progress/lesson events compatible with gamification; this service does not award XP directly.
-- No dedicated tests; verify enrollment authorization and progress events with isolated persistence/broker.
+- Extend the matching `Features/{Admin,Public,User}Endpoint/` handler/service.
+- Preserve `AddCourseAuthorization()` tier policies and enrollment/progress ownership checks.
+- MassTransit is publisher-only; there is no registered consumer/queue convention here.
+- Lesson/progress events feed gamification; do not award XP in this service.
+- Verify enrollment authorization and progress event payloads with isolated persistence/broker.

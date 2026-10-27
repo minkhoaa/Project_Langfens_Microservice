@@ -1,8 +1,8 @@
 # Vocabulary service
-Decks/cards, learner-specific study state and SM2 scheduling; optional Azure AI enrichment/extraction.
+Decks/cards and learner-specific SM2 review state; Azure AI enrichment/extraction is optional.
 
-- `Features/User/UserService.cs` updates review state; `Application/Helper/Sm2Scheduler.cs` computes schedules.
-- Preserve grade 0–5, failure reset, EF floor 1.3 and UTC dates; update repetitions/easiness/interval/next-due together on the learner/card relation.
-- Publishes `CardReviewedEvent`; no registered consumers. Keep gamification event compatibility.
-- `AddVocabularyAuthorization()` and deck ownership checks enforce tier boundaries; `AZURE_OPENAI__*` is optional.
-- No dedicated tests; exercise failed/pass scheduling with explicit time and isolate AI/event dependencies.
+- Reviews: `Features/User/UserService.cs`; scheduling: `Application/Helper/Sm2Scheduler.cs`.
+- Preserve grades 0–5, failure reset, EF floor 1.3 and UTC dates; update repetitions/easiness/interval/next-due together on the learner/card relation.
+- Publishes `CardReviewedEvent` to gamification; no registered consumers.
+- Preserve `AddVocabularyAuthorization()` tier policies and deck ownership checks; `AZURE_OPENAI__*` must remain optional.
+- Test failed/pass scheduling with explicit time and isolated AI/event dependencies.

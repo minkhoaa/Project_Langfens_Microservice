@@ -48,7 +48,7 @@ CACHE_DIR = SCRIPT_DIR / "_cache_writing_images"
 PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-# Headings / colours use the langfens palette (see langfens-fe-app CLAUDE.md).
+# Headings / colours use the langfens palette defined below.
 PRIMARY = "#2563EB"          # blue-600
 PRIMARY_LIGHT = "#DBEAFE"    # blue-100
 ACCENT = "#06D6A0"           # teal

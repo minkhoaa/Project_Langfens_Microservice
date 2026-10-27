@@ -1,11 +1,10 @@
 # AI service
-FastAPI writing/grammar/speaking inference, embeddings/RAG and ASR; autonomous Reading belongs to generation-service.
+FastAPI grading/explanations, embeddings/RAG, roleplay and ASR; routes/lifespan: `app/main.py`, settings: `app/config.py`.
 
-- `app/main.py` wires lifespan/routes; `app/config.py` settings, `app/services/` inference and `app/prompts/` templates.
-- Judges call `llm_service.generate()` → `groq_service`; preserve Groq/MiniMax routing, key cooldowns and cost guardrails.
-- Ollama BGE-M3 embeddings default to 1024 dimensions; Qdrant collections must match. Reuse `qdrant_factory` and Redis cache invalidation.
-- Direct Ollama roleplay and local Qwen/LoRA grading are separate paths, not judge fallbacks; never fabricate successful scores/retrieval on failure.
-- Keep Pydantic v2 boundaries, async/thread-offloaded inference and the 25 MiB speech input limit.
-- Local venv: `python -m pytest -m "not live"`; live E2E can run whenever reachable even without `--run-live`.
-- `tests/conftest.py` stubs missing ML dependencies: passing tests do not verify real model availability.
-- Startup can ingest empty Qdrant collections (`DISABLE_INGESTION_ON_STARTUP`); do not start it for passive verification.
+- Use a service-local venv: `python -m pip install -r requirements-dev.txt`; test here with `python -m pytest -m "not live"`.
+- Live E2E runs when services are reachable even without `--run-live`; the root test runner does not exclude it.
+- Settings auto-load `deploy/envs/ai.env`; use `AI_SERVICE_ENV_FILE` to select isolated test configuration.
+- Judges use `llm_service.generate()` → Groq with key rotation/cooldowns; Ollama roleplay and local Qwen/LoRA are separate paths, not judge fallbacks.
+- Ollama BGE-M3 defaults to 1024 dimensions; match Qdrant collections, reuse `qdrant_factory` and preserve Redis cache invalidation.
+- Keep Pydantic v2 boundaries, nonblocking inference and the 25 MiB speech input limit; never fabricate successful scores/retrieval on failure.
+- Startup can ingest Qdrant and prewarm models (`DISABLE_INGESTION_ON_STARTUP` disables that lifespan work); do not start for passive checks. Mocked tests do not prove model availability.

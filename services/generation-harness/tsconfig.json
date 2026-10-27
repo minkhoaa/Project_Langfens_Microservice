@@ -1,0 +1,37 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"paths": {
+			"generation-telemetry": ["./packages/telemetry/src/index.ts"],
+			"generation-telemetry/testing": ["./packages/telemetry/src/testing/index.ts"],
+			"generation-telemetry/render": ["./packages/telemetry/src/render.ts"],
+			"generation-codemode": ["./packages/codemode/src/index.ts"],
+			"generation-codemode/cloudflare": ["./packages/codemode/src/cloudflare.ts"],
+			"generation-codemode/declarations": ["./packages/codemode/src/declarations.ts"],
+			"generation-codemode/portable": ["./packages/codemode/src/portable.ts"],
+			"generation-codemode/source": ["./packages/codemode/src/source.ts"],
+			"generation-codemode/worker": ["./packages/codemode/src/runtime/worker.ts"],
+			"generation-mcp": ["./packages/mcp/src/index.ts"],
+			"generation-mcp/oauth": ["./packages/mcp/src/oauth/index.ts"],
+			"generation-mcp/testing": ["./packages/mcp/src/testing/index.ts"],
+			"generation-ai": ["./packages/ai/src/index.ts"],
+			"generation-ai/oauth": ["./packages/ai/src/oauth.ts"],
+			"generation-ai/*": ["./packages/ai/src/*.ts", "./packages/ai/src/providers/*.ts"],
+			"generation-ai/dist/*": ["./packages/ai/src/*"],
+			"generation-agent-core": ["./packages/agent/src/index.ts"],
+			"generation-harness-core": ["./packages/generation-harness-core/src/index.ts"],
+			"generation-harness-core/hooks": ["./packages/generation-harness-core/src/core/hooks/index.ts"],
+			"generation-harness-core/*": ["./packages/generation-harness-core/src/*"],
+			"generation-subagents": ["./packages/generation-subagents/src/index.ts"],
+			"generation-subagents/*": ["./packages/generation-subagents/src/*"],
+			"typebox": ["./node_modules/typebox"],
+			"generation-tui": ["./packages/tui/src/index.ts"],
+			"generation-tui/*": ["./packages/tui/src/*"]
+		}
+	},
+	"include": ["packages/*/src/**/*"],
+	"exclude": ["**/dist/**"]
+}

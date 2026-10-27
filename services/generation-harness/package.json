@@ -1,0 +1,41 @@
+{
+	"name": "langfens-harness",
+	"displayName": "Langfens Harness",
+	"description": "generation-harness creation",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"clean": "npm run clean --workspaces",
+		"build": "npm run build -w generation-telemetry && npm run build -w generation-tui && npm run build -w generation-codemode && npm run build -w generation-mcp && npm run build -w generation-ai && npm run build -w generation-agent-core && npm run build -w generation-harness-core && npm run build -w generation-subagents",
+		"build:offline": "npm run build",
+		"dev": "node scripts/run.mjs --source",
+		"start": "node scripts/run.mjs",
+		"start:tui": "node scripts/run.mjs",
+		"start:rpc": "node scripts/run.mjs --mode rpc",
+		"typecheck": "tsc --noEmit && npm run typecheck -w generation-subagents",
+		"smoke": "node scripts/smoke.mjs",
+		"test": "node --test test/branding.test.mjs test/isolation.test.mjs test/tools.test.mjs test/runtime.test.mjs test/subagents.test.mjs test/consolidation.test.mjs"
+	},
+	"devDependencies": {
+		"@anthropic-ai/sandbox-runtime": "0.0.26",
+		"@biomejs/biome": "2.3.5",
+		"@biomejs/wasm-nodejs": "2.3.5",
+		"@types/node": "22.19.19",
+		"esbuild": "0.28.2",
+		"husky": "9.1.7",
+		"pnpm": "11.15.1",
+		"shx": "0.3.4",
+		"typescript": "7.0.2",
+		"yaml": "2.9.0"
+	},
+	"engines": {
+		"node": ">=22.19.0"
+	},
+	"version": "0.0.3",
+	"overrides": {
+		"protobufjs": "7.6.6"
+	}
+}
