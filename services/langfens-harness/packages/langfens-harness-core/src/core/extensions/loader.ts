@@ -79,10 +79,14 @@ function getAliases(): Record<string, string> {
 	const packagesRoot = path.resolve(__dirname, "../../../../");
 	const resolveWorkspaceOrImport = (workspaceRelativePath: string, specifier: string): string => {
 		const workspacePath = path.join(packagesRoot, workspaceRelativePath);
-		if (fs.existsSync(workspacePath)) {
-			return workspacePath;
+		const canonical = fs.realpathSync(workspacePath);
+		if (!canonical.startsWith(fs.realpathSync(packagesRoot) + path.sep)) {
+			throw new Error(`Foreign local workspace entry for ${specifier}`);
 		}
-		return fileURLToPath(import.meta.resolve(specifier));
+		const workspaceDir = workspaceRelativePath.split("/")[0];
+		const manifest = JSON.parse(fs.readFileSync(path.join(packagesRoot, workspaceDir, "package.json"), "utf8"));
+		if (manifest.name !== specifier.split("/")[0]) throw new Error(`Invalid local workspace manifest for ${specifier}`);
+		return canonical;
 	};
 
 	const harnessCodingAgentEntry = packageIndex;

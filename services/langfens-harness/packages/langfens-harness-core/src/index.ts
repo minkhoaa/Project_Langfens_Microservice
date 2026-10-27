@@ -1,4 +1,5 @@
 // Core session management
+export { getCorePackageRoot, resolveRuntimePaths, type RuntimePaths } from "./runtime-paths.ts";
 
 export { type Args, parseArgs } from "./cli/args.ts";
 

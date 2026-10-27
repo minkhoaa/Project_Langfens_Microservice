@@ -11,25 +11,10 @@ import {
 	statSync,
 	writeFileSync,
 } from "node:fs";
-import { homedir } from "node:os";
+import { resolveRuntimePaths } from "../runtime-paths.ts";
 
 function getEnv(): NodeJS.ProcessEnv {
-	if (process.platform !== "linux" || Object.keys(process.env).length > 0) {
-		return process.env;
-	}
-	try {
-		const data = readFileSync("/proc/self/environ", "utf-8");
-		const env: NodeJS.ProcessEnv = {};
-		for (const entry of data.split("\0")) {
-			const idx = entry.indexOf("=");
-			if (idx > 0) {
-				env[entry.slice(0, idx)] = entry.slice(idx + 1);
-			}
-		}
-		return env;
-	} catch {
-		return process.env;
-	}
+	return process.env;
 }
 
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
@@ -231,7 +216,7 @@ function toPosixPath(p: string): string {
 }
 
 function getHomeDir(): string {
-	return process.env.HOME || homedir();
+	return resolveRuntimePaths().home;
 }
 
 export function getExtensionTempFolder(agentDir: string): string {
@@ -2099,36 +2084,6 @@ export class DefaultPackageManager implements PackageManager {
 		return join(this.agentDir, "npm");
 	}
 
-	private getGlobalNpmRoot(): string {
-		const npmCommand = this.getNpmCommand();
-		const commandKey = [npmCommand.command, ...npmCommand.args].join("\0");
-		if (this.globalNpmRoot && this.globalNpmRootCommandKey === commandKey) {
-			return this.globalNpmRoot;
-		}
-		if (this.getPackageManagerName() === "bun") {
-			const binDir = this.runNpmCommandSync(["pm", "bin", "-g"]).trim();
-			this.globalNpmRoot = join(dirname(binDir), "install", "global", "node_modules");
-		} else {
-			this.globalNpmRoot = this.runNpmCommandSync(["root", "-g"]).trim();
-		}
-		this.globalNpmRootCommandKey = commandKey;
-		return this.globalNpmRoot;
-	}
-
-	private getPnpmGlobalPackagePath(packageName: string): string | undefined {
-		if (this.getPackageManagerName() !== "pnpm") {
-			return undefined;
-		}
-
-		const output = this.runNpmCommandSync(["list", "-g", "--depth", "0", "--json"]);
-		const entries = JSON.parse(output) as Array<{ dependencies?: Record<string, { path?: string }> }>;
-		for (const entry of entries) {
-			const path = entry.dependencies?.[packageName]?.path;
-			if (path) return path;
-		}
-		return undefined;
-	}
-
 	private getManagedNpmInstallPath(source: NpmSource, scope: SourceScope): string {
 		if (scope === "temporary") {
 			return join(this.getTemporaryDir("npm"), "node_modules", source.name);
@@ -2140,22 +2095,8 @@ export class DefaultPackageManager implements PackageManager {
 		return join(this.agentDir, "npm", "node_modules", source.name);
 	}
 
-	private getLegacyGlobalNpmInstallPath(source: NpmSource): string | undefined {
-		try {
-			return this.getPnpmGlobalPackagePath(source.name) ?? join(this.getGlobalNpmRoot(), source.name);
-		} catch {
-			return undefined;
-		}
-	}
-
 	private getNpmInstallPath(source: NpmSource, scope: SourceScope): string {
-		const managedPath = this.getManagedNpmInstallPath(source, scope);
-		// Standalone harness must never reuse packages installed by the host's npm/Pi.
-		if (process.env.LANGFENS_HARNESS_ISOLATED === "1" || scope !== "user" || existsSync(managedPath)) {
-			return managedPath;
-		}
-		const legacyPath = this.getLegacyGlobalNpmInstallPath(source);
-		return legacyPath && existsSync(legacyPath) ? legacyPath : managedPath;
+		return this.getManagedNpmInstallPath(source, scope);
 	}
 
 	private getGitInstallPath(source: GitSource, scope: SourceScope): string {
@@ -2551,20 +2492,6 @@ export class DefaultPackageManager implements PackageManager {
 			userMetadata,
 			userOverrides.skills,
 			globalBaseDir,
-		);
-
-		// User skills from ~/.agents/ (with its own baseDir)
-		const userAgentsBaseDir = dirname(userAgentsSkillsDir);
-		const userAgentsMetadata: PathMetadata = {
-			...userMetadata,
-			baseDir: userAgentsBaseDir,
-		};
-		addResources(
-			"skills",
-			collectAutoSkillEntries(userAgentsSkillsDir, "agents"),
-			userAgentsMetadata,
-			userOverrides.skills,
-			userAgentsBaseDir,
 		);
 
 		addResources(

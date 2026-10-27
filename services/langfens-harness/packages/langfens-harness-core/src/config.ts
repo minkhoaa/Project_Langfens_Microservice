@@ -1,9 +1,8 @@
-import { accessSync, constants, existsSync, readFileSync, realpathSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { createRequire } from "module";
-import { homedir } from "os";
-import { basename, dirname, join, resolve, sep, win32 } from "path";
+import { basename, dirname, join, resolve, sep } from "path";
 import { fileURLToPath } from "url";
-import { spawnProcessSync } from "./utils/child-process.ts";
+import { getCorePackageRoot, resolveRuntimePaths } from "./runtime-paths.ts";
 import { normalizePath } from "./utils/paths.ts";
 import { stripBom } from "./utils/text.ts";
 
@@ -82,17 +81,7 @@ export function findNodePackageDir(startDir: string): string {
 }
 
 export function getPackageDir(): string {
-	// Allow override via environment variable (useful for Nix/Guix where store paths tokenize poorly)
-	const envDir = process.env.LANGFENS_HARNESS_PACKAGE_DIR;
-	if (envDir) {
-		return normalizePath(envDir);
-	}
-
-	if (isBunBinary) {
-		// Bun binary: process.execPath points to the compiled executable
-		return dirname(process.execPath);
-	}
-	return findNodePackageDir(__dirname);
+	return getCorePackageRoot();
 }
 
 /**
@@ -296,12 +285,11 @@ export function getAgentDir(): string {
 	if (envDir) {
 		return expandTildePath(envDir);
 	}
-	return join(homedir(), CONFIG_DIR_NAME, "agent");
+	return resolveRuntimePaths().agentDir;
 }
 
 /** Bound ancestor discovery in standalone processes; ordinary SDK behavior is unchanged. */
 export function getStandaloneDiscoveryRoot(cwd: string): string | undefined {
-	if (process.env.LANGFENS_HARNESS_ISOLATED !== "1") return undefined;
 	const workspace = process.env.LANGFENS_HARNESS_WORKSPACE_DIR;
 	const root = workspace ? resolve(workspace) : resolve(cwd);
 	const current = resolve(cwd);
@@ -345,9 +333,9 @@ export function getPromptsDir(): string {
 
 /** Get path to sessions directory */
 export function getSessionsDir(agentDir: string = getAgentDir()): string {
-	// CLI already honors this variable; standalone SDK/default session discovery must too.
-	const envDir = process.env.LANGFENS_HARNESS_ISOLATED === "1" ? process.env[ENV_SESSION_DIR] : undefined;
-	return envDir ? expandTildePath(envDir) : join(agentDir, "sessions");
+	return resolve(agentDir) === resolve(getAgentDir())
+		? resolveRuntimePaths().sessionsDir
+		: join(agentDir, "sessions");
 }
 
 /** Get path to debug log file */

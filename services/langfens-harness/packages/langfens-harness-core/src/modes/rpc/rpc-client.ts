@@ -5,7 +5,9 @@
  */
 
 import { type ChildProcess, spawn } from "node:child_process";
-import { join } from "node:path";
+import { mkdirSync, realpathSync } from "node:fs";
+import { join, sep } from "node:path";
+import { resolveRuntimePaths } from "../../runtime-paths.ts";
 import type { AgentMessage, ThinkingLevel } from "langfens-agent-core";
 import { getPackageDir } from "../../config.ts";
 import type { ImageContent } from "langfens-ai";
@@ -80,7 +82,26 @@ export class RpcClient {
 
 		this.exitError = null;
 
-		const cliPath = this.options.cliPath ?? join(getPackageDir(), "dist", "bundle", "cli.js");
+		const packageRoot = realpathSync(getPackageDir());
+		const cliPath = realpathSync(this.options.cliPath ?? join(packageRoot, "dist", "bundle", "cli.js"));
+		if (!cliPath.startsWith(packageRoot + sep)) throw new Error("RPC requires an owned local core entry");
+		const paths = resolveRuntimePaths({ runtimeDir: this.options.env?.LANGFENS_HARNESS_RUNTIME_DIR, cwd: this.options.cwd });
+		for (const directory of [paths.home, paths.agentDir, paths.sessionsDir, paths.workspaceDir]) mkdirSync(directory, { recursive: true, mode: 0o700 });
+		const env: NodeJS.ProcessEnv = { ...process.env };
+		for (const key of Object.keys(env)) {
+			if (key.startsWith("PI_") || ["NODE_PATH", "NODE_OPTIONS", "INIT_CWD"].includes(key)) delete env[key];
+		}
+		// Explicit caller preloads (e.g. a test network guard) are trusted API inputs, not inherited host injection.
+		Object.assign(env, this.options.env, {
+			HOME: paths.home, USERPROFILE: paths.home,
+			LANGFENS_HARNESS_RUNTIME_DIR: paths.root, LANGFENS_HARNESS_AGENT_DIR: paths.agentDir,
+			LANGFENS_HARNESS_SESSION_DIR: paths.sessionsDir, LANGFENS_HARNESS_PACKAGE_DIR: packageRoot,
+			LANGFENS_HARNESS_WORKSPACE_DIR: paths.cwd, LANGFENS_HARNESS_ISOLATED: "1",
+			LANGFENS_HARNESS_OFFLINE: "1", LANGFENS_HARNESS_SKIP_VERSION_CHECK: "1", LANGFENS_HARNESS_TELEMETRY: "0",
+			LANGFENS_SUBAGENTS_CORE_ROOT: packageRoot,
+		});
+		delete env.NODE_PATH;
+		for (const key of Object.keys(env)) if (key.startsWith("PI_")) delete env[key];
 		const args = ["--mode", "rpc"];
 
 		if (this.options.provider) {
@@ -94,8 +115,8 @@ export class RpcClient {
 		}
 
 		const childProcess = spawn(process.execPath, [cliPath, ...args], {
-			cwd: this.options.cwd,
-			env: { ...process.env, ...this.options.env },
+			cwd: paths.cwd,
+			env,
 			stdio: ["pipe", "pipe", "pipe"],
 		});
 		this.process = childProcess;

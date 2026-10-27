@@ -1,8 +1,10 @@
+import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { Agent, type AgentMessage, setDefaultStreamFn, type ThinkingLevel } from "langfens-agent-core";
 import type { ModelsSimpleStreamOptions } from "langfens-ai";
 import { clampThinkingLevel, type Message, type Model, streamSimple } from "langfens-ai/compat";
 import { getAgentDir } from "../config.ts";
+import { resolveRuntimePaths } from "../runtime-paths.ts";
 import { resolvePath } from "../utils/paths.ts";
 import { AgentSession } from "./agent-session.ts";
 import { formatNoModelsAvailableMessage } from "./auth-guidance.ts";
@@ -46,6 +48,8 @@ import { getBranchSelection } from "./virtual-models.ts";
 setDefaultStreamFn(streamSimple);
 
 export interface CreateAgentSessionOptions {
+	/** Private runtime root; independent of the tool working directory. */
+	runtimeDir?: string;
 	/** Working directory for project-local discovery. Default: process.cwd() */
 	cwd?: string;
 	/** Global config directory. Default: ~/.langfens/agent */
@@ -189,16 +193,18 @@ function getDefaultAgentDir(): string {
  * ```
  */
 export async function createAgentSession(options: CreateAgentSessionOptions = {}): Promise<CreateAgentSessionResult> {
-	const cwd = resolvePath(options.cwd ?? options.sessionManager?.getCwd() ?? process.cwd());
-	const agentDir = options.agentDir ? resolvePath(options.agentDir) : getDefaultAgentDir();
+	const paths = resolveRuntimePaths({ runtimeDir: options.runtimeDir, cwd: options.cwd ?? options.sessionManager?.getCwd() });
+	const cwd = resolvePath(paths.cwd);
+	if (!options.cwd && !options.sessionManager) mkdirSync(cwd, { recursive: true, mode: 0o700 });
+	const agentDir = options.agentDir ? resolvePath(options.agentDir) : paths.agentDir;
 	let resourceLoader = options.resourceLoader;
 
-	const authPath = options.agentDir ? join(agentDir, "auth.json") : undefined;
-	const modelsPath = options.agentDir ? join(agentDir, "models.json") : undefined;
+	const authPath = join(agentDir, "auth.json");
+	const modelsPath = join(agentDir, "models.json");
 	const modelRuntime = options.modelRuntime ?? (await ModelRuntime.create({ authPath, modelsPath }));
 
 	const settingsManager = options.settingsManager ?? SettingsManager.create(cwd, agentDir);
-	const sessionManager = options.sessionManager ?? SessionManager.create(cwd, getDefaultSessionDir(cwd, agentDir));
+	const sessionManager = options.sessionManager ?? SessionManager.create(cwd, options.runtimeDir ? paths.sessionsDir : getDefaultSessionDir(cwd, agentDir));
 
 	if (!resourceLoader) {
 		resourceLoader = new DefaultResourceLoader({ cwd, agentDir, settingsManager });
