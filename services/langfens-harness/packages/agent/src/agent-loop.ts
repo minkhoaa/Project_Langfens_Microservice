@@ -11,13 +11,13 @@ import {
 	getToolStateChanges,
 	mergeClientIdentity,
 	normalizeContext,
-	PI_ATTRIBUTION,
+	LANGFENS_HARNESS_ATTRIBUTION,
 	type SystemMessage,
 	type ToolResultMessage,
 	type ToolStateChanges,
 	toToolDeclaration,
 	validateToolArguments,
-} from "@earendil-works/pi-ai";
+} from "langfens-ai";
 import { getDefaultStreamFn } from "./stream-fn.ts";
 import type {
 	AgentContext,
@@ -38,7 +38,7 @@ export type AgentEventSink = (event: AgentEvent) => Promise<void> | void;
  * Request identity of agent loops: pi-ai's defaults with provider attribution to pi. `AgentLoopConfig.identity`
  * overrides it field by field.
  */
-export const DEFAULT_AGENT_IDENTITY: ClientIdentity = { attribution: PI_ATTRIBUTION };
+export const DEFAULT_AGENT_IDENTITY: ClientIdentity = { attribution: LANGFENS_HARNESS_ATTRIBUTION };
 
 /**
  * Start an agent loop with a new prompt message.

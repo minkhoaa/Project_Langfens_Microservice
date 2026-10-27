@@ -1,12 +1,12 @@
 {
-	"name": "pi-monorepo",
+	"name": "langfens-harness",
 	"displayName": "langfens-harness",
 	"private": true,
 	"type": "module",
 	"workspaces": ["packages/*"],
 	"scripts": {
 		"clean": "npm run clean --workspaces",
-		"build": "npm run build -w @earendil-works/pi-telemetry && npm run build -w @earendil-works/pi-tui && npm run build -w @earendil-works/pi-codemode && npm run build -w @earendil-works/pi-mcp && npm run build -w @earendil-works/pi-ai && npm run build -w @earendil-works/pi-agent-core && npm run build -w @earendil-works/pi-coding-agent",
+		"build": "npm run build -w langfens-telemetry && npm run build -w langfens-tui && npm run build -w langfens-codemode && npm run build -w langfens-mcp && npm run build -w langfens-ai && npm run build -w langfens-agent-core && npm run build -w langfens-harness-core",
 		"build:offline": "npm run build",
 		"typecheck": "tsc --noEmit",
 		"check": "npm run typecheck",

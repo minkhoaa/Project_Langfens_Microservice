@@ -4,8 +4,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { createCodingTools } from "../packages/coding-agent/src/core/tools/index.ts";
-import { DEFAULT_MAX_LINES } from "../packages/coding-agent/src/core/tools/truncate.ts";
+import { createCodingTools } from "../packages/langfens-harness-core/src/core/tools/index.ts";
+import { DEFAULT_MAX_LINES } from "../packages/langfens-harness-core/src/core/tools/truncate.ts";
 
 async function execute(tool, args) {
 	return tool.execute(`test-${tool.name}`, args);

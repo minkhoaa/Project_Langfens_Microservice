@@ -1,5 +1,5 @@
 {
-	"name": "@earendil-works/pi-mcp",
+	"name": "langfens-mcp",
 	"version": "1.4.0",
 	"description": "Standalone Model Context Protocol client for pi and other applications",
 	"type": "module",
@@ -23,7 +23,10 @@
 		}
 	},
 	"sideEffects": false,
-	"files": ["dist", "LICENSES"],
+	"files": [
+		"dist",
+		"LICENSES"
+	],
 	"scripts": {
 		"clean": "shx rm -rf dist",
 		"build": "tsc -p tsconfig.build.json"
@@ -35,11 +38,6 @@
 	],
 	"author": "Earendil Works",
 	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
-		"directory": "packages/mcp"
-	},
 	"engines": {
 		"node": ">=22.19.0"
 	},

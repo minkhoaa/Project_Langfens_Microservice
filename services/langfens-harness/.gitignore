@@ -13,6 +13,9 @@ packages/ai/src/providers/.model-generation-*/
 # Runtime catalog is pinned source, even when the parent repository ignores data/.
 !packages/ai/src/providers/data/
 !packages/ai/src/providers/data/*.json
+# Local JavaScript CLI source is not a platform build output.
+!packages/langfens-harness-core/bin/
+!packages/langfens-harness-core/bin/*.mjs
 *.cpuprofile
 
 # Environment

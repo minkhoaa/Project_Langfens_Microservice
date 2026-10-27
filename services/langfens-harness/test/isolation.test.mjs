@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import test from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { RpcClient } from "@earendil-works/pi-coding-agent";
+import { RpcClient } from "langfens-harness-core";
 import { cliPath, harnessRoot, packageRoot, runtimeLaunch } from "../scripts/runtime.mjs";
 
 const offline = new URL("./offline.mjs", import.meta.url).href;
@@ -37,9 +37,9 @@ function launchFor(t) {
 	const inherited = {
 		HOME: host, USERPROFILE: host, PATH: poisonBin,
 		NODE_PATH: join(host, "node_modules"), NODE_OPTIONS: `--import=${join(host, "preload.mjs")}`,
-		PI_PACKAGE_DIR: host, PI_CODING_AGENT_DIR: join(host, ".pi/agent"),
-		PI_CODING_AGENT_SESSION_DIR: host, PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT: host,
-		PI_SUBAGENT_PI_BINARY: join(poisonBin, "pi"),
+		LANGFENS_HARNESS_PACKAGE_DIR: host, LANGFENS_HARNESS_AGENT_DIR: join(host, ".pi/agent"),
+		LANGFENS_HARNESS_SESSION_DIR: host, LANGFENS_SUBAGENTS_CORE_ROOT: host,
+		LANGFENS_SUBAGENTS_BINARY: join(poisonBin, "pi"),
 		LANGFENS_HARNESS_RUNTIME_DIR: join(dir, "runtime"),
 	};
 	const launch = runtimeLaunch([], inherited);
@@ -81,19 +81,17 @@ test("launcher replaces hostile host configuration/preloads and runs with no glo
 	assert.equal(output.trim(), "1.4.0");
 	assert.equal(launch.command, process.execPath);
 	assert.equal(launch.args[0], cliPath);
-	assert.equal(launch.env.PI_PACKAGE_DIR, packageRoot);
-	assert.equal(launch.env.PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT, packageRoot);
+	assert.equal(launch.env.LANGFENS_HARNESS_PACKAGE_DIR, packageRoot);
+	assert.equal(launch.env.LANGFENS_SUBAGENTS_CORE_ROOT, packageRoot);
 	assert.equal(runtimeLaunch([], launch.inherited).env.NODE_OPTIONS, undefined);
 	assert.equal(launch.env.NODE_PATH, undefined);
-	const localBin = join(packageRoot, "bin/pi.mjs");
-	assert.equal(realpathSync(join(harnessRoot, "node_modules/.bin/pi")), localBin);
+	const localBin = join(packageRoot, "bin/langfens-harness.mjs");
+	assert.equal(realpathSync(join(harnessRoot, "node_modules/.bin/langfens-harness")), localBin);
 	assert.equal(execFileSync(process.execPath, [localBin, "--version"], { env: launch.env, encoding: "utf8" }).trim(), "1.4.0");
-	assert.equal(launch.env.PI_SUBAGENT_PI_BINARY, undefined);
+	assert.equal(launch.env.LANGFENS_SUBAGENTS_BINARY, undefined);
 	assert.equal(realpathSync(join(launch.runtime, "agent/npm")), join(launch.runtime, "packages/npm"));
-	if (process.platform !== "win32") {
-		assert.equal(realpathSync(join(launch.runtime, "bin/pi")), join(harnessRoot, "scripts/run.mjs"));
-		assert.equal(execFileSync(join(launch.runtime, "bin/pi"), ["--version"], { env: launch.env, encoding: "utf8" }).trim(), "1.4.0");
-	}
+	assert.equal(existsSync(join(launch.runtime, "bin/pi")), false);
+	assert.equal(existsSync(join(harnessRoot, "node_modules/.bin/pi")), false);
 });
 
 test("SDK config/auth paths and default discovery ignore fake host settings, skills and extensions", (t) => {
@@ -104,12 +102,12 @@ test("SDK config/auth paths and default discovery ignore fake host settings, ski
 		import { DefaultResourceLoader, SessionManager, SettingsManager } from ${JSON.stringify(pathToFileURL(join(packageRoot, "dist/index.js")).href)};
 		import { getAgentDir, getAuthPath, getPackageDir, getModelsPath, getSettingsPath } from ${JSON.stringify(pathToFileURL(join(packageRoot, "dist/config.js")).href)};
 		import { DefaultPackageManager } from ${JSON.stringify(pathToFileURL(join(packageRoot, "dist/core/package-manager.js")).href)};
-		assert.equal(getAgentDir(), process.env.PI_CODING_AGENT_DIR);
-		assert.equal(getPackageDir(), process.env.PI_PACKAGE_DIR);
+		assert.equal(getAgentDir(), process.env.LANGFENS_HARNESS_AGENT_DIR);
+		assert.equal(getPackageDir(), process.env.LANGFENS_HARNESS_PACKAGE_DIR);
 		assert.ok([getAuthPath(), getModelsPath(), getSettingsPath()].every(p => p.startsWith(getAgentDir() + '/')));
 		assert.equal(existsSync(getAuthPath()), false);
 		const session = SessionManager.create(process.cwd());
-		assert.ok(session.getSessionFile().startsWith(process.env.PI_CODING_AGENT_SESSION_DIR + '/'));
+		assert.ok(session.getSessionFile().startsWith(process.env.LANGFENS_HARNESS_SESSION_DIR + '/'));
 		session.appendMessage({role: 'user', content: 'Stored offline, never sent', timestamp: Date.now()});
 		assert.equal(existsSync(session.getSessionFile()), true);
 		const settings = SettingsManager.create(process.cwd(), getAgentDir());
@@ -137,12 +135,12 @@ for (const entry of ["dist/cli.js", "dist/bundle/cli.js"]) {
 		const extension = join(launch.runtime, "inspect.mjs");
 		put(extension, `
 			import { writeFileSync } from 'node:fs';
-			import { getAgentDir } from '@earendil-works/pi-coding-agent';
+			import { getAgentDir } from 'langfens-harness-core';
 			export default function(pi) {
 				pi.on('session_start', () => writeFileSync(${JSON.stringify(snapshot)}, JSON.stringify({
 					execPath: process.execPath, argv: process.argv, cwd: process.cwd(), agent: getAgentDir(),
-					home: process.env.HOME, package: process.env.PI_PACKAGE_DIR,
-					childPackage: process.env.PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT
+					home: process.env.HOME, package: process.env.LANGFENS_HARNESS_PACKAGE_DIR,
+					childPackage: process.env.LANGFENS_SUBAGENTS_CORE_ROOT
 				})));
 			}
 		`);
@@ -156,7 +154,7 @@ for (const entry of ["dist/cli.js", "dist/bundle/cli.js"]) {
 		assert.equal(child.execPath, process.execPath);
 		assert.equal(child.argv[1], localCli);
 		assert.equal(child.cwd, launch.workspace);
-		assert.equal(child.agent, launch.env.PI_CODING_AGENT_DIR);
+		assert.equal(child.agent, launch.env.LANGFENS_HARNESS_AGENT_DIR);
 		assert.equal(child.home, launch.env.HOME);
 		assert.equal(child.package, packageRoot);
 		assert.equal(child.childPackage, packageRoot);
@@ -172,38 +170,7 @@ test("source entrypoint resolves workspace source and starts offline", { timeout
 	}), /--mode/);
 });
 
-test("installed pi-subagents resolver selects and actually executes the local Node CLI (read-only optional audit)", {
-	skip: !process.env.PI_SUBAGENTS_EXTENSION && "Set PI_SUBAGENTS_EXTENSION to audit an existing resolver; no extension is installed",
-	timeout: 20000,
-}, (t) => {
-	const launch = launchFor(t);
-	const bundle = dirname(resolve(process.env.PI_SUBAGENTS_EXTENSION));
-	const source = readdirSync(bundle).filter(name => name.endsWith(".js")).map(name => readFileSync(join(bundle, name), "utf8"))
-		.find(source => source.includes("function getPiSpawnCommand("));
-	assert.ok(source, "Expected pi-subagents Node spawn resolver");
-	const start = source.indexOf('// src/runs/shared/pi-spawn.ts');
-	const end = source.indexOf('// src/runs/shared/structured-output.ts', start);
-	assert.ok(start >= 0 && end > start, "Resolver artifact format changed; re-audit rather than silently skip");
-	// Evaluate the actual installed resolver in a disposable file without importing
-	// its extension, transitive host modules, settings or Pi global. No agent prompts.
-	const fixture = join(launch.runtime, "resolver.mjs");
-	put(fixture, `const PI_CODING_AGENT_PACKAGE_ROOT_ENV = 'PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT';\n${source.slice(start, end)}\nexport {getPiSpawnCommand};`);
-	const probe = `
-		import assert from 'node:assert/strict';
-		import {execFileSync} from 'node:child_process';
-		import {getPiSpawnCommand} from ${JSON.stringify(pathToFileURL(fixture).href)};
-		for (const argv1 of [${JSON.stringify(cliPath)}, '/missing/sdk-host.mjs']) {
-			const plan = getPiSpawnCommand(['--version'], {argv1});
-			assert.equal(plan.command, process.execPath);
-			assert.equal(plan.args[0], argv1 === ${JSON.stringify(cliPath)} ? argv1 : ${JSON.stringify(join(packageRoot, "bin/pi.mjs"))});
-			assert.equal(execFileSync(plan.command, plan.args, {encoding:'utf8'}).trim(), '1.4.0');
-		}
-		console.log('subagent-executable-isolated');
-	`;
-	assert.equal(execFileSync(process.execPath, ["--input-type=module", "-e", probe], {
-		cwd: launch.cwd, env: launch.env, encoding: "utf8",
-	}).trim(), "subagent-executable-isolated");
-});
+
 
 test("TUI reaches interactive startup in a real PTY without provider calls", {
 	skip: process.platform === "win32" && "PTY smoke uses Python's Unix pty module", timeout: 30000,

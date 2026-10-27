@@ -7,10 +7,10 @@ import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { runtimeEnvironment } from "../scripts/runtime.mjs";
-import { Agent } from "@earendil-works/pi-agent-core";
-import { createFauxCore, fauxAssistantMessage, fauxProvider, fauxToolCall, InMemoryCredentialStore } from "@earendil-works/pi-ai";
-import { builtinProviders, getAllBuiltinModels, getBuiltinProviders } from "@earendil-works/pi-ai/providers/all";
-import { CodemodeSandbox } from "@earendil-works/pi-codemode";
+import { Agent } from "langfens-agent-core";
+import { createFauxCore, fauxAssistantMessage, fauxProvider, fauxToolCall, InMemoryCredentialStore } from "langfens-ai";
+import { builtinProviders, getAllBuiltinModels, getBuiltinProviders } from "langfens-ai/providers/all";
+import { CodemodeSandbox } from "langfens-codemode";
 import {
 	createAgentSession,
 	createReadTool,
@@ -22,8 +22,8 @@ import {
 	RpcClient,
 	SessionManager,
 	SettingsManager,
-} from "@earendil-works/pi-coding-agent";
-import { Markdown, Text, visibleWidth } from "@earendil-works/pi-tui";
+} from "langfens-harness-core";
+import { Markdown, Text, visibleWidth } from "langfens-tui";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const offlineImport = `--import=${new URL("./offline.mjs", import.meta.url).href}`;
@@ -143,7 +143,7 @@ for (const entry of ["dist/cli.js", "dist/bundle/cli.js"]) {
 	test(`${entry}: CLI and RPC state/session/export commands work without prompts`, { timeout: 20000 }, async (t) => {
 		const cwd = scratch(t);
 		const env = childEnv(cwd);
-		const cliPath = join(root, "packages/coding-agent", entry);
+		const cliPath = join(root, "packages/langfens-harness-core", entry);
 		assert.equal(execFileSync(process.execPath, [cliPath, "--version"], { cwd, env, encoding: "utf8" }).trim(), "1.4.0");
 		assert.match(execFileSync(process.execPath, [cliPath, "--help"], { cwd, env, encoding: "utf8" }), /--mode/);
 		const manager = SessionManager.create(cwd, join(cwd, "sessions"));
@@ -167,33 +167,3 @@ for (const entry of ["dist/cli.js", "dist/bundle/cli.js"]) {
 		assert.deepEqual(await client.newSession(), { cancelled: false });
 	});
 }
-
-test("existing pi-subagents extension loads through the host aliases (optional, no install)", {
-	skip: !process.env.PI_SUBAGENTS_EXTENSION && "Set PI_SUBAGENTS_EXTENSION to an already installed extension entry",
-	timeout: 30000,
-}, async (t) => {
-	const cwd = scratch(t);
-	const loaded = await discoverAndLoadExtensions([resolve(process.env.PI_SUBAGENTS_EXTENSION)], cwd, join(cwd, "agent"));
-	t.after(() => loaded.runtime.invalidate());
-	assert.deepEqual(loaded.errors, []);
-	assert.equal(loaded.extensions.length, 1);
-	assert.ok(loaded.extensions[0].tools.has("subagent"));
-	assert.ok(loaded.extensions[0].commands.has("subagents-doctor"));
-	assert.ok(loaded.extensions[0].handlers.has("session_start"));
-	assert.ok(loaded.extensions[0].handlers.has("session_shutdown"));
-	for (const entry of ["dist/cli.js", "dist/bundle/cli.js"]) {
-		const childDir = scratch(t);
-		const client = new RpcClient({
-			cliPath: join(root, "packages/coding-agent", entry), cwd: childDir, env: childEnv(childDir),
-			args: ["--offline", "--no-session", "--no-extensions", "--extension", resolve(process.env.PI_SUBAGENTS_EXTENSION), "--no-skills", "--no-prompt-templates", "--no-themes"],
-		});
-		try {
-			await client.start();
-			assert.ok((await client.getCommands()).some((command) => command.name === "subagents-doctor"), entry);
-			assert.equal((await client.getState()).isStreaming, false);
-			assert.doesNotMatch(client.getStderr(), /Failed to load extension|Extension error/i);
-		} finally {
-			await client.stop();
-		}
-	}
-});

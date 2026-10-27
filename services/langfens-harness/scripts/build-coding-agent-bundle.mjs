@@ -8,7 +8,7 @@ import { build } from "esbuild";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "..");
-const codingAgentDir = join(repoRoot, "packages", "coding-agent");
+const codingAgentDir = join(repoRoot, "packages", "langfens-harness-core");
 const aiDistDir = join(repoRoot, "packages", "ai", "dist");
 const codingAgentDistDir = join(codingAgentDir, "dist");
 const bundleDir = join(codingAgentDistDir, "bundle");
@@ -80,7 +80,7 @@ function commonBuildOptions() {
 		absWorkingDir: repoRoot,
 		banner,
 		bundle: true,
-		define: { PI_BUNDLED_NODE: "true" },
+		define: { LANGFENS_HARNESS_BUNDLED_NODE: "true" },
 		external: ["@silvia-odwyer/photon-node"],
 		format: "esm",
 		legalComments: "none",
@@ -169,8 +169,8 @@ const mainResult = await build({
 
 const bedrockLoaderOutput = findContainingOutput(mainResult.metafile, "packages/ai/dist/api/bedrock-converse-stream.lazy.js");
 const oauthLoaderOutput = findContainingOutput(mainResult.metafile, "packages/ai/dist/auth/oauth/load.js");
-const imageResizeOutput = findContainingOutput(mainResult.metafile, "packages/coding-agent/dist/utils/image-resize.js");
-const configOutput = findContainingOutput(mainResult.metafile, "packages/coding-agent/dist/config.js");
+const imageResizeOutput = findContainingOutput(mainResult.metafile, "packages/langfens-harness-core/dist/utils/image-resize.js");
+const configOutput = findContainingOutput(mainResult.metafile, "packages/langfens-harness-core/dist/config.js");
 if (dirname(bedrockLoaderOutput) !== dirname(oauthLoaderOutput)) {
 	throw new Error("Bedrock and OAuth lazy loaders were emitted into different directories");
 }

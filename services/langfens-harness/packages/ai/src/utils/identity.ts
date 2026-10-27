@@ -1,5 +1,5 @@
 import type { Models, MutableModels } from "../models.ts";
-import { PI_AI_VERSION } from "./version.ts";
+import { LANGFENS_HARNESS_AI_VERSION } from "./version.ts";
 
 /**
  * The `User-Agent` sent to providers:
@@ -21,7 +21,7 @@ export interface ClientAttribution {
 }
 
 /** pi's attribution, used by pi-agent-core, pi-durable, and the coding agent. */
-export const PI_ATTRIBUTION: ClientAttribution = { name: "pi", url: "https://pi.dev", categories: ["cli-agent"] };
+export const LANGFENS_HARNESS_ATTRIBUTION: ClientAttribution = { name: "Langfens Harness", url: "urn:langfens:harness", categories: ["cli-agent"] };
 
 /**
  * How pi-ai identifies the calling app to providers. Every field is optional; absent fields use pi-ai's defaults:
@@ -60,7 +60,7 @@ export function mergeClientIdentity(...sources: (ClientIdentity | undefined)[]):
 
 /** The version in the detailed `User-Agent`. */
 export function getClientVersion(identity?: ClientIdentity): string {
-	return identity?.version ?? PI_AI_VERSION;
+	return identity?.version ?? LANGFENS_HARNESS_AI_VERSION;
 }
 
 function runtimeDescription(): string | undefined {
@@ -75,8 +75,8 @@ function runtimeDescription(): string | undefined {
 export function formatUserAgent(identity?: ClientIdentity): string {
 	const mode = identity?.userAgent ?? "detailed";
 	if (typeof mode === "object") return mode.custom;
-	if (mode === "short") return "pi";
-	const product = `pi/${getClientVersion(identity)}`;
+	if (mode === "short") return "langfens-harness";
+	const product = `langfens-harness/${getClientVersion(identity)}`;
 	const runtime = runtimeDescription();
 	return runtime ? `${product} (${process.platform}; ${runtime}; ${process.arch})` : `${product} (browser)`;
 }

@@ -479,7 +479,7 @@ function isReservedHeader(key: string): boolean {
 function bedrockUserAgent(identity: ClientIdentity | undefined): string | [string, string?][] {
 	const mode = identity?.userAgent ?? "detailed";
 	if (typeof mode === "object") return mode.custom;
-	return mode === "short" ? [["pi"]] : [["pi", getClientVersion(identity)]];
+	return mode === "short" ? [["langfens-harness"]] : [["langfens-harness", getClientVersion(identity)]];
 }
 
 /**
@@ -844,13 +844,13 @@ function mapThinkingLevelToEffort(
 
 /**
  * Resolve cache retention preference.
- * Defaults to "short" and uses PI_CACHE_RETENTION for backward compatibility.
+ * Defaults to "short" and uses LANGFENS_HARNESS_CACHE_RETENTION for backward compatibility.
  */
 function resolveCacheRetention(cacheRetention?: CacheRetention, env?: ProviderEnv): CacheRetention {
 	if (cacheRetention) {
 		return cacheRetention;
 	}
-	if (getProviderEnvValue("PI_CACHE_RETENTION", env) === "long") {
+	if (getProviderEnvValue("LANGFENS_HARNESS_CACHE_RETENTION", env) === "long") {
 		return "long";
 	}
 	return "short";

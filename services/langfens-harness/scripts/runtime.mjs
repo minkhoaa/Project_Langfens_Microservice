@@ -3,7 +3,7 @@ import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const harnessRoot = realpathSync(fileURLToPath(new URL("..", import.meta.url)));
-export const packageRoot = join(harnessRoot, "packages/coding-agent");
+export const packageRoot = join(harnessRoot, "packages/langfens-harness-core");
 export const cliPath = join(packageRoot, "dist/bundle/cli.js");
 
 // This is a process/configuration boundary, not a sandbox for untrusted extensions/tools.
@@ -35,21 +35,16 @@ export function runtimeEnvironment(inherited = process.env) {
 		LANGFENS_HARNESS_WORKSPACE_DIR: workspace,
 		HOME: home, USERPROFILE: home,
 		XDG_CONFIG_HOME: join(home, ".config"), XDG_CACHE_HOME: join(home, ".cache"), XDG_DATA_HOME: join(home, ".local/share"),
-		PI_CODING_AGENT_DIR: agent,
-		PI_PACKAGE_DIR: packageRoot,
-		PI_CODING_AGENT_SESSION_DIR: join(runtime, "sessions"),
-		PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT: packageRoot,
-		PI_OFFLINE: "1", PI_SKIP_VERSION_CHECK: "1", PI_TELEMETRY: "0",
+		LANGFENS_HARNESS_AGENT_DIR: agent,
+		LANGFENS_HARNESS_PACKAGE_DIR: packageRoot,
+		LANGFENS_HARNESS_SESSION_DIR: join(runtime, "sessions"),
+		LANGFENS_SUBAGENTS_CORE_ROOT: packageRoot,
+		LANGFENS_HARNESS_OFFLINE: "1", LANGFENS_HARNESS_SKIP_VERSION_CHECK: "1", LANGFENS_HARNESS_TELEMETRY: "0",
 		npm_config_prefix: join(packages, "npm"), npm_config_cache: join(packages, ".npm-cache"),
 	});
-	// Also protect legacy extensions which spawn `pi` rather than selecting the host SDK.
-	const bin = join(runtime, "bin");
-	if (process.platform !== "win32") {
-		const shim = join(bin, "pi");
-		if (!existsSync(shim)) symlinkSync(join(harnessRoot, "scripts/run.mjs"), shim);
-		if (realpathSync(shim) !== join(harnessRoot, "scripts/run.mjs")) throw new Error(`Unexpected harness executable: ${shim}`);
-	}
-	env.PATH = [bin, dirname(process.execPath), inherited.PATH || ""].join(process.platform === "win32" ? ";" : ":");
+	// Harness selection is always an absolute local Node entry, never a PATH shim.
+	delete env.LANGFENS_SUBAGENTS_BINARY;
+	env.PATH = [dirname(process.execPath), inherited.PATH || ""].join(process.platform === "win32" ? ";" : ":");
 	return { env, runtime, workspace, packages };
 }
 

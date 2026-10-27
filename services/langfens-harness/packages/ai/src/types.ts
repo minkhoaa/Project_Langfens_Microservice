@@ -1,4 +1,4 @@
-import type { TelemetrySpan } from "@earendil-works/pi-telemetry";
+import type { TelemetrySpan } from "langfens-telemetry";
 import type { AnthropicOptions } from "./api/anthropic-messages.ts";
 import type { AzureOpenAIResponsesOptions } from "./api/azure-openai-responses.ts";
 import type { BedrockOptions } from "./api/bedrock-converse-stream.ts";
@@ -8,7 +8,7 @@ import type { MistralOptions } from "./api/mistral-conversations.ts";
 import type { OpenAICodexResponsesOptions } from "./api/openai-codex-responses.ts";
 import type { OpenAICompletionsOptions } from "./api/openai-completions.ts";
 import type { OpenAIResponsesOptions } from "./api/openai-responses.ts";
-import type { PiMessagesOptions } from "./api/pi-messages.ts";
+import type { HarnessMessagesOptions } from "./api/harness-messages.ts";
 import type {
 	AnthropicMessagesCompat,
 	BedrockCompat,
@@ -297,7 +297,7 @@ export interface ApiOptionsMap {
 	"google-vertex": GoogleVertexOptions;
 	"mistral-conversations": MistralOptions;
 	"bedrock-converse-stream": BedrockOptions;
-	"pi-messages": PiMessagesOptions;
+	"pi-messages": HarnessMessagesOptions;
 }
 
 /**

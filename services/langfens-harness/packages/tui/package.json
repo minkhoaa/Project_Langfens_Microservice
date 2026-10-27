@@ -1,5 +1,5 @@
 {
-	"name": "@earendil-works/pi-tui",
+	"name": "langfens-tui",
 	"version": "1.4.0",
 	"description": "Terminal User Interface library with differential rendering for efficient text-based applications",
 	"type": "module",
@@ -36,11 +36,6 @@
 	],
 	"author": "Mario Zechner",
 	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
-		"directory": "packages/tui"
-	},
 	"engines": {
 		"node": ">=22.19.0"
 	},
