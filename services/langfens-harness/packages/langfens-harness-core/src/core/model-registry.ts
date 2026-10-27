@@ -52,6 +52,11 @@ export class ModelRegistry {
 		this.runtime = runtime;
 	}
 
+	/** Share native provider configuration with isolated local child sessions, not conversation state. */
+	getRuntime(): ModelRuntime {
+		return this.runtime;
+	}
+
 	/** Reload models.json asynchronously. Await before making synchronous registry reads. */
 	refresh(options?: ModelsRefreshOptions): Promise<ModelsRefreshResult> {
 		return this.runtime.refresh(options);

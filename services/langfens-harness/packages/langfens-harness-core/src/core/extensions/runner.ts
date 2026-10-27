@@ -367,6 +367,7 @@ export class ExtensionRunner {
 	private uiContext: ExtensionUIContext;
 	private mode: ExtensionMode = "print";
 	private cwd: string;
+	private agentDir: string;
 	private sessionManager: SessionManager;
 	private modelRegistry: ModelRegistry;
 	private errorListeners: Set<ExtensionErrorListener> = new Set();
@@ -405,11 +406,13 @@ export class ExtensionRunner {
 		cwd: string,
 		sessionManager: SessionManager,
 		modelRegistry: ModelRegistry,
+		agentDir: string,
 	) {
 		this.extensions = extensions;
 		this.runtime = runtime;
 		this.uiContext = noOpUIContext;
 		this.cwd = cwd;
+		this.agentDir = agentDir;
 		this.sessionManager = sessionManager;
 		this.modelRegistry = modelRegistry;
 	}
@@ -901,6 +904,10 @@ export class ExtensionRunner {
 			get cwd() {
 				runner.assertActive();
 				return runner.cwd;
+			},
+			get agentDir() {
+				runner.assertActive();
+				return runner.agentDir;
 			},
 			get sessionManager() {
 				runner.assertActive();

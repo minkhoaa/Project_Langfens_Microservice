@@ -5,6 +5,8 @@
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		"paths": {
+			"langfens-subagents": ["./packages/langfens-subagents/src/index.ts"],
+			"langfens-harness-core/ai": ["./packages/langfens-harness-core/src/ai.ts"],
 			"langfens-telemetry": ["./packages/telemetry/src/index.ts"],
 			"langfens-telemetry/*": ["./packages/telemetry/src/*.ts", "./packages/telemetry/src/*/index.ts"],
 			"langfens-codemode": ["./packages/codemode/src/index.ts"],

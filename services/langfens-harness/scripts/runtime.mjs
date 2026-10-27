@@ -20,6 +20,18 @@ export function ownedCoreEntry(source = false) {
   return realEntry;
 }
 
+/** Root application wiring loads the vendored extension without a core package dependency cycle. */
+function ownedSubagentEntry(source) {
+  const expected = join(harnessRoot, 'packages/langfens-subagents');
+  const canonical = realpathSync(expected);
+  if (canonical !== expected) throw new Error('Foreign local subagent package root');
+  const manifest = JSON.parse(readFileSync(join(canonical, 'package.json'), 'utf8'));
+  if (manifest.name !== 'langfens-subagents' || manifest.peerDependencies?.['langfens-harness-core'] !== '1.4.0') throw new Error('Invalid local subagent manifest');
+  const entry = realpathSync(join(canonical, source ? 'src/index.ts' : 'dist/index.js'));
+  if (!entry.startsWith(canonical + sep)) throw new Error('Foreign local subagent entry');
+  return entry;
+}
+
 // Configuration/executable isolation, not a sandbox for tools or explicitly loaded extensions.
 export function runtimeEnvironment(inherited = process.env) {
   const runtime = resolve(inherited.LANGFENS_HARNESS_RUNTIME_DIR || join(harnessRoot, '.runtime'));
@@ -60,6 +72,10 @@ export function runtimeLaunch(args = [], inherited = process.env) {
       if (!input[i+1] || input[i+1].startsWith('--')) throw new Error('--cwd requires a directory');
       explicitCwd = resolve(input[++i]);
     } else forwarded.push(input[i]);
+  }
+  if (!forwarded.includes('--no-extensions')) {
+    const extension = ownedSubagentEntry(source);
+    if (!forwarded.includes(extension)) forwarded.unshift('--extension', extension);
   }
   const runtime = runtimeEnvironment(inherited);
   const cwd = explicitCwd || (inherited.LANGFENS_HARNESS_ISOLATED === '1' && inherited.LANGFENS_HARNESS_WORKING_DIR) || runtime.workspace;
