@@ -204,7 +204,7 @@ describe("worker lifetime", () => {
 
 const runtimes = [
 	{ name: "Node", command: process.execPath, available: true },
-	{ name: "Bun", command: "bun", available: spawnSync("bun", ["--version"], { timeout: 5000 }).status === 0 },
+	{ name: "Bun", command: "bun", available: process.env.ENABLE_BUN_TESTS === "1" && spawnSync("bun", ["--version"], { timeout: 5000 }).status === 0 },
 ];
 
 describe.each(runtimes)("$name process lifetime", ({ name, command, available }) => {

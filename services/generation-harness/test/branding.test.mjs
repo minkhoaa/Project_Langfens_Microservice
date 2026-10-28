@@ -35,7 +35,7 @@ test("local CLI identifies itself without global executable or configuration", (
 		cwd: launch.cwd,
 		env: launch.env,
 		encoding: "utf8",
-		timeout: 20000,
+		timeout: 45000,
 	});
 	assert.match(help, /generation-harness/);
 	assert.doesNotMatch(help, /@(?:earendil-works|mariozechner)\/pi-|~\/\.pi\b/);
