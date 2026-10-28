@@ -5,6 +5,9 @@
  */
 
 import { type ChildProcess, spawn } from "node:child_process";
+import { mkdirSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { AgentMessage, ThinkingLevel } from "generation-agent-core";
 import type { ImageContent } from "generation-ai";
 import type { PromptDisposition, QueuedInputDisposition, SessionStats } from "../../core/agent-session.ts";
@@ -78,7 +81,36 @@ export class RpcClient {
 
 		this.exitError = null;
 
-		const cliPath = this.options.cliPath ?? "dist/cli.js";
+		const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+		const cliPath = this.options.cliPath ?? join(packageRoot, "dist/cli.js");
+		const runtime = resolve(
+			this.options.env?.GENERATION_HARNESS_RUNTIME_DIR ||
+			process.env.GENERATION_HARNESS_RUNTIME_DIR ||
+			join(packageRoot, "../../.runtime"),
+		);
+		const home = this.options.env?.HOME || join(runtime, "home");
+		const agent = this.options.env?.GENERATION_HARNESS_AGENT_DIR || join(runtime, "agent");
+		const sessions = this.options.env?.GENERATION_HARNESS_SESSION_DIR || join(runtime, "sessions");
+		const workspace = this.options.cwd || this.options.env?.GENERATION_HARNESS_WORKING_DIR || process.env.GENERATION_HARNESS_WORKING_DIR || join(runtime, "workspace");
+		for (const dir of [home, agent, workspace, sessions]) mkdirSync(dir, { recursive: true, mode: 0o700 });
+		const env = { ...process.env, ...this.options.env };
+		for (const key of Object.keys(env)) if (key.startsWith("PI_") || ["NODE_PATH", "NODE_OPTIONS", "INIT_CWD"].includes(key)) delete env[key];
+		Object.assign(env, {
+			GENERATION_HARNESS_ISOLATED: "1",
+			GENERATION_HARNESS_RUNTIME_DIR: runtime,
+			GENERATION_HARNESS_AGENT_DIR: agent,
+			GENERATION_HARNESS_SESSION_DIR: sessions,
+			GENERATION_HARNESS_WORKSPACE_DIR: workspace,
+			GENERATION_HARNESS_WORKING_DIR: workspace,
+			HOME: home,
+			USERPROFILE: home,
+			XDG_CONFIG_HOME: this.options.env?.XDG_CONFIG_HOME || join(home, ".config"),
+			XDG_CACHE_HOME: this.options.env?.XDG_CACHE_HOME || join(home, ".cache"),
+			XDG_DATA_HOME: this.options.env?.XDG_DATA_HOME || join(home, ".local/share"),
+			GENERATION_HARNESS_OFFLINE: "1",
+			GENERATION_HARNESS_TELEMETRY: "0",
+			GENERATION_HARNESS_SKIP_VERSION_CHECK: "1",
+		});
 		const args = ["--mode", "rpc"];
 
 		if (this.options.provider) {
@@ -91,9 +123,9 @@ export class RpcClient {
 			args.push(...this.options.args);
 		}
 
-		const childProcess = spawn("node", [cliPath, ...args], {
-			cwd: this.options.cwd,
-			env: { ...process.env, ...this.options.env },
+		const childProcess = spawn(process.execPath, [cliPath, "--mode", "rpc", ...args.slice(2)], {
+			cwd: this.options.cwd || workspace,
+			env,
 			stdio: ["pipe", "pipe", "pipe"],
 		});
 		this.process = childProcess;

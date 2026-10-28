@@ -6,17 +6,12 @@ import {
 	TuiMainScreen,
 } from "generation-tui";
 import { existsSync } from "fs";
-import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, getAgentDir, getSettingsPath, PACKAGE_NAME } from "../config.ts";
-import { areExperimentalFeaturesEnabled } from "../core/experimental.ts";
+import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, getAgentDir, getSettingsPath } from "../config.ts";
 import { KeybindingsManager } from "../core/keybindings.ts";
 import { DefaultPackageManager, type ResolvedResource } from "../core/package-manager.ts";
 import { SettingsManager } from "../core/settings-manager.ts";
 import { ExtensionInputComponent } from "../modes/interactive/components/extension-input.ts";
 import { ExtensionSelectorComponent } from "../modes/interactive/components/extension-selector.ts";
-import {
-	FirstTimeSetupComponent,
-	type FirstTimeSetupResult,
-} from "../modes/interactive/components/first-time-setup.ts";
 import { SYSTEM_THEME_NAME } from "../modes/interactive/theme/system-theme.ts";
 import {
 	getTerminalTheme,
@@ -30,24 +25,6 @@ import {
 	type Theme,
 } from "../modes/interactive/theme/theme.ts";
 import { requestTerminalColors } from "../modes/interactive/theme/theme-controller.ts";
-
-const OFFICIAL_PACKAGE_NAME = "generation-harness-core";
-const OFFICIAL_APP_NAME = "pi";
-const OFFICIAL_CONFIG_DIR_NAME = ".pi";
-
-interface DistributionMetadata {
-	packageName: string;
-	appName: string;
-	configDirName: string;
-}
-
-function isOfficialDistribution({ packageName, appName, configDirName }: DistributionMetadata): boolean {
-	return (
-		packageName === OFFICIAL_PACKAGE_NAME &&
-		appName === OFFICIAL_APP_NAME &&
-		configDirName === OFFICIAL_CONFIG_DIR_NAME
-	);
-}
 
 function loadThemes(resources: ResolvedResource[]): Theme[] {
 	const themes: Theme[] = [];
@@ -122,29 +99,11 @@ async function clearStartupTui(ui: TUI): Promise<void> {
 }
 
 /**
- * First-time setup runs when all of these hold:
- * - this is the official Pi distribution (not a fork/rebrand)
- * - experimental features are enabled (PI_EXPERIMENTAL=1)
- * - the default agent directory is used (no custom agent dir override)
- * - setup was not completed before (settings.json does not exist)
+ * First-time setup is disabled in the local generation harness.
+ * All runtime configurations and settings resolve locally without external onboarding wizards.
  */
-export function shouldRunFirstTimeSetup(settingsPath: string = getSettingsPath()): boolean {
-	if (
-		!isOfficialDistribution({
-			packageName: PACKAGE_NAME,
-			appName: APP_NAME,
-			configDirName: CONFIG_DIR_NAME,
-		})
-	) {
-		return false;
-	}
-	if (!areExperimentalFeaturesEnabled()) {
-		return false;
-	}
-	if (process.env[ENV_AGENT_DIR]) {
-		return false;
-	}
-	return !existsSync(settingsPath);
+export function shouldRunFirstTimeSetup(_settingsPath: string = getSettingsPath()): boolean {
+	return false;
 }
 
 export async function showStartupSelector<T>(
@@ -175,46 +134,6 @@ export async function showStartupSelector<T>(
 		ui.addChild(selector);
 		ui.setFocus(selector);
 		startStartupTui(ui, settingsManager);
-	});
-}
-
-/** Show the first-time setup dialog and persist the result */
-export async function showFirstTimeSetup(settingsManager: SettingsManager): Promise<void> {
-	const ui = await createStartupTui(settingsManager);
-	return new Promise((resolve) => {
-		let settled = false;
-		const finish = async (result: FirstTimeSetupResult | undefined) => {
-			if (settled) {
-				return;
-			}
-			settled = true;
-			if (result) {
-				settingsManager.setTheme(result.theme);
-				settingsManager.setEnableAnalytics(result.shareAnalytics);
-				await settingsManager.flush();
-			}
-			await clearStartupTui(ui);
-			ui.stop();
-			resolve();
-		};
-
-		ui.start();
-		let previewTheme = SYSTEM_THEME_NAME;
-		setTheme(previewTheme);
-		const component = new FirstTimeSetupComponent({
-			onThemePreview: (themeName) => {
-				previewTheme = themeName;
-				setTheme(themeName);
-				ui.requestRender();
-			},
-			onSubmit: (result) => void finish(result),
-			onCancel: () => void finish(undefined),
-		});
-		ui.addChild(component);
-		ui.setFocus(component);
-		ui.requestRender();
-		// The terminal's colors regenerate the system theme; re-rendering rebuilds the dialog with it.
-		queryStartupTerminalColors(ui, () => setTheme(previewTheme));
 	});
 }
 

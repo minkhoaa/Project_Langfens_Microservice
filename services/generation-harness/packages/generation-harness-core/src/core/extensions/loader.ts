@@ -10,13 +10,13 @@ import { fileURLToPath } from "node:url";
 import type { Provider } from "generation-ai";
 import type { KeyId } from "generation-tui";
 import type { createJiti } from "jiti";
-import { CONFIG_DIR_NAME, getAgentDir, isBunBinary, isBundledNode } from "../../config.ts";
+import { CONFIG_DIR_NAME, getAgentDir, isBundledNode } from "../../config.ts";
 import { resolvePath } from "../../utils/paths.ts";
 import { createEventBus, type EventBus } from "../event-bus.ts";
 import type { ExecOptions } from "../exec.ts";
 import { execCommand } from "../exec.ts";
 import { type McpServerConfig, McpServerRegistry, mcpNamespace, validateMcpServerConfig } from "../mcp-servers.ts";
-import { readPiManifest } from "../pi-manifest.ts";
+import { readGenerationManifest } from "../generation-manifest.ts";
 import { createSyntheticSourceInfo, getSyntheticPathSource, isSyntheticPath } from "../source-info.ts";
 import { time } from "../timings.ts";
 import type { ModelRouteRequest, VirtualModelDefinition } from "../virtual-models.ts";
@@ -38,11 +38,8 @@ import type {
 
 const require = createRequire(import.meta.url);
 
-const isNodeSeaBinary =
-	("sea" in process.features && process.features.sea === true) ||
-	process.getBuiltinModule("node:sea")?.isSea() === true;
-const isTypeScriptSourceRuntime = !isBunBinary && path.extname(fileURLToPath(import.meta.url)) === ".ts";
-const usesEmbeddedModules = isBunBinary || isNodeSeaBinary || isBundledNode;
+const isTypeScriptSourceRuntime = path.extname(fileURLToPath(import.meta.url)) === ".ts";
+const usesEmbeddedModules = isBundledNode;
 
 let createJitiPromise: Promise<typeof createJiti> | undefined;
 
@@ -66,11 +63,17 @@ function getVirtualModules(): Promise<Record<string, unknown>> {
  */
 let _aliases: Record<string, string> | null = null;
 
-function getAliases(): Record<string, string> {
+export function getAliases(): Record<string, string> {
 	if (_aliases) return _aliases;
 
 	const __dirname = path.dirname(fileURLToPath(import.meta.url));
-	const packageIndex = path.resolve(__dirname, "../..", "index.js");
+	let generationCoreEntry = path.resolve(__dirname, "../..", "index.js");
+	if (!fs.existsSync(generationCoreEntry)) {
+		const srcCoreEntry = path.resolve(__dirname, "../..", "index.ts");
+		if (fs.existsSync(srcCoreEntry)) {
+			generationCoreEntry = srcCoreEntry;
+		}
+	}
 
 	const typeboxEntry = require.resolve("typebox");
 	const typeboxCompileEntry = require.resolve("typebox/compile");
@@ -78,44 +81,46 @@ function getAliases(): Record<string, string> {
 
 	const packagesRoot = path.resolve(__dirname, "../../../../");
 	const resolveWorkspaceOrImport = (workspaceRelativePath: string, specifier: string): string => {
-		const workspacePath = path.join(packagesRoot, workspaceRelativePath);
-		if (fs.existsSync(workspacePath)) {
-			return workspacePath;
+		const distPath = path.resolve(packagesRoot, workspaceRelativePath);
+		// Validate path containment within packagesRoot
+		if (!distPath.startsWith(packagesRoot + path.sep)) {
+			throw new Error(`Security error: Workspace path ${distPath} escapes packages root ${packagesRoot}`);
 		}
-		return fileURLToPath(import.meta.resolve(specifier));
+		if (fs.existsSync(distPath)) {
+			return distPath;
+		}
+		// In source dev mode, check if corresponding TypeScript source file exists
+		const srcRelativePath = workspaceRelativePath.replace(/^([^/]+)\/dist\/(.+)\.js$/, "$1/src/$2.ts");
+		if (srcRelativePath !== workspaceRelativePath) {
+			const srcPath = path.resolve(packagesRoot, srcRelativePath);
+			if (srcPath.startsWith(packagesRoot + path.sep) && fs.existsSync(srcPath)) {
+				return srcPath;
+			}
+		}
+		throw new Error(
+			`Missing build output for owned workspace package '${specifier}' at ${distPath}. ` +
+			`Run 'npm run build' to compile local workspace packages before loading extensions.`,
+		);
 	};
 
-	const piCodingAgentEntry = packageIndex;
-	const piAgentCoreEntry = resolveWorkspaceOrImport("agent/dist/index.js", "generation-agent-core");
-	const piTuiEntry = resolveWorkspaceOrImport("tui/dist/index.js", "generation-tui");
-	// Extensions resolve the pi-ai root to the compat entrypoint (a strict
-	// superset of the core entrypoint): existing extensions using the old
-	// global API keep working at runtime until compat is removed.
-	const piAiCompatEntry = resolveWorkspaceOrImport("ai/dist/compat.js", "generation-ai/compat");
-	const piAiModelsEntry = resolveWorkspaceOrImport("ai/dist/models.js", "generation-ai/models");
-	const piAiOauthEntry = resolveWorkspaceOrImport("ai/dist/oauth.js", "generation-ai/oauth");
-	const piAiProvidersEntry = resolveWorkspaceOrImport(
+	const generationAgentEntry = resolveWorkspaceOrImport("agent/dist/index.js", "generation-agent-core");
+	const generationTuiEntry = resolveWorkspaceOrImport("tui/dist/index.js", "generation-tui");
+	const generationAiEntry = resolveWorkspaceOrImport("ai/dist/index.js", "generation-ai");
+	const generationAiModelsEntry = resolveWorkspaceOrImport("ai/dist/models.js", "generation-ai/models");
+	const generationAiOauthEntry = resolveWorkspaceOrImport("ai/dist/oauth.js", "generation-ai/oauth");
+	const generationAiProvidersEntry = resolveWorkspaceOrImport(
 		"ai/dist/providers/all.js",
 		"generation-ai/providers/all",
 	);
 
 	_aliases = {
-		"generation-harness-core": piCodingAgentEntry,
-		"generation-agent-core": piAgentCoreEntry,
-		"generation-tui": piTuiEntry,
-		"generation-ai/providers/all": piAiProvidersEntry,
-		"generation-ai/compat": piAiCompatEntry,
-		"generation-ai/models": piAiModelsEntry,
-		"generation-ai/oauth": piAiOauthEntry,
-		"generation-ai": piAiCompatEntry,
-		"@mariozechner/pi-coding-agent": piCodingAgentEntry,
-		"@mariozechner/pi-agent-core": piAgentCoreEntry,
-		"@mariozechner/pi-tui": piTuiEntry,
-		"@mariozechner/pi-ai/providers/all": piAiProvidersEntry,
-		"@mariozechner/pi-ai/compat": piAiCompatEntry,
-		"@mariozechner/pi-ai/models": piAiModelsEntry,
-		"@mariozechner/pi-ai/oauth": piAiOauthEntry,
-		"@mariozechner/pi-ai": piAiCompatEntry,
+		"generation-harness-core": generationCoreEntry,
+		"generation-agent-core": generationAgentEntry,
+		"generation-tui": generationTuiEntry,
+		"generation-ai/providers/all": generationAiProvidersEntry,
+		"generation-ai/models": generationAiModelsEntry,
+		"generation-ai/oauth": generationAiOauthEntry,
+		"generation-ai": generationAiEntry,
 		typebox: typeboxEntry,
 		"typebox/compile": typeboxCompileEntry,
 		"typebox/value": typeboxValueEntry,
@@ -750,10 +755,10 @@ function isExtensionFile(name: string): boolean {
  * Returns resolved paths or null if no entry points found.
  */
 function resolveExtensionEntries(dir: string): string[] | null {
-	// Check for package.json with "pi" field first
+	// Check for package.json with "generation" field first
 	const packageJsonPath = path.join(dir, "package.json");
 	if (fs.existsSync(packageJsonPath)) {
-		const manifest = readPiManifest(packageJsonPath);
+		const manifest = readGenerationManifest(packageJsonPath);
 		if (manifest?.extensions?.length) {
 			const entries: string[] = [];
 			for (const extPath of manifest.extensions) {
@@ -787,7 +792,7 @@ function resolveExtensionEntries(dir: string): string[] | null {
  * Discovery rules:
  * 1. Direct files: `extensions/*.ts` or `*.js` → load
  * 2. Subdirectory with index: `extensions/* /index.ts` or `index.js` → load
- * 3. Subdirectory with package.json: `extensions/* /package.json` with "pi" field → load what it declares
+ * 3. Subdirectory with package.json: `extensions/* /package.json` with "generation" field → load what it declares
  *
  * No recursion beyond one level. Complex packages must use package.json manifest.
  */

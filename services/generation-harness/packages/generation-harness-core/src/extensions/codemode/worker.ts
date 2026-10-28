@@ -1,6 +1,5 @@
 /**
- * Worker entry for the codemode sandbox in bundled builds. The Node bundle and the Bun binary
- * build this file as a separate entrypoint because pi-codemode's own worker file is not on disk
- * there; `getCodemodeWorkerSpecifier()` in config.ts resolves it.
+ * Worker entry bundled as a separate Node esbuild entrypoint because the dependency worker is not
+ * available as a physical file in the bundle; `getCodemodeWorkerSpecifier()` resolves it.
  */
 import "generation-codemode/worker";

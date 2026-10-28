@@ -1,11 +1,9 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
+const offlineSetup = fileURLToPath(new URL("./test/offline.mjs", import.meta.url));
+
 export const workspaceSourcePaths = {
-	chordIndex: fileURLToPath(new URL("./packages/chord/src/index.ts", import.meta.url)),
-	chordContext: fileURLToPath(new URL("./packages/chord/src/context/index.ts", import.meta.url)),
-	chordDelta: fileURLToPath(new URL("./packages/chord/src/delta/index.ts", import.meta.url)),
-	chordNode: fileURLToPath(new URL("./packages/chord/src/node.ts", import.meta.url)),
 	telemetryIndex: fileURLToPath(new URL("./packages/telemetry/src/index.ts", import.meta.url)),
 	telemetryTesting: fileURLToPath(new URL("./packages/telemetry/src/testing/index.ts", import.meta.url)),
 	mcpIndex: fileURLToPath(new URL("./packages/mcp/src/index.ts", import.meta.url)),
@@ -22,43 +20,43 @@ export const workspaceSourcePaths = {
 	codemodeIndex: fileURLToPath(new URL("./packages/codemode/src/index.ts", import.meta.url)),
 	codemodeDeclarations: fileURLToPath(new URL("./packages/codemode/src/declarations.ts", import.meta.url)),
 	codemodeSource: fileURLToPath(new URL("./packages/codemode/src/source.ts", import.meta.url)),
-	codingAgentIndex: fileURLToPath(new URL("./packages/coding-agent/src/index.ts", import.meta.url)),
+	coreIndex: fileURLToPath(new URL("./packages/generation-harness-core/src/index.ts", import.meta.url)),
 	tuiIndex: fileURLToPath(new URL("./packages/tui/src/index.ts", import.meta.url)),
 } as const;
 
 export default defineConfig({
+	test: {
+		setupFiles: [offlineSetup],
+	},
 	resolve: {
 		alias: [
-			{ find: /^@earendil-works\/chord$/, replacement: workspaceSourcePaths.chordIndex },
-			{ find: /^@earendil-works\/chord\/context$/, replacement: workspaceSourcePaths.chordContext },
-			{ find: /^@earendil-works\/chord\/delta$/, replacement: workspaceSourcePaths.chordDelta },
-			{ find: /^@earendil-works\/chord\/node$/, replacement: workspaceSourcePaths.chordNode },
-			{ find: /^@earendil-works\/pi-telemetry$/, replacement: workspaceSourcePaths.telemetryIndex },
-			{ find: /^@earendil-works\/pi-telemetry\/testing$/, replacement: workspaceSourcePaths.telemetryTesting },
-			{ find: /^@earendil-works\/pi-mcp$/, replacement: workspaceSourcePaths.mcpIndex },
-			{ find: /^@earendil-works\/pi-mcp\/oauth$/, replacement: workspaceSourcePaths.mcpOAuth },
-			{ find: /^@earendil-works\/pi-mcp\/testing$/, replacement: workspaceSourcePaths.mcpTesting },
-			{ find: /^@earendil-works\/pi-ai$/, replacement: workspaceSourcePaths.aiIndex },
-			{ find: /^@earendil-works\/pi-ai\/compat$/, replacement: workspaceSourcePaths.aiCompat },
-		{ find: /^@earendil-works\/pi-ai\/models$/, replacement: workspaceSourcePaths.aiModels },
-			{ find: /^@earendil-works\/pi-ai\/oauth$/, replacement: workspaceSourcePaths.aiOAuth },
+			{ find: /^generation-telemetry$/, replacement: workspaceSourcePaths.telemetryIndex },
+			{ find: /^generation-telemetry\/testing$/, replacement: workspaceSourcePaths.telemetryTesting },
+			{ find: /^generation-mcp$/, replacement: workspaceSourcePaths.mcpIndex },
+			{ find: /^generation-mcp\/oauth$/, replacement: workspaceSourcePaths.mcpOAuth },
+			{ find: /^generation-mcp\/testing$/, replacement: workspaceSourcePaths.mcpTesting },
+			{ find: /^generation-ai$/, replacement: workspaceSourcePaths.aiIndex },
+			{ find: /^generation-ai\/compat$/, replacement: workspaceSourcePaths.aiCompat },
+			{ find: /^generation-ai\/models$/, replacement: workspaceSourcePaths.aiModels },
+			{ find: /^generation-ai\/oauth$/, replacement: workspaceSourcePaths.aiOAuth },
 			{
-				find: /^@earendil-works\/pi-ai\/utils\/(.+)$/,
+				find: /^generation-ai\/utils\/(.+)$/,
 				replacement: `${workspaceSourcePaths.aiUtils}/$1.ts`,
 			},
 			{
-				find: /^@earendil-works\/pi-ai\/api\/(.+)$/,
+				find: /^generation-ai\/api\/(.+)$/,
 				replacement: `${workspaceSourcePaths.aiApi}/$1.ts`,
 			},
 			{
-				find: /^@earendil-works\/pi-ai\/providers\/(.+)$/,
+				find: /^generation-ai\/providers\/(.+)$/,
 				replacement: `${workspaceSourcePaths.aiProviders}/$1.ts`,
 			},
-			{ find: /^@earendil-works\/pi-agent-core$/, replacement: workspaceSourcePaths.agentIndex },
-			{ find: /^@earendil-works\/pi-codemode$/, replacement: workspaceSourcePaths.codemodeIndex },
-			{ find: /^@earendil-works\/pi-codemode\/declarations$/, replacement: workspaceSourcePaths.codemodeDeclarations },
-			{ find: /^@earendil-works\/pi-codemode\/source$/, replacement: workspaceSourcePaths.codemodeSource },
-			{ find: /^@earendil-works\/pi-tui$/, replacement: workspaceSourcePaths.tuiIndex },
+			{ find: /^generation-agent-core$/, replacement: workspaceSourcePaths.agentIndex },
+			{ find: /^generation-codemode$/, replacement: workspaceSourcePaths.codemodeIndex },
+			{ find: /^generation-codemode\/declarations$/, replacement: workspaceSourcePaths.codemodeDeclarations },
+			{ find: /^generation-codemode\/source$/, replacement: workspaceSourcePaths.codemodeSource },
+			{ find: /^generation-harness-core$/, replacement: workspaceSourcePaths.coreIndex },
+			{ find: /^generation-tui$/, replacement: workspaceSourcePaths.tuiIndex },
 		],
 	},
 });

@@ -166,9 +166,9 @@ export function createLocalShellOperations(shellName: string, resolveShellConfig
 }
 
 /**
- * Create bash operations using pi's built-in local shell execution backend.
+ * Create bash operations using the harness's built-in local shell execution backend.
  *
- * This is useful for extensions that intercept user_bash and still want pi's
+ * This is useful for extensions that intercept user_bash and still want the harness's
  * standard local shell behavior while wrapping or rewriting commands.
  */
 export function createLocalBashOperations(options?: { shellPath?: string }): BashOperations {
@@ -421,7 +421,7 @@ const bashToolConfig: ShellToolConfig = {
 	prompt: "$",
 	promptSnippet: bashToolSystemPromptContribution.snippet,
 	promptGuidelines: bashToolSystemPromptContribution.guidelines,
-	tempFilePrefix: "pi-bash",
+	tempFilePrefix: "generation-bash",
 };
 
 export function createBashToolDefinition(

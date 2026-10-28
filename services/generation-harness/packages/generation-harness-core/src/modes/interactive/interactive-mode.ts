@@ -1,6 +1,8 @@
 /**
  * Interactive mode for the coding agent.
  * Handles TUI rendering and user interaction, delegating business logic to AgentSession.
+ *
+ * Source attribution: Adapted from upstream commit b3a29f1111114fac696e2cfcd65acdb382a6ed5e under MIT License.
  */
 
 import * as crypto from "node:crypto";
@@ -63,6 +65,7 @@ import {
 	getAuthPath,
 	getDebugLogPath,
 	getDocsPath,
+	getReadmePath,
 	VERSION,
 } from "../../config.ts";
 import { type AgentSession, type AgentSessionEvent, parseSkillBlock } from "../../core/agent-session.ts";
@@ -104,7 +107,6 @@ import {
 } from "../../core/model-resolver.ts";
 import { CredentialSynchronizationError } from "../../core/model-runtime.ts";
 import { DefaultPackageManager } from "../../core/package-manager.ts";
-import { RADIUS_MCP_URL, RADIUS_PROVIDER_ID } from "../../core/radius.ts";
 import type { ResourceDiagnostic } from "../../core/resource-loader.ts";
 import { formatMissingSessionCwdPrompt, MissingSessionCwdError } from "../../core/session-cwd.ts";
 import {
@@ -116,26 +118,22 @@ import {
 import type { FullscreenExitOutput, TuiMode } from "../../core/settings-manager.ts";
 import { BUILTIN_SLASH_COMMANDS } from "../../core/slash-commands.ts";
 import type { SourceInfo } from "../../core/source-info.ts";
-import { isInstallTelemetryEnabled } from "../../core/telemetry.ts";
 import { withBuiltInRenderers } from "../../core/tools/renderers/index.ts";
 import type { TruncationResult } from "../../core/tools/truncate.ts";
 import { hasTrustRequiringProjectResources, ProjectTrustStore } from "../../core/trust-manager.ts";
 import { getUsageCostBreakdown } from "../../core/usage-totals.ts";
 import { addMcpServerConfig, loadMcpConfig } from "../../extensions/mcp/config.ts";
-import { getChangelogPath, getNewEntries, normalizeChangelogLinks, parseChangelog } from "../../utils/changelog.ts";
+// In-tree changelog parser omitted for isolated harness
 import { copyToClipboard, readClipboardFilePaths, readClipboardText } from "../../utils/clipboard.ts";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.ts";
 import { parseGitUrl } from "../../utils/git.ts";
 import { ensurePngTranscoder } from "../../utils/image-convert.ts";
 import { getCwdRelativePath } from "../../utils/paths.ts";
-import { getPiUserAgent } from "../../utils/pi-user-agent.ts";
+import { getGenerationUserAgent } from "../../utils/generation-user-agent.ts";
 import { killTrackedDetachedChildren } from "../../utils/shell.ts";
 import { loadAllHighlightLanguages } from "../../utils/syntax-highlight.ts";
 import { ensureTool, type ToolStatus } from "../../utils/tools-manager.ts";
-import { checkForNewPiVersion, type LatestPiRelease } from "../../utils/version-check.ts";
-import { reportBug } from "./bug-report.ts";
 import { createChatViewport } from "./chat-viewport.ts";
-import { ArminComponent } from "./components/armin.ts";
 import { AssistantMessageComponent } from "./components/assistant-message.ts";
 import { BashExecutionComponent } from "./components/bash-execution.ts";
 import { BranchSummaryMessageComponent } from "./components/branch-summary-message.ts";
@@ -144,8 +142,6 @@ import { CustomEditor } from "./components/custom-editor.ts";
 import { CustomEntryComponent } from "./components/custom-entry.ts";
 import { CustomMessageComponent } from "./components/custom-message.ts";
 import { DynamicBorder } from "./components/dynamic-border.ts";
-import { EarendilAnnouncementComponent } from "./components/earendil-announcement.ts";
-import { playArmin3d, playPiLogo3d } from "./components/easter-egg-3d.lazy.ts";
 import { ExtensionEditorComponent } from "./components/extension-editor.ts";
 import { ExtensionInputComponent } from "./components/extension-input.ts";
 import { ExtensionSelectorComponent } from "./components/extension-selector.ts";
@@ -160,8 +156,7 @@ import {
 	formatAuthSelectorProviderType,
 	OAuthSelectorComponent,
 } from "./components/oauth-selector.ts";
-import { piLogoLines, piWordmark, supportsPiLogo } from "./components/pi-logo.ts";
-import { createLoginMenuSelector } from "./components/radius-login-selector.ts";
+import { harnessLogoLines, harnessWordmark, supportsLogo } from "./components/harness-logo.ts";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.ts";
 import { SessionSelectorComponent } from "./components/session-selector.ts";
 import { SettingsSelectorComponent } from "./components/settings-selector.ts";
@@ -185,7 +180,6 @@ import { editInExternalEditor } from "./external-editor.ts";
 import { refreshModelCatalogs } from "./model-catalog-refresh.ts";
 import { getModelSearchText } from "./model-search.ts";
 import { type BlockedStatus, ProgramStatusReporter } from "./program-status-reporter.ts";
-import { shareSession } from "./session-share.ts";
 import {
 	getAvailableThemes,
 	getAvailableThemesWithPaths,
@@ -370,7 +364,6 @@ type LoginProviderCompletionOption = {
 	subscription?: boolean;
 };
 
-const RADIUS_LOGIN_INTRO = "Radius is a service crafted for Pi by the builders of Pi, Earendil Works";
 
 const AUTH_TYPE_ORDER = { oauth: 0, api_key: 1 } satisfies Record<AuthSelectorProvider["authType"], number>;
 
@@ -432,7 +425,7 @@ export interface InteractiveModeOptions {
 	startupDiagnostics?: AgentSessionRuntimeDiagnostic[];
 	/** Warning message if session model couldn't be restored */
 	modelFallbackMessage?: string;
-	/** Cwd to trust after reload if it gained a .pi directory during this implicitly trusted session. */
+	/** Cwd to trust after reload if it gained a .generation directory during this implicitly trusted session. */
 	autoTrustOnReloadCwd?: string;
 	/** Initial message to send on startup (can include @file content) */
 	initialMessage?: string;
@@ -448,6 +441,8 @@ export interface InteractiveModeOptions {
 	initialThemeSetting?: string;
 	/** Terminal implementation. Defaults to the current process terminal. */
 	terminal?: Terminal;
+	/** Optional callback when interactive mode exits. Defaults to process.exit. */
+	exitHandler?: (code: number) => void;
 }
 
 export class InteractiveMode {
@@ -1012,11 +1007,11 @@ export class InteractiveMode {
 			const showDetails = this.shouldShowStartupDetails();
 			// Built on demand so the header follows theme changes. The logo's first line carries the version,
 			// its second line the first line of key hints. Terminals that cannot render the logo get a
-			// "Pi vX" line instead, with the key hints below it.
-			const showLogo = supportsPiLogo();
+			// "Langfens Harness vX" line instead, with the key hints below it.
+			const showLogo = supportsLogo();
 			const withLogo = (hints: string) => {
-				if (!showLogo) return `${piWordmark()} ${theme.fg("dim", `v${this.version}`)}\n${hints}`;
-				const [top, bottom] = piLogoLines();
+				if (!showLogo) return `${harnessWordmark()} ${theme.fg("dim", `v${this.version}`)}\n${hints}`;
+				const [top, bottom] = harnessLogoLines();
 				return `${top} ${theme.fg("dim", `v${this.version}`)}\n${bottom} ${hints}`;
 			};
 
@@ -1062,7 +1057,7 @@ export class InteractiveMode {
 					`Press ${keyText("app.tools.expand")} to show full startup help${showDetails ? " and loaded resources" : ""}.`,
 				);
 			const onboarding = () =>
-				theme.fg("dim", `Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.`);
+				theme.fg("dim", `${APP_TITLE} can explain its own features and look up its docs. Ask it how to use or extend ${APP_TITLE}.`);
 			const header = new BuiltInHeader(
 				() => `${withLogo(compactInstructions())}\n${compactOnboarding()}\n\n${onboarding()}`,
 				() => `${withLogo(expandedInstructions())}\n\n${onboarding()}`,
@@ -1070,7 +1065,6 @@ export class InteractiveMode {
 				1,
 				0,
 			);
-			if (showLogo) header.onLogoClick = (column, row) => playPiLogo3d(this.renderer, column, row);
 			this.builtInHeader = header;
 
 			// Setup UI layout
@@ -1148,7 +1142,7 @@ export class InteractiveMode {
 	async run(): Promise<void> {
 		await this.init();
 
-		if (!process.env.PI_OFFLINE) {
+		if (!Boolean(process.env.GENERATION_HARNESS_OFFLINE)) {
 			const controller = new AbortController();
 			const timeout = setTimeout(() => controller.abort(), 15_000);
 			void refreshModelCatalogs(this.session.modelRuntime, controller.signal)
@@ -1157,12 +1151,6 @@ export class InteractiveMode {
 				.finally(() => clearTimeout(timeout));
 		}
 
-		// Start version check asynchronously
-		checkForNewPiVersion(this.version).then((newRelease) => {
-			if (newRelease) {
-				this.showNewVersionNotification(newRelease);
-			}
-		});
 
 		// Start package update check asynchronously
 		this.checkForPackageUpdates()
@@ -1173,7 +1161,7 @@ export class InteractiveMode {
 			})
 			.finally(() => {
 				// On Windows, npm can overwrite the shared console title while checking
-				// extension package versions. Restore Pi's title after the startup check.
+				// extension package versions. Restore title after the startup check.
 				if (process.platform === "win32" && this.isInitialized) {
 					this.updateTerminalTitle();
 				}
@@ -1223,7 +1211,7 @@ export class InteractiveMode {
 		if (crash) {
 			const when = new Date(crash.timestamp).toLocaleString();
 			this.showWarning(
-				`${APP_NAME} crashed on ${when} (${crash.message}). Run /bug to report it; the crash details are attached automatically.`,
+				`${APP_NAME} crashed on ${when} (${crash.message}). Run /bug to view the local debug log: ${getDebugLogPath()}`,
 			);
 		}
 
@@ -1251,8 +1239,11 @@ export class InteractiveMode {
 		}
 
 		// Main interactive loop
-		while (true) {
+		while (!this.shutdownRequested && !this.isShuttingDown) {
 			const userInput = await this.getUserInput();
+			if (this.shutdownRequested || this.isShuttingDown || !userInput) {
+				break;
+			}
 			try {
 				await this.session.prompt(userInput);
 			} catch (error: unknown) {
@@ -1263,7 +1254,7 @@ export class InteractiveMode {
 	}
 
 	private async checkForPackageUpdates(): Promise<string[]> {
-		if (process.env.PI_OFFLINE) {
+		if (Boolean(process.env.GENERATION_HARNESS_OFFLINE)) {
 			return [];
 		}
 
@@ -1321,7 +1312,7 @@ export class InteractiveMode {
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Pi works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return `tmux extended-keys-format is xterm. ${APP_TITLE} works best with csi-u. Add \`set -g extended-keys-format csi-u\` to ~/.tmux.conf and restart tmux.`;
 		}
 
 		return undefined;
@@ -1332,50 +1323,10 @@ export class InteractiveMode {
 	 * Only shows new entries since last seen version, skips for resumed sessions.
 	 */
 	private getChangelogForDisplay(): string | undefined {
-		// Skip changelog for resumed/continued sessions (already have messages)
-		if (this.session.state.messages.length > 0) {
-			return undefined;
-		}
-
-		const lastVersion = this.settingsManager.getLastChangelogVersion();
-		const changelogPath = getChangelogPath();
-		const entries = parseChangelog(changelogPath);
-
-		if (!lastVersion) {
-			// Fresh install - record the version, send telemetry, don't show changelog
-			this.settingsManager.setLastChangelogVersion(VERSION);
-			this.reportInstallTelemetry(VERSION);
-			return undefined;
-		}
-
-		const newEntries = getNewEntries(entries, lastVersion);
-		if (newEntries.length > 0) {
-			this.settingsManager.setLastChangelogVersion(VERSION);
-			this.reportInstallTelemetry(VERSION);
-			return newEntries.map((e) => normalizeChangelogLinks(e.content, e)).join("\n\n");
-		}
-
 		return undefined;
 	}
 
-	private reportInstallTelemetry(version: string): void {
-		if (process.env.PI_OFFLINE) {
-			return;
-		}
-
-		if (!isInstallTelemetryEnabled(this.settingsManager)) {
-			return;
-		}
-
-		void fetch(`https://pi.dev/api/report-install?version=${encodeURIComponent(version)}`, {
-			headers: {
-				"User-Agent": getPiUserAgent(version),
-			},
-			signal: AbortSignal.timeout(5000),
-		})
-			.then(() => undefined)
-			.catch(() => undefined);
-	}
+	private reportInstallTelemetry(_version: string): void {}
 
 	private getMarkdownThemeWithSettings(): MarkdownTheme {
 		return {
@@ -2163,8 +2114,8 @@ export class InteractiveMode {
 	}
 
 	private crashReportInstructions(): string {
-		const resume = this.session.sessionFile ? `run \`${APP_NAME} -r\` to resume the session, then` : "start pi and";
-		return `To report this crash: ${resume} run /bug. The crash details are attached automatically.`;
+		const resume = this.session.sessionFile ? `run \`${APP_NAME} -r\` to resume the session.` : `start ${APP_NAME}.`;
+		return `Local debug log: ${getDebugLogPath()}. To resume: ${resume}`;
 	}
 
 	private suggestBugReport(): void {
@@ -2172,7 +2123,7 @@ export class InteractiveMode {
 		this.bugReportHintShown = true;
 		this.chatContainer.addChild(
 			new ThemedText(
-				() => theme.fg("muted", `If this looks like a ${APP_NAME} bug, /bug sends a report to the developers.`),
+				() => theme.fg("muted", `If this looks like an unexpected ${APP_NAME} error, local diagnostics are in ${getDebugLogPath()}.`),
 				this.outputPad,
 				0,
 			),
@@ -2840,8 +2791,12 @@ export class InteractiveMode {
 		// Save text from current editor before switching
 		const currentText = this.editor.getText();
 
-		this.disposeActiveSelector();
-		this.editorContainer.clear();
+		// An open extension dialog keeps the editor slot; the new editor is shown when the last dialog closes.
+		const dialogOpen = this.extensionDialogs.length > 0;
+		if (!dialogOpen) {
+			this.disposeActiveSelector();
+			this.editorContainer.clear();
+		}
 
 		if (factory) {
 			// Create the custom editor with tui, theme, and keybindings
@@ -2899,7 +2854,7 @@ export class InteractiveMode {
 			this.editor = this.defaultEditor;
 		}
 
-		this.editorContainer.addChild(this.editor as Component);
+		if (!dialogOpen) this.editorContainer.addChild(this.editor as Component);
 		if (this.activeStatusIndicator) {
 			this.statusContainer.clear();
 			this.activeWorkingIndicatorEmbedded = this.setEditorWorkingStatusIndicator(this.activeStatusIndicator);
@@ -2907,7 +2862,7 @@ export class InteractiveMode {
 				this.statusContainer.addChild(this.activeStatusIndicator);
 			}
 		}
-		this.ui.setFocus(this.editor as Component);
+		if (!dialogOpen) this.ui.setFocus(this.editor as Component);
 		this.ui.requestRender();
 	}
 
@@ -2936,6 +2891,7 @@ export class InteractiveMode {
 			overlay?: boolean;
 			overlayOptions?: OverlayOptions | (() => OverlayOptions);
 			onHandle?: (handle: OverlayHandle) => void;
+			blocked?: BlockedStatus;
 		},
 	): Promise<T> {
 		const savedText = this.editor.getText();
@@ -2989,7 +2945,7 @@ export class InteractiveMode {
 						// Expose handle to caller for visibility control
 						options?.onHandle?.(overlayHandle);
 					} else {
-						this.pushExtensionDialog(c);
+						this.pushExtensionDialog(c, options?.blocked);
 					}
 				})
 				.catch((err) => {
@@ -3130,7 +3086,7 @@ export class InteractiveMode {
 			if (image) {
 				const tmpDir = os.tmpdir();
 				const ext = extensionForImageMimeType(image.mimeType) ?? "png";
-				const fileName = `pi-clipboard-${crypto.randomUUID()}.${ext}`;
+				const fileName = `generation-clipboard-${crypto.randomUUID()}.${ext}`;
 				const filePath = path.join(tmpDir, fileName);
 				fs.writeFileSync(filePath, Buffer.from(image.bytes));
 
@@ -3213,7 +3169,7 @@ export class InteractiveMode {
 				this.editor.setText("");
 				return;
 			}
-			if (text === "/session") {
+			if (text === "/session" || text === "/stats") {
 				this.handleSessionCommand();
 				this.editor.setText("");
 				return;
@@ -3259,7 +3215,7 @@ export class InteractiveMode {
 				this.editor.setText("");
 				return;
 			}
-			if (text === "/new") {
+			if (text === "/new" || text === "/reset" || text === "/clear") {
 				this.editor.setText("");
 				await this.handleClearCommand();
 				return;
@@ -3280,22 +3236,12 @@ export class InteractiveMode {
 				this.editor.setText("");
 				return;
 			}
-			if (text === "/arminsayshi") {
-				this.handleArminSaysHi();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/dementedelves") {
-				this.handleDementedDelves();
-				this.editor.setText("");
-				return;
-			}
 			if (text === "/resume") {
 				this.showSessionSelector();
 				this.editor.setText("");
 				return;
 			}
-			if (text === "/quit") {
+			if (text === "/quit" || text === "/exit") {
 				this.editor.setText("");
 				await this.shutdown();
 				return;
@@ -3835,7 +3781,10 @@ export class InteractiveMode {
 		this.chatContainer.addChild(component);
 	}
 
-	private addMessageToChat(message: AgentMessage, options?: { populateHistory?: boolean }): void {
+	private addMessageToChat(
+		message: AgentMessage,
+		options?: { populateHistory?: boolean; messageId?: string; timestamp?: string },
+	): void {
 		switch (message.role) {
 			case "bashExecution": {
 				const component = new BashExecutionComponent(
@@ -3960,6 +3909,7 @@ export class InteractiveMode {
 
 	private renderSessionItems(
 		items: readonly RenderSessionItem[],
+		messageMeta?: Map<AgentMessage, { id: string; timestamp: string }>,
 		options: { updateFooter?: boolean; populateHistory?: boolean } = {},
 	): void {
 		this.pendingTools.clear();
@@ -3992,7 +3942,11 @@ export class InteractiveMode {
 			const message = item;
 			// Assistant messages need special handling for tool calls
 			if (message.role === "assistant") {
-				this.addMessageToChat(message);
+				const meta = messageMeta?.get(message);
+				this.addMessageToChat(message, {
+					messageId: meta?.id,
+					timestamp: meta?.timestamp,
+				});
 				// Render tool call components
 				for (const content of message.content) {
 					if (content.type === "toolCall") {
@@ -4042,7 +3996,12 @@ export class InteractiveMode {
 				}
 			} else {
 				// All other messages use standard rendering
-				this.addMessageToChat(message, options);
+				const meta = messageMeta?.get(message);
+				this.addMessageToChat(message, {
+					...options,
+					messageId: meta?.id,
+					timestamp: meta?.timestamp,
+				});
 			}
 		}
 
@@ -4064,17 +4023,21 @@ export class InteractiveMode {
 	): void {
 		// Selection coordinates point into the transcript being replaced (#9311).
 		if (this.renderer instanceof TuiAltScreen) this.renderer.resetTextSelection();
+		const messageMeta = new Map<AgentMessage, { id: string; timestamp: string }>();
 		const items = entries.flatMap((entry): RenderSessionItem[] => {
 			if (entry.type === "custom" || (entry.type === "usage" && entry.kind === "cache_warm")) {
 				return [entry];
 			}
 			const messages = sessionEntryToContextMessages(entry);
+			for (const msg of messages) {
+				messageMeta.set(msg, { id: entry.id, timestamp: entry.timestamp });
+			}
 			if ((entry.type === "compaction" || entry.type === "branch_summary") && entry.usage && messages.length > 0) {
 				return [...messages, { type: "compaction_cost", kind: entry.type, usage: entry.usage }];
 			}
 			return messages;
 		});
-		this.renderSessionItems(items, options);
+		this.renderSessionItems(items, messageMeta, options);
 	}
 
 	private addCacheWarmingUsage(entry: UsageEntry): void {
@@ -4205,7 +4168,7 @@ export class InteractiveMode {
 				() =>
 					theme.fg(
 						"warning",
-						`This project is not trusted. Project ${CONFIG_DIR_NAME} resources and packages are ignored. Use /trust to save a trust decision, then restart pi.`,
+						`This project is not trusted. Project ${CONFIG_DIR_NAME} resources and packages are ignored. Use /trust to save a trust decision, then restart ${APP_NAME}.`,
 					),
 				1,
 				0,
@@ -4266,18 +4229,13 @@ export class InteractiveMode {
 		// dispatch and re-sends the signal if only its own listeners remain.
 
 		if (options?.fromSignal) {
-			// Signal-triggered shutdown (SIGTERM/SIGHUP). Emit extension cleanup
-			// (session_shutdown) BEFORE touching the terminal. Extension teardown
-			// such as removing sockets does not write to the tty, so it must not be
-			// skipped if a later terminal-restore write fails on a dead or stalled
-			// terminal. If the terminal is gone, the restore writes below emit EIO,
-			// which the stdout/stderr error handler turns into emergencyTerminalExit;
-			// the render loop is already idle, so this cannot hot-spin (see #4144).
 			await this.runtimeHost.dispose();
 			this.themeController.disableAutoSync();
 			await this.ui.terminal.drainInput(1000);
 			this.stop();
-			process.exit(0);
+			const exit = this.options.exitHandler ?? ((code: number) => process.exit(code));
+			exit(0);
+			return;
 		}
 
 		// Interactive quit (Ctrl+D, Ctrl+C, /quit, extension shutdown()). Stop the
@@ -4285,6 +4243,12 @@ export class InteractiveMode {
 		// the final frame while the process is exiting.
 		// Drain any in-flight Kitty key release events before stopping.
 		// This prevents escape sequences from leaking to the parent shell over slow SSH.
+		this.shutdownRequested = true;
+		if (this.onInputCallback) {
+			const cb = this.onInputCallback;
+			this.onInputCallback = undefined;
+			cb("");
+		}
 		this.themeController.disableAutoSync();
 		await this.ui.terminal.drainInput(1000);
 
@@ -4296,7 +4260,8 @@ export class InteractiveMode {
 			process.stdout.write(`${chalk.dim("To resume this session:")} ${resumeCommand}\n`);
 		}
 
-		process.exit(0);
+		const exit = this.options.exitHandler ?? ((code: number) => process.exit(code));
+		exit(0);
 	}
 
 	private emergencyTerminalExit(): never {
@@ -4320,7 +4285,7 @@ export class InteractiveMode {
 	 * paste / Kitty / modifyOtherKeys sequences.
 	 */
 	private uncaughtCrash(error: Error): never {
-		// A dead terminal is not a pi crash. Do not try to restore it or record it.
+		// A dead terminal is not an application crash. Do not try to restore it or record it.
 		if (isDeadTerminalError(error)) {
 			this.emergencyTerminalExit();
 		}
@@ -4392,7 +4357,7 @@ export class InteractiveMode {
 
 		// Restore the terminal before the process dies on any uncaught throw.
 		// Without this, an unhandled exception from extension code (or anywhere
-		// in pi) leaves the terminal in raw mode with no cursor.
+		// in the harness) leaves the terminal in raw mode with no cursor.
 		const uncaughtExceptionHandler = (error: Error) => this.uncaughtCrash(error);
 		process.prependListener("uncaughtException", uncaughtExceptionHandler);
 		this.signalCleanupHandlers.push(() => process.off("uncaughtException", uncaughtExceptionHandler));
@@ -4599,38 +4564,6 @@ export class InteractiveMode {
 	showWarning(warningMessage: string): void {
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new ThemedText(() => theme.fg("warning", `Warning: ${warningMessage}`), 1, 0));
-		this.ui.requestRender();
-	}
-
-	showNewVersionNotification(release: LatestPiRelease): void {
-		const updateInstruction = () =>
-			theme.fg("muted", `New version ${release.version} is available. Run `) +
-			theme.fg("accent", `${APP_NAME} update`);
-		const changelogUrl = "https://pi.dev/changelog";
-		const changelogLine = () => {
-			const changelogLink = getCapabilities().hyperlinks
-				? hyperlink(theme.fg("accent", changelogUrl), changelogUrl)
-				: theme.fg("accent", changelogUrl);
-			return theme.fg("muted", "Changelog: ") + changelogLink;
-		};
-		const note = release.note?.trim();
-
-		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new DynamicBorder((text) => theme.fg("warning", text)));
-		this.chatContainer.addChild(
-			new ThemedText(() => `${theme.bold(theme.fg("warning", "Update Available"))}\n${updateInstruction()}`, 1, 0),
-		);
-		if (note) {
-			this.chatContainer.addChild(new Spacer(1));
-			this.chatContainer.addChild(
-				new Markdown(note, 1, 0, this.getMarkdownThemeWithSettings(), {
-					color: (text) => theme.fg("muted", text),
-				}),
-			);
-			this.chatContainer.addChild(new Spacer(1));
-		}
-		this.chatContainer.addChild(new ThemedText(changelogLine, 1, 0));
-		this.chatContainer.addChild(new DynamicBorder((text) => theme.fg("warning", text)));
 		this.ui.requestRender();
 	}
 
@@ -5857,12 +5790,6 @@ export class InteractiveMode {
 	}
 
 	private showLoginAuthTypeSelector(providerOptions?: AuthSelectorProvider[]): void {
-		// The top-level selector offers Radius directly, as its last option.
-		const radiusOption = providerOptions
-			? undefined
-			: this.getLoginProviderOptions("oauth").find((provider) => provider.id === RADIUS_PROVIDER_ID);
-		const radiusText = radiusOption ? `Sign in with ${radiusOption.name}` : undefined;
-		const radiusLabel = radiusOption ? `${radiusText}${formatAuthSelectorProviderStatus(radiusOption)}` : undefined;
 		const oauthProvider = providerOptions?.find((provider) => provider.authType === "oauth");
 		const oauthLoginLabel =
 			oauthProvider?.method && "loginLabel" in oauthProvider.method ? oauthProvider.method.loginLabel : undefined;
@@ -5878,7 +5805,6 @@ export class InteractiveMode {
 		if (availableAuthTypes.has("api_key")) {
 			options.push(apiKeyLabel);
 		}
-		if (radiusLabel) options.push(radiusLabel);
 
 		if (options.length === 0) {
 			this.showStatus("No login methods available.");
@@ -5899,10 +5825,6 @@ export class InteractiveMode {
 		this.showSelector((done) => {
 			const onSelect = (option: string) => {
 				done();
-				if (radiusOption && option === radiusLabel) {
-					void this.startProviderLogin(radiusOption, () => this.showLoginAuthTypeSelector());
-					return;
-				}
 				const authType = option === subscriptionLabel ? "oauth" : "api_key";
 				if (providerOptions) {
 					const providerOption = providerOptions.find((provider) => provider.authType === authType);
@@ -5917,17 +5839,7 @@ export class InteractiveMode {
 				done();
 				this.ui.requestRender();
 			};
-			const selector =
-				radiusLabel && radiusText
-					? createLoginMenuSelector(
-							this.ui,
-							title,
-							options,
-							{ label: radiusLabel, text: radiusText },
-							onSelect,
-							onCancel,
-						)
-					: new ExtensionSelectorComponent(title, options, onSelect, onCancel);
+			const selector = new ExtensionSelectorComponent(title, options, onSelect, onCancel);
 			return { component: selector, focus: selector, dispose: () => selector.dispose() };
 		});
 	}
@@ -6071,7 +5983,7 @@ export class InteractiveMode {
 					// Radius catalogs vary by account; prefer balanced, then use catalog order.
 					selectedModel =
 						providerModels.find((model) => model.id === defaultModelId) ??
-						(providerId === "radius" ? providerModels[0] : undefined);
+						undefined;
 					if (!selectedModel) {
 						selectionError = `${actionLabel}, but its default model "${defaultModelId}" is not available. Use /model to select a model.`;
 					} else {
@@ -6178,8 +6090,8 @@ export class InteractiveMode {
 		if (providerId === "amazon-bedrock") {
 			dialog.showDetails([
 				theme.fg("text", "You can also use an AWS profile, IAM keys, or role-based credentials."),
-				theme.fg("muted", "See:"),
-				theme.fg("accent", `  ${path.join(getDocsPath(), "providers.md")}`),
+				theme.fg("muted", "See README:"),
+				theme.fg("accent", `  ${getReadmePath()}`),
 			]);
 		}
 
@@ -6240,7 +6152,7 @@ export class InteractiveMode {
 					restoreDialog();
 					reject(new Error("Login cancelled"));
 				},
-				{ description: providerId === RADIUS_PROVIDER_ID ? RADIUS_LOGIN_INTRO : undefined },
+				{ description: undefined },
 			);
 			this.editorContainer.clear();
 			this.editorContainer.addChild(selector);
@@ -6328,7 +6240,6 @@ export class InteractiveMode {
 			await this.loginProvider(dialog, providerId, providerName, "oauth");
 			restoreEditor();
 			await this.completeProviderAuthentication(providerId, providerName, "oauth", previousModel);
-			if (providerId === RADIUS_PROVIDER_ID) this.offerRadiusMcpServer(providerId, providerName);
 		} catch (error: unknown) {
 			restoreEditor();
 			const errorMsg = error instanceof Error ? error.message : String(error);
@@ -6342,59 +6253,6 @@ export class InteractiveMode {
 				this.showError(`Failed to login to ${providerName}: ${errorMsg}`);
 			}
 		}
-	}
-
-	/**
-	 * Offer to point the Radius MCP server in the global mcp.json at the Radius login, adding the server
-	 * when missing. Nothing is asked when a global server already uses this login.
-	 */
-	private offerRadiusMcpServer(providerId: string, providerName: string): void {
-		const mcpPath = path.join(getAgentDir(), "mcp.json");
-		const normalizeUrl = (url: string) => url.replace(/\/+$/u, "");
-		const { servers } = loadMcpConfig({
-			agentDir: getAgentDir(),
-			cwd: this.sessionManager.getCwd(),
-			projectTrusted: false,
-		});
-		const existing = servers.find(
-			(server) => "url" in server.config && normalizeUrl(server.config.url) === normalizeUrl(RADIUS_MCP_URL),
-		);
-		if (existing && "url" in existing.config && existing.config.auth?.provider === providerId) return;
-
-		let name = existing?.name ?? "radius";
-		if (!existing && servers.some((server) => server.name === name)) name = "radius-mcp";
-		const config: McpHttpServerConfig =
-			existing && "url" in existing.config
-				? { ...existing.config, auth: { provider: providerId } }
-				: { url: RADIUS_MCP_URL, auth: { provider: providerId } };
-		// `auth` replaces the MCP OAuth sign-in.
-		delete config.oauth;
-
-		this.showSelector((done) => {
-			const selector = new ExtensionSelectorComponent(
-				`Configure ${providerName} MCP in ${mcpPath}?`,
-				["Yes", "No"],
-				(option) => {
-					done();
-					if (option !== "Yes") return;
-					try {
-						addMcpServerConfig(mcpPath, name, config);
-					} catch (error: unknown) {
-						this.showError(
-							`Could not update ${mcpPath}: ${error instanceof Error ? error.message : String(error)}`,
-						);
-						return;
-					}
-					// The MCP extension reads mcp.json when the session starts.
-					void this.handleReloadCommand();
-				},
-				() => {
-					done();
-					this.ui.requestRender();
-				},
-			);
-			return { component: selector, focus: selector };
-		});
 	}
 
 	// =========================================================================
@@ -6583,29 +6441,11 @@ export class InteractiveMode {
 	}
 
 	private async handleShareCommand(): Promise<void> {
-		await shareSession({
-			session: this.session,
-			ui: this.ui,
-			editorContainer: this.editorContainer,
-			editor: this.editor,
-			showStatus: (message) => this.showStatus(message),
-			showError: (message) => this.showError(message),
-		});
+		this.showStatus("Remote session sharing is disabled. Use local HTML export instead.");
 	}
 
-	private async handleBugCommand(hint: string | undefined): Promise<void> {
-		await reportBug(
-			{
-				session: this.session,
-				ui: this.ui,
-				editorContainer: this.editorContainer,
-				editor: this.editor,
-				keybindings: this.keybindings,
-				showStatus: (message) => this.showStatus(message),
-				showError: (message) => this.showError(message),
-			},
-			hint,
-		);
+	private async handleBugCommand(_hint: string | undefined): Promise<void> {
+		this.showStatus(`Bug reporting service is disabled. Local debug log: ${getDebugLogPath()}`);
 	}
 
 	private async handleCopyCommand(
@@ -6746,23 +6586,11 @@ export class InteractiveMode {
 	}
 
 	private handleChangelogCommand(): void {
-		const changelogPath = getChangelogPath();
-		const allEntries = parseChangelog(changelogPath);
-
-		const changelogMarkdown =
-			allEntries.length > 0
-				? allEntries
-						.reverse()
-						.map((e) => normalizeChangelogLinks(e.content, e))
-						.join("\n\n")
-				: "No changelog entries found.";
-
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new DynamicBorder());
-		this.chatContainer.addChild(new ThemedText(() => theme.bold(theme.fg("accent", "What's New")), 1, 0));
+		this.chatContainer.addChild(
+			new ThemedText(() => theme.fg("muted", "No changelog entries found in local Langfens checkout."), 1, 0),
+		);
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Markdown(changelogMarkdown, 1, 1, this.getMarkdownThemeWithSettings()));
-		this.chatContainer.addChild(new DynamicBorder());
 		this.ui.requestRender();
 	}
 
@@ -6945,18 +6773,6 @@ export class InteractiveMode {
 		this.ui.requestRender();
 	}
 
-	private handleArminSaysHi(): void {
-		if (playArmin3d(this.renderer)) return;
-		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new ArminComponent(this.ui));
-		this.ui.requestRender();
-	}
-
-	private handleDementedDelves(): void {
-		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new EarendilAnnouncementComponent());
-		this.ui.requestRender();
-	}
 
 	private async handleBashCommand(command: string, excludeFromContext = false): Promise<void> {
 		const extensionRunner = this.session.extensionRunner;

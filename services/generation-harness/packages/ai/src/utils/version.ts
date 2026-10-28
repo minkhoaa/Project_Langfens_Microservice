@@ -1,2 +1,1 @@
 export const GENERATION_AI_VERSION = "1.4.0";
-export const PI_AI_VERSION = GENERATION_AI_VERSION;

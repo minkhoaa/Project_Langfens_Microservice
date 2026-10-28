@@ -55,10 +55,6 @@ const HOST_PROVIDED_EXTENSION_PACKAGES = new Set([
 	"generation-ai",
 	"generation-harness-core",
 	"generation-tui",
-	"@mariozechner/pi-agent-core",
-	"@mariozechner/pi-ai",
-	"@mariozechner/pi-coding-agent",
-	"@mariozechner/pi-tui",
 	"@sinclair/typebox",
 	"typebox",
 ]);
@@ -143,7 +139,7 @@ function omitReplacedExtensions(
 			const registeredName = kind === "command" ? `/${rawName}` : kind === "flag" ? `--${rawName}` : rawName;
 			warnings?.push({
 				path: extension.path,
-				warning: `Extension ${replacement.extension.path} registers ${kind} \`${registeredName}\`, so built-in extension \`${builtinName}\` was not loaded. To use \`${builtinName}\`, run \`pi config\` and make sure it is enabled under Built-in extensions, then disable or remove the existing extension. We recommend only having one or the other loaded at a time.`,
+				warning: `Extension ${replacement.extension.path} registers ${kind} \`${registeredName}\`, so built-in extension \`${builtinName}\` was not loaded. To use \`${builtinName}\`, make sure it is enabled under Built-in extensions, then disable or remove the existing extension. We recommend only having one or the other loaded at a time.`,
 			});
 		}
 		return false;
@@ -264,7 +260,7 @@ export function loadProjectContextFiles(options: {
 		}
 
 		const parentDir = dirname(currentDir);
-		if (parentDir === currentDir) break;
+		if (parentDir === currentDir || (process.env.GENERATION_HARNESS_ISOLATED === "1" && currentDir === resolvedCwd)) break;
 		currentDir = parentDir;
 	}
 

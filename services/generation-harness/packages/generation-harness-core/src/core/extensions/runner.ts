@@ -284,7 +284,7 @@ function sameMessages(left: AgentMessage[], right: AgentMessage[]): boolean {
 
 /**
  * Re-attach the prompt and tool state after a `context` handler. Handlers only see the
- * conversation; the system messages belong to Pi. An unchanged conversation keeps every
+ * conversation; the system messages belong to the harness. An unchanged conversation keeps every
  * system message in place, so models with mid-conversation support keep their cached
  * prefix. A changed one gets the replayed prompt sections and tool declarations as one
  * leading system message, so pruning, windowing, or slicing from a compaction summary
@@ -1307,7 +1307,7 @@ export class ExtensionRunner {
 
 	/**
 	 * Run the request-time transforms in two phases. `context` handlers see the conversation
-	 * only and Pi restores the prompt and tool state after each; `context_with_system`
+	 * only and the harness restores the prompt and tool state after each; `context_with_system`
 	 * handlers then see the full transcript and their output is used as returned.
 	 */
 	async emitContext(messages: AgentMessage[]): Promise<AgentMessage[]> {

@@ -881,7 +881,7 @@ export type SessionEvent =
  * Fired before each LLM call. Can modify messages.
  *
  * `messages` holds the conversation without system messages. The prompt and tool state
- * belong to Pi: it restores them after the handler returns, so a handler cannot drop
+ * belong to the harness: it restores them after the handler returns, so a handler cannot drop
  * them and does not need to preserve them.
  */
 export interface ContextEvent {
@@ -890,7 +890,7 @@ export interface ContextEvent {
 }
 
 /**
- * Fired before each LLM call, after every `context` handler has run and Pi has restored
+ * Fired before each LLM call, after every `context` handler has run and the harness has restored
  * the prompt and tool state. `messages` is the full transcript including system messages,
  * and the result is sent as returned: the handler owns the prompt and tool declarations.
  */
@@ -922,7 +922,7 @@ export interface AfterProviderResponseEvent {
 	headers: Record<string, string>;
 }
 
-/** Fired for a parsed provider stream event before Pi normalizes it. */
+/** Fired for a parsed provider stream event before the harness normalizes it. */
 export interface ProviderStreamEvent {
 	type: "provider_stream_event";
 	provider: ProviderId;
@@ -1040,7 +1040,7 @@ export interface AgentSettledEvent {
 
 export type UIPromptKind = "select" | "confirm" | "input" | "editor" | "custom";
 
-/** Fired when Pi starts waiting on a blocking user-facing extension UI prompt. */
+/** Fired when the harness starts waiting on a blocking user-facing extension UI prompt. */
 export interface UIPromptStartEvent {
 	type: "ui_prompt_start";
 	reason: "ui_prompt";
@@ -1048,7 +1048,7 @@ export interface UIPromptStartEvent {
 	title?: string;
 }
 
-/** Fired when Pi is no longer waiting on a blocking user-facing extension UI prompt. */
+/** Fired when the harness is no longer waiting on a blocking user-facing extension UI prompt. */
 export interface UIPromptEndEvent {
 	type: "ui_prompt_end";
 	reason: "ui_prompt";
@@ -1716,7 +1716,7 @@ export interface ExtensionAPI {
 	/** Register a custom renderer for CustomMessageEntry. */
 	registerMessageRenderer<T = unknown>(customType: string, renderer: MessageRenderer<T>): void;
 
-	/** Register a transformer for user and assistant Markdown before Pi renders it in the interactive transcript. */
+	/** Register a transformer for user and assistant Markdown before the harness renders it in the interactive transcript. */
 	registerMarkdownTransformer(transformer: MarkdownTransformer): void;
 
 	/** Register a custom renderer for CustomEntry. Custom entries do not participate in LLM context. */

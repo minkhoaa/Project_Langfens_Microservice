@@ -10,6 +10,7 @@
  * - AWS_BEARER_TOKEN_BEDROCK (Bedrock API key)
  */
 export function hasBedrockCredentials(): boolean {
+	if (process.env.GENERATION_HARNESS_OFFLINE === "1") return false;
 	return !!(
 		process.env.AWS_PROFILE ||
 		(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ||

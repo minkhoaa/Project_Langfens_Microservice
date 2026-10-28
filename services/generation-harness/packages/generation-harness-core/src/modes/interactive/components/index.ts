@@ -1,5 +1,4 @@
 // UI Components for extensions
-export { ArminComponent } from "./armin.ts";
 export { AssistantMessageComponent } from "./assistant-message.ts";
 export { BashExecutionComponent } from "./bash-execution.ts";
 export { BorderedLoader } from "./bordered-loader.ts";
@@ -12,12 +11,8 @@ export { DynamicBorder } from "./dynamic-border.ts";
 export { ExtensionEditorComponent } from "./extension-editor.ts";
 export { ExtensionInputComponent } from "./extension-input.ts";
 export { ExtensionSelectorComponent } from "./extension-selector.ts";
-export {
-	FirstTimeSetupComponent,
-	type FirstTimeSetupOptions,
-	type FirstTimeSetupResult,
-} from "./first-time-setup.ts";
 export { FooterComponent } from "./footer.ts";
+export { harnessLogoLines, harnessWordmark, supportsLogo } from "./harness-logo.ts";
 export { keyHint, keyText, rawKeyHint } from "./keybinding-hints.ts";
 export { LoginDialogComponent } from "./login-dialog.ts";
 export { ModelSelectorComponent } from "./model-selector.ts";

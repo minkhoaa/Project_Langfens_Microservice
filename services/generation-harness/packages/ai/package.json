@@ -42,10 +42,6 @@
 		"./bedrock-provider": {
 			"types": "./dist/bedrock-provider.d.ts",
 			"import": "./dist/bedrock-provider.js"
-		},
-		"./bun-oauth": {
-			"types": "./dist/bun-oauth.d.ts",
-			"import": "./dist/bun-oauth.js"
 		}
 	},
 	"bin": {
@@ -98,7 +94,6 @@
 	},
 	"devDependencies": {
 		"@types/node": "22.19.19",
-		"canvas": "3.2.3",
 		"vitest": "4.1.11"
 	}
 }

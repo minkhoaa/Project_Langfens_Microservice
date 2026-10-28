@@ -8,7 +8,7 @@ import type { MistralOptions } from "./api/mistral-conversations.ts";
 import type { OpenAICodexResponsesOptions } from "./api/openai-codex-responses.ts";
 import type { OpenAICompletionsOptions } from "./api/openai-completions.ts";
 import type { OpenAIResponsesOptions } from "./api/openai-responses.ts";
-import type { PiMessagesOptions } from "./api/pi-messages.ts";
+import type { GenerationMessagesOptions } from "./api/generation-messages.ts";
 import type {
 	AnthropicMessagesCompat,
 	BedrockCompat,
@@ -71,7 +71,7 @@ export type KnownApi =
 	| "bedrock-converse-stream"
 	| "google-generative-ai"
 	| "google-vertex"
-	| "pi-messages";
+	| "generation-messages";
 
 export type Api = KnownApi | (string & {});
 
@@ -96,7 +96,6 @@ export type KnownProvider =
 	| "openai"
 	| "azure"
 	| "openai-codex"
-	| "radius"
 	| "typesafe"
 	| "nvidia"
 	| "deepseek"
@@ -194,7 +193,7 @@ export interface ProviderRequestOptions<TModel = Model<Api>> {
 	headers?: ProviderHeaders;
 	/**
 	 * How the request identifies the calling app: `User-Agent` and provider attribution headers.
-	 * Absent fields use pi-ai's defaults: a detailed `User-Agent` and no attribution.
+	 * Absent fields use the harness defaults: a detailed `User-Agent` and no attribution.
 	 */
 	identity?: ClientIdentity;
 	/**
@@ -224,7 +223,7 @@ export interface StreamOptions extends ProviderRequestOptions<Model<Api>> {
 	 */
 	onResponse?: (response: ProviderResponse, model: Model<Api>) => void | Promise<void>;
 	/**
-	 * Optional observer for each parsed provider stream event before Pi normalization.
+	 * Optional observer for each parsed provider stream event before harness normalization.
 	 * Event data is adapter-owned and must be treated as read-only.
 	 * Adapter support is explicit; unsupported adapters do not invoke it.
 	 */
@@ -233,7 +232,7 @@ export interface StreamOptions extends ProviderRequestOptions<Model<Api>> {
 	/**
 	 * Arbitrary sampling parameters merged into the request body as-is, after the named request
 	 * fields, so keys here override them. Lets custom OpenAI-compatible servers (llama.cpp, vLLM,
-	 * SGLang, ...) receive parameters pi does not model, e.g. `top_p`, `top_k`, `min_p`,
+	 * SGLang, ...) receive parameters the harness does not model, e.g. `top_p`, `top_k`, `min_p`,
 	 * `repetition_penalty`. Merged over `Model.samplingParams` per key. Only applied by
 	 * OpenAI-compatible adapters (completions, responses, Azure responses); other APIs ignore it.
 	 */
@@ -297,7 +296,7 @@ export interface ApiOptionsMap {
 	"google-vertex": GoogleVertexOptions;
 	"mistral-conversations": MistralOptions;
 	"bedrock-converse-stream": BedrockOptions;
-	"pi-messages": PiMessagesOptions;
+	"generation-messages": GenerationMessagesOptions;
 }
 
 /**
@@ -585,7 +584,7 @@ export interface AssistantMessage {
 	responseId?: string; // Provider-specific response/message identifier when the upstream API exposes one
 	/** Exact provider-native effort level used for this response. Absent for legacy or unmanaged responses. */
 	providerThinkingLevel?: string;
-	/** Pi thinking level the agent loop requested for this response. Absent outside the agent loop and for legacy responses. */
+	/** Thinking level the agent loop requested for this response. Absent outside the agent loop and for legacy responses. */
 	thinkingLevel?: ModelThinkingLevel;
 	diagnostics?: AssistantMessageDiagnostic[]; // Redacted provider/runtime diagnostics for failures and recoveries.
 	usage: Usage;
@@ -853,7 +852,7 @@ export interface Model<TApi extends Api> extends BaseModel<TApi> {
 	type?: "chat";
 	reasoning: boolean;
 	/**
-	 * Maps pi thinking levels to provider/model-specific values.
+	 * Maps thinking levels to provider/model-specific values.
 	 * Missing keys use provider defaults. null marks a level as unsupported.
 	 */
 	thinkingLevelMap?: ThinkingLevelMap;
@@ -863,7 +862,7 @@ export interface Model<TApi extends Api> extends BaseModel<TApi> {
 	maxTokens: number;
 	/** Default sampling parameters for this model. See {@link StreamOptions.samplingParams}; per-request keys override these. */
 	samplingParams?: SamplingParams;
-	/** Sampling parameter overrides selected by the effective pi thinking level. */
+	/** Sampling parameter overrides selected by the effective thinking level. */
 	samplingParamsByThinkingLevel?: SamplingParamsByThinkingLevel;
 	/** Compatibility overrides for OpenAI-compatible APIs. If not set, auto-detected from baseUrl. */
 	compat?: TApi extends "openai-completions"

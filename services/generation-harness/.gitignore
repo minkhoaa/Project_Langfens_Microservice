@@ -8,12 +8,20 @@ dist/
 packages/*/dist/
 packages/*/dist-chrome/
 packages/*/dist-firefox/
-packages/ai/src/providers/data/
 packages/ai/src/providers/.model-generation-*/
+# Override the repository-wide data/ rule for bundled offline model catalogs.
+!packages/ai/src/providers/data/
+!packages/ai/src/providers/data/*.json
+!packages/ai/test/data/
+!packages/ai/test/data/red-circle.png
+# The local Node CLI entrypoint is source, not a compiled bin artifact.
+!packages/generation-harness-core/bin/
+!packages/generation-harness-core/bin/*.mjs
 *.cpuprofile
 
 # Environment
 .env
+.runtime/
 
 # Editor files
 .vscode/
@@ -28,21 +36,15 @@ packages/ai/src/providers/.model-generation-*/
 .npm/
 coverage/
 .nyc_output/
-.pi_config/
 tui-debug.log
 compaction-results/
 .opencode/
 syntax.jsonl
 out.jsonl
-pi-*.html
 out.html
 packages/coding-agent/binaries/
 packages/env/bin/
 packages/env/daemon/target/
 todo.md
 plans/
-.pi/hf-sessions/
-.pi/hf-sessions-backup/
-.pi/settings.json
 collect.sh
-packages/agent/docs/extensions/pi-server-artifact/index.md

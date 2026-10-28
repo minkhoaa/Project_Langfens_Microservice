@@ -73,7 +73,6 @@ export function runtimeEnvironment(inherited = process.env) {
 		npm_config_prefix: join(packages, "npm"),
 		npm_config_cache: join(packages, ".npm-cache"),
 	});
-	env.PATH = [dirname(process.execPath), inherited.PATH || ""].join(process.platform === "win32" ? ";" : ":");
 	return { env, runtime, workspace, packages };
 }
 

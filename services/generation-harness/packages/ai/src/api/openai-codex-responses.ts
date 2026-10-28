@@ -210,7 +210,7 @@ type ProcessWithBuiltinModule = typeof process & {
 };
 
 function loadNodeZlib(): typeof NodeZlib | null {
-	if (typeof process === "undefined" || !(process.versions?.node || process.versions?.bun)) {
+	if (typeof process === "undefined" || !process.versions?.node) {
 		return null;
 	}
 	return (process as ProcessWithBuiltinModule).getBuiltinModule?.("node:zlib") ?? null;
@@ -286,7 +286,7 @@ export const stream: StreamFunction<"openai-codex-responses", OpenAICodexRespons
 			}
 			const websocketRequestId = codexSessionId || uuidv7();
 			// Codex expects an originator on every request; it is not attribution.
-			const identityHeaders = { originator: "pi", ...getIdentityHeaders(model, options?.identity) };
+			const identityHeaders = { originator: "generation", ...getIdentityHeaders(model, options?.identity) };
 			const sseHeaders = buildSSEHeaders(
 				identityHeaders,
 				model.headers,
@@ -1015,31 +1015,6 @@ type WebSocketConstructor = new (
 let _cachedWebsocket: WebSocketConstructor | null = null;
 async function getWebSocketConstructor(env?: ProviderEnv): Promise<WebSocketConstructor | null> {
 	if (!env && _cachedWebsocket) return _cachedWebsocket;
-
-	// bun doesn't respect http proxy envs, ref: https://github.com/oven-sh/bun/issues/15489
-	// TODO: remove this when bun supports proxy envs in websocket.
-	if (typeof process !== "undefined" && process.versions?.bun) {
-		const WebSocketWithProxy = class extends WebSocket {
-			constructor(url: string | URL, options?: string | string[] | Record<string, unknown>) {
-				let _opts: Record<string, unknown> = {};
-				if (Array.isArray(options) || typeof options === "string") {
-					_opts = { protocols: options };
-				} else {
-					_opts = { ...options };
-				}
-
-				const proxyUrl = resolveHttpProxyUrlForTarget(
-					url.toString().replace(/^wss:/, "https:").replace(/^ws:/, "http:"),
-					env,
-				);
-				super(url, { ..._opts, ...(proxyUrl ? { proxy: proxyUrl.toString() } : {}) } as any);
-			}
-		};
-		if (!env) {
-			_cachedWebsocket = WebSocketWithProxy;
-		}
-		return WebSocketWithProxy;
-	}
 
 	const ctor = (globalThis as { WebSocket?: unknown }).WebSocket;
 	if (typeof ctor !== "function") return null;

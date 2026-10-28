@@ -82,7 +82,7 @@ import {
 	resolveConfiguredModelHeaders,
 	validateExtensionProvider,
 } from "./provider-composer.ts";
-import { withPersonalizedCatalog, withRemoteCatalog } from "./remote-catalog-provider.ts";
+import { withPersonalizedCatalog } from "./remote-catalog-provider.ts";
 import { RuntimeCredentials } from "./runtime-credentials.ts";
 import {
 	createVirtualModel,
@@ -118,7 +118,6 @@ export interface CreateModelRuntimeOptions {
 	allowModelNetwork?: boolean;
 	/** Timeout for the create-time network model refresh. */
 	modelRefreshTimeoutMs?: number;
-	catalogBaseUrl?: string;
 	/** Optional caller cancellation for initial cache restoration and availability checks. */
 	signal?: AbortSignal;
 	/** Skip initial catalog and availability refresh. Static models remain available. */
@@ -170,7 +169,7 @@ function mergeHeaders(
 	return merged;
 }
 
-/** Configured pi-ai Models collection used by coding-agent and SDK consumers. */
+/** Configured ai Models collection used by coding-agent and SDK consumers. */
 export class ModelRuntime implements Models {
 	private readonly models: MutableModels;
 	private readonly credentials: RuntimeCredentials;
@@ -225,19 +224,15 @@ export class ModelRuntime implements Models {
 			(modelsPath
 				? new FileModelsStore(options.modelsStorePath ?? join(dirname(modelsPath), "models-store.json"))
 				: new InMemoryCodingAgentModelsStore());
-		const builtinModelDataGeneratedAt = builtinProviderCatalog.getBuiltinModelDataGeneratedAt();
 		const providers = builtinProviderCatalog.builtinProviders().map((provider) => {
-			if (provider.id === "radius") return provider;
 			// OpenRouter narrows the catalog to the models, limits and prices of the user's key.
 			if (provider.id === "openrouter") {
 				return withPersonalizedCatalog(
 					provider,
 					personalizeOpenRouterCatalog,
-					options.catalogBaseUrl,
-					builtinModelDataGeneratedAt,
 				);
 			}
-			return withRemoteCatalog(provider, options.catalogBaseUrl, builtinModelDataGeneratedAt);
+			return provider;
 		});
 		const runtime = new ModelRuntime(
 			credentials,
@@ -245,9 +240,8 @@ export class ModelRuntime implements Models {
 			modelsPath,
 			modelsStore,
 			providers,
-			process.env.PI_OFFLINE === undefined,
+			process.env.GENERATION_HARNESS_OFFLINE === undefined,
 		);
-		runtime.configureRadiusProviders();
 		runtime.rebuildProviders();
 		const refreshFromNetwork = runtime.modelNetworkEnabled && options.allowModelNetwork === true;
 		const controller =
@@ -266,23 +260,6 @@ export class ModelRuntime implements Models {
 			if (timeout) clearTimeout(timeout);
 		}
 		return runtime;
-	}
-
-	private configureRadiusProviders(): void {
-		this.builtins.clear();
-		for (const [providerId, provider] of this.defaultBuiltins) this.builtins.set(providerId, provider);
-		for (const providerId of this.config.getProviderIds()) {
-			const config = this.config.getProvider(providerId);
-			if (config?.oauth !== "radius" || !config.baseUrl) continue;
-			this.builtins.set(
-				providerId,
-				builtinProviderCatalog.radiusProvider({
-					id: providerId,
-					name: config.name ?? providerId,
-					gateway: config.baseUrl.replace(/\/v1\/?$/u, ""),
-				}),
-			);
-		}
 	}
 
 	private providerIds(): Set<string> {
@@ -855,7 +832,6 @@ export class ModelRuntime implements Models {
 
 	async refresh(options: ModelsRefreshOptions = {}): Promise<ModelsRefreshResult> {
 		this.config = await ModelConfig.load(this.modelsPath);
-		this.configureRadiusProviders();
 		if (options.providers) {
 			for (const providerId of new Set(options.providers)) this.recomposeProvider(providerId);
 			this.updateModelSnapshot();
@@ -866,7 +842,7 @@ export class ModelRuntime implements Models {
 			...options,
 			allowNetwork: options.allowNetwork ?? this.modelNetworkEnabled,
 		};
-		// Published pi-ai builds before ModelsStore returned void and accepted a provider ID.
+		// Prior ai builds before ModelsStore returned void and accepted a provider ID.
 		// The fallback keeps source-mode CLI tests working without rebuilding workspace dependencies.
 		const result = ((await this.models.refresh(refreshOptions)) as ModelsRefreshResult | undefined) ?? {
 			aborted: refreshOptions.signal?.aborted ?? false,

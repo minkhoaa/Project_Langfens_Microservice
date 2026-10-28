@@ -1,5 +1,5 @@
 /**
- * TUI config selector for `pi config` command
+ * TUI config selector for configuration management
  */
 
 import { ProcessTerminal, type TUI, TuiMainScreen } from "generation-tui";

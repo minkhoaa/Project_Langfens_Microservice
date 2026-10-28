@@ -13,16 +13,6 @@ import { stripBom } from "./utils/text.ts";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-/**
- * Detect if we're running as a Bun compiled binary.
- * Bun binaries have import.meta.url containing "$bunfs", "~BUN", or "%7EBUN" (Bun's virtual filesystem path)
- */
-export const isBunBinary =
-	import.meta.url.includes("$bunfs") || import.meta.url.includes("~BUN") || import.meta.url.includes("%7EBUN");
-
-/** Detect if Bun is the runtime (compiled binary or bun run) */
-export const isBunRuntime = !!process.versions.bun;
-
 /** Detect the esbuild-bundled Node.js distribution. */
 declare const GENERATION_HARNESS_BUNDLED_NODE: boolean;
 export const isBundledNode = typeof GENERATION_HARNESS_BUNDLED_NODE !== "undefined" && GENERATION_HARNESS_BUNDLED_NODE;
@@ -31,7 +21,7 @@ export const isBundledNode = typeof GENERATION_HARNESS_BUNDLED_NODE !== "undefin
 // Install Method Detection
 // =============================================================================
 
-export type InstallMethod = "bun-binary" | "npm" | "pnpm" | "yarn" | "bun" | "unknown";
+export type InstallMethod = "npm" | "pnpm" | "yarn" | "unknown";
 
 export interface SelfUpdateCommand {
 	command: string;
@@ -59,17 +49,14 @@ export function getUpdateInstruction(packageName: string): string {
 
 /**
  * Get the base directory for resolving package assets (themes, package.json, README.md, CHANGELOG.md).
- * - For Bun binary: returns the directory containing the executable
- * - For Node.js: returns the package root containing package.json
- * - Ignores Bun binary metadata copied into dist/ when the package root is available
+ * Resolves the package root containing package.json, ignoring dist metadata when the source root exists.
  */
 export function findNodePackageDir(startDir: string): string {
 	let dir = startDir;
 	while (dir !== dirname(dir)) {
 		if (existsSync(join(dir, "package.json"))) {
 			const parent = dirname(dir);
-			// build:binary places Bun's metadata inside dist/. Node still needs the
-			// package root so its dist-relative asset paths do not become dist/dist/.
+			// Keep dist-relative asset paths rooted at the package, not dist/dist/.
 			if (basename(dir) === "dist" && existsSync(join(parent, "package.json"))) {
 				return parent;
 			}
@@ -86,14 +73,9 @@ export function getPackageDir(): string {
 
 /**
  * Get path to built-in themes directory (shipped with package)
- * - For Bun binary: theme/ next to executable
- * - For Node.js (dist/): dist/modes/interactive/theme/
- * - For source (src/): src/modes/interactive/theme/
+ * Resolves the theme assets alongside source or compiled package files.
  */
 export function getThemesDir(): string {
-	if (isBunBinary) {
-		return join(getPackageDir(), "theme");
-	}
 	// Theme is in modes/interactive/theme/ relative to src/ or dist/
 	const packageDir = getPackageDir();
 	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
@@ -102,14 +84,9 @@ export function getThemesDir(): string {
 
 /**
  * Get path to HTML export template directory (shipped with package)
- * - For Bun binary: export-html/ next to executable
- * - For Node.js (dist/): dist/core/export-html/
- * - For source (src/): src/core/export-html/
+ * Resolves HTML export assets alongside source or compiled package files.
  */
 export function getExportTemplateDir(): string {
-	if (isBunBinary) {
-		return join(getPackageDir(), "export-html");
-	}
 	const packageDir = getPackageDir();
 	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
 	return join(packageDir, srcOrDist, "core", "export-html");
@@ -122,7 +99,15 @@ export function getPackageJsonPath(): string {
 
 /** Get path to README.md */
 export function getReadmePath(): string {
-	return resolve(join(getPackageDir(), "README.md"));
+	const rootReadme = resolve(join(getPackageDir(), "../..", "README.md"));
+	if (existsSync(rootReadme)) {
+		return rootReadme;
+	}
+	const localReadme = resolve(join(getPackageDir(), "README.md"));
+	if (existsSync(localReadme)) {
+		return localReadme;
+	}
+	return rootReadme;
 }
 
 /** Get path to docs directory */
@@ -142,14 +127,9 @@ export function getChangelogPath(): string {
 
 /**
  * Get path to built-in interactive assets directory.
- * - For Bun binary: assets/ next to executable
- * - For Node.js (dist/): dist/modes/interactive/assets/
- * - For source (src/): src/modes/interactive/assets/
+ * Resolves interactive assets alongside source or compiled package files.
  */
 export function getInteractiveAssetsDir(): string {
-	if (isBunBinary) {
-		return join(getPackageDir(), "assets");
-	}
 	const packageDir = getPackageDir();
 	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
 	return join(packageDir, srcOrDist, "modes", "interactive", "assets");
@@ -162,11 +142,6 @@ export function getBundledInteractiveAssetPath(name: string): string {
 
 let quickJSWasmPath: string | undefined;
 
-/** Called by the Bun entry with the path of the QuickJS wasm file embedded in the compiled executable. */
-export function setEmbeddedQuickJSWasmPath(path: string): void {
-	quickJSWasmPath = path;
-}
-
 /**
  * Get path to `quickjs-wasi/quickjs.wasm`, the VM that runs codemode scripts. Resolved once so the
  * compiled module cached per path keeps working after an update removes this install (#10439).
@@ -178,13 +153,9 @@ export function getQuickJSWasmPath(): string {
 
 /** Resolve the codemode worker entry for a release runtime. */
 export function resolveCodemodeWorkerSpecifier(
-	runtime: "bun-binary" | "bundled-node" | "unbundled",
+	runtime: "bundled-node" | "unbundled",
 	moduleUrl: string,
 ): string | URL | undefined {
-	// Bun embeds explicit source entrypoints, but on Windows Bun 1.3 cannot map an absolute
-	// B:\~BUN URL back to one. A relative string with the original source extension works on
-	// every Bun platform.
-	if (runtime === "bun-binary") return "./src/extensions/codemode/worker.ts";
 	if (runtime === "bundled-node") return new URL("./codemode-worker.js", moduleUrl);
 	return undefined;
 }
@@ -192,11 +163,10 @@ export function resolveCodemodeWorkerSpecifier(
 let codemodeWorkerDataUrl: URL | undefined;
 
 /**
- * Get the codemode worker entry, or undefined to use the worker that ships next to pi-codemode.
- * The Bun and Node release builds both pass the worker as an extra entrypoint.
+ * Get the codemode worker entry for the Node esbuild bundle, or undefined in unbundled builds.
  */
 export function getCodemodeWorkerSpecifier(): string | URL | undefined {
-	const runtime = isBunBinary ? "bun-binary" : isBundledNode ? "bundled-node" : "unbundled";
+	const runtime = isBundledNode ? "bundled-node" : "unbundled";
 	const specifier = resolveCodemodeWorkerSpecifier(runtime, import.meta.url);
 	if (runtime !== "bundled-node" || !(specifier instanceof URL)) return specifier;
 	// Spawn workers from an in-memory copy. An update replaces or deletes the file while this
@@ -216,8 +186,7 @@ export type InstallChange = { kind: "updated"; version: string } | { kind: "remo
  * and could find an unrelated package.json, such as one in the home directory.
  */
 export function detectInstallChange(packageJsonPath = startupPackageJsonPath): InstallChange | undefined {
-	// The Bun binary embeds its code, so replacing the executable does not affect this process.
-	if (isBunBinary || !packageJsonPath) return undefined;
+	if (!packageJsonPath) return undefined;
 	let installed: PackageJson;
 	try {
 		installed = JSON.parse(stripBom(readFileSync(packageJsonPath, "utf-8"))) as PackageJson;

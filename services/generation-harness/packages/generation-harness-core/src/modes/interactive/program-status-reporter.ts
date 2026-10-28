@@ -1,3 +1,9 @@
+/**
+ * Terminal program status reporter (OSC 7501).
+ *
+ * Source attribution: Adapted from upstream commit b3a29f1111114fac696e2cfcd65acdb382a6ed5e under MIT License.
+ */
+
 import type { ProgramStatus, Terminal } from "generation-tui";
 import { APP_NAME } from "../../config.ts";
 import type { AgentSessionEvent } from "../../core/agent-session.ts";

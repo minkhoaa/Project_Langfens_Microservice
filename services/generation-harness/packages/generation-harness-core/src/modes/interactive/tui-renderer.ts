@@ -1,3 +1,9 @@
+/**
+ * TUI renderer factory and stable proxy reference.
+ *
+ * Source attribution: Adapted from upstream commit b3a29f1111114fac696e2cfcd65acdb382a6ed5e under MIT License.
+ */
+
 import type { Terminal, WheelScrollLines } from "generation-tui";
 import { ProcessTerminal, type TUI, TuiAltScreen, TuiMainScreen } from "generation-tui";
 import { copyToClipboard } from "../../utils/clipboard.ts";

@@ -108,15 +108,14 @@ export interface McpOAuthConfig {
 	scope?: string;
 	/**
 	 * `client_name` sent with dynamic client registration, for servers that only accept known clients.
-	 * Default: `pi`.
+	 * Default: `Langfens Harness`.
 	 */
 	clientName?: string;
 	/**
-	 * How pi identifies itself without `clientId`. `dcr` (default): dynamic client registration. `cimd`:
-	 * pi's Client ID Metadata Document on pi.dev, for authorization servers that allow pi by that URL. The
-	 * server must support it for public clients, and the callback must use the default path `/callback`.
+	 * Registration method. `dcr` (default) uses dynamic client registration. Configure `clientId` to use
+	 * an existing client identity. Client ID Metadata Documents are unsupported.
 	 */
-	clientRegistration?: "dcr" | "cimd";
+	clientRegistration?: "dcr";
 	/**
 	 * Authorization server metadata document (RFC 8414 or OpenID Connect discovery) to use instead of
 	 * discovery through the server, for servers that advertise a wrong authorization server or none.
@@ -189,14 +188,7 @@ function validateOAuth(value: unknown): string | undefined {
 		return "oauth.clientName must be a non-empty string";
 	}
 	if (value.clientRegistration !== undefined && value.clientRegistration !== "dcr") {
-		if (value.clientRegistration !== "cimd") return 'oauth.clientRegistration must be "dcr" or "cimd"';
-		if (value.clientId !== undefined || value.clientName !== undefined) {
-			return 'oauth.clientRegistration "cimd" cannot be combined with oauth.clientId or oauth.clientName';
-		}
-		const callback = typeof value.callbackUrl === "string" ? new URL(value.callbackUrl) : undefined;
-		if (callback && (callback.hostname === "[::1]" || callback.pathname !== "/callback")) {
-			return 'oauth.clientRegistration "cimd" requires oauth.callbackUrl on localhost or 127.0.0.1 with path /callback';
-		}
+		return 'oauth.clientRegistration must be "dcr"; Client ID Metadata Documents are unsupported';
 	}
 	const metadataUrl = value.authServerMetadataUrl;
 	if (metadataUrl !== undefined) {

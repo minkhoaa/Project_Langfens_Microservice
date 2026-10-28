@@ -10,8 +10,8 @@ const NODE_FS_SPECIFIER = "node:" + "fs";
 const NODE_OS_SPECIFIER = "node:" + "os";
 const NODE_PATH_SPECIFIER = "node:" + "path";
 
-// Eagerly load in Node.js/Bun environment only
-if (typeof process !== "undefined" && (process.versions?.node || process.versions?.bun)) {
+// Eagerly load in Node.js environment only
+if (typeof process !== "undefined" && Boolean(process.versions?.node)) {
 	dynamicImport(NODE_FS_SPECIFIER).then((m) => {
 		_existsSync = (m as typeof import("node:fs")).existsSync;
 	});
@@ -48,7 +48,7 @@ function hasVertexAdcCredentials(env?: ProviderEnv): boolean {
 		// return false WITHOUT caching so the next call retries once they're ready.
 		// Only cache false permanently in a browser environment where fs is never available.
 		if (!_existsSync || !_homedir || !_join) {
-			const isNode = typeof process !== "undefined" && (process.versions?.node || process.versions?.bun);
+			const isNode = typeof process !== "undefined" && Boolean(process.versions?.node);
 			if (!isNode) {
 				// Definitively in a browser — safe to cache false permanently
 				cachedVertexAdcCredentialsExists = false;
@@ -96,7 +96,6 @@ function getApiKeyEnvVars(provider: string): readonly string[] | undefined {
 		cerebras: "CEREBRAS_API_KEY",
 		xai: "XAI_API_KEY",
 		typesafe: "TYPESAFE_API_KEY",
-		radius: "RADIUS_API_KEY",
 		openrouter: "OPENROUTER_API_KEY",
 		"vercel-ai-gateway": "AI_GATEWAY_API_KEY",
 		zai: "ZAI_API_KEY",

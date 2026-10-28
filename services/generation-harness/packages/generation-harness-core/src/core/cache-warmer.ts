@@ -39,7 +39,7 @@ export function getCacheWarmingDelayMs(ttlMs: number): number | undefined {
 export function getPromptCacheTtlMs(model: Model<Api>, options: SimpleStreamOptions | undefined): number | undefined {
 	const retention =
 		options?.cacheRetention ??
-		(getProviderEnvValue("PI_CACHE_RETENTION", options?.env) === "long" ? "long" : "short");
+		(getProviderEnvValue("GENERATION_HARNESS_CACHE_RETENTION", options?.env) === "long" ? "long" : "short");
 	if (retention === "none") return undefined;
 	const seconds = model.promptCache?.[retention];
 	return seconds === undefined ? undefined : seconds * 1000;
@@ -101,7 +101,7 @@ export interface CacheWarmingDecision {
 	expectedSavings: number;
 	/** False when the prompt size or the model's prices are unknown. */
 	economicsAvailable: boolean;
-	/** Pi's decision: "warm" when `expectedSavings` is at least $0.05. */
+	/** Warmer decision: "warm" when `expectedSavings` is at least $0.05. */
 	action: CacheWarmingAction;
 }
 

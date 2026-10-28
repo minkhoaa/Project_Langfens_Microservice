@@ -11,7 +11,7 @@ import {
 	getToolStateChanges,
 	mergeClientIdentity,
 	normalizeContext,
-	PI_ATTRIBUTION,
+	GENERATION_ATTRIBUTION,
 	type SystemMessage,
 	type ToolResultMessage,
 	type ToolStateChanges,
@@ -35,10 +35,10 @@ import type {
 export type AgentEventSink = (event: AgentEvent) => Promise<void> | void;
 
 /**
- * Request identity of agent loops: pi-ai's defaults with provider attribution to pi. `AgentLoopConfig.identity`
+ * Request identity of agent loops: generation defaults with provider attribution. `AgentLoopConfig.identity`
  * overrides it field by field.
  */
-export const DEFAULT_AGENT_IDENTITY: ClientIdentity = { attribution: PI_ATTRIBUTION };
+export const DEFAULT_AGENT_IDENTITY: ClientIdentity = { attribution: GENERATION_ATTRIBUTION };
 
 /**
  * Start an agent loop with a new prompt message.

@@ -62,7 +62,6 @@ import { sleep } from "../utils/sleep.ts";
 import { normalizeToolResultImages } from "../utils/tool-result-images.ts";
 import { formatNoApiKeyFoundMessage, formatNoModelSelectedMessage } from "./auth-guidance.ts";
 import { type BashResult, executeBashWithOperations } from "./bash-executor.ts";
-import { generateBugReportSummary } from "./bug-report.ts";
 import type { CacheWarmer, CacheWarmingStatus } from "./cache-warmer.ts";
 import {
 	type CompactionPreparation,
@@ -2782,7 +2781,7 @@ export class AgentSession {
 	// Compaction
 	// =========================================================================
 
-	/** Generate Pi's built-in compaction summary for manual and automatic compaction. */
+	/** Generate built-in compaction summary for manual and automatic compaction. */
 	private async _runDefaultCompaction(
 		preparation: CompactionPreparation,
 		model: Model<any>,
@@ -2790,7 +2789,7 @@ export class AgentSession {
 		signal: AbortSignal,
 		reason: "manual" | "threshold" | "overflow",
 	): Promise<CompactionResult> {
-		// Resolve the request only when Pi summarizes itself: routing may call models or fail.
+		// Resolve the request only when the harness summarizes itself: routing may call models or fail.
 		const request = await this._getSummarizationRequestAuth(model, signal);
 		return compact(
 			preparation,
@@ -4383,20 +4382,8 @@ export class AgentSession {
 	 * Ask the current model to describe what went wrong in this session for a bug report.
 	 * Used when the user declines to share the transcript itself.
 	 */
-	async summarizeForBugReport(options: { hint?: string; signal: AbortSignal }): Promise<string> {
-		const model = this.model;
-		if (!model) {
-			throw new Error("No model selected");
-		}
-		return generateBugReportSummary({
-			...(await this._getSummarizationRequestAuth(model, options.signal)),
-			messages: this.messages,
-			hint: options.hint,
-			signal: options.signal,
-			streamFn: this.agent.streamFunction,
-			retry: this.settingsManager.getRetrySettings(),
-			sessionId: this.sessionId,
-		});
+	async summarizeForBugReport(_options: { hint?: string; signal?: AbortSignal }): Promise<string> {
+		throw new Error("Bug reporting is not supported in Langfens Harness.");
 	}
 
 	// =========================================================================

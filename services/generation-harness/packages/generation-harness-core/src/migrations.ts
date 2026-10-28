@@ -9,9 +9,7 @@ import { CONFIG_DIR_NAME, getAgentDir, getBinDir } from "./config.ts";
 import { migrateKeybindingsConfig } from "./core/keybindings.ts";
 import { stripBom } from "./utils/text.ts";
 
-const MIGRATION_GUIDE_URL =
-	"https://github.com/earendil-works/pi/blob/main/packages/coding-agent/CHANGELOG.md#extensions-migration";
-const EXTENSIONS_DOC_URL = "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md";
+
 
 /**
  * Migrate legacy oauth.json and settings.json apiKeys to auth.json.
@@ -73,13 +71,9 @@ export function migrateAuthToAuthJson(): string[] {
 }
 
 /**
- * Migrate sessions from ~/.pi/agent/*.jsonl to proper session directories.
+ * Move misplaced flat session files into the local session directory.
  *
- * Bug in v0.30.0: Sessions were saved to ~/.pi/agent/ instead of
- * ~/.pi/agent/sessions/<encoded-cwd>/. This migration moves them
- * to the correct location based on the cwd in their session header.
- *
- * See: https://github.com/earendil-works/pi-mono/issues/320
+ * Older sessions may have been saved directly in the local agent directory.
  */
 export function migrateSessionsFromAgentRoot(): void {
 	const agentDir = getAgentDir();
@@ -217,7 +211,7 @@ function migrateToolsToBin(): void {
 
 /**
  * Check for deprecated hooks/ and tools/ directories.
- * Note: tools/ may contain fd/rg binaries extracted by pi, so only warn if it has other files.
+ * Note: tools/ may contain fd/rg binaries extracted by the harness, so only warn if it has other files.
  */
 function checkDeprecatedExtensionDirs(baseDir: string, label: string): string[] {
 	const hooksDir = join(baseDir, "hooks");
@@ -281,8 +275,6 @@ export async function showDeprecationWarnings(warnings: string[]): Promise<void>
 		console.log(chalk.yellow(`Warning: ${warning}`));
 	}
 	console.log(chalk.yellow(`\nMove your extensions to the extensions/ directory.`));
-	console.log(chalk.yellow(`Migration guide: ${MIGRATION_GUIDE_URL}`));
-	console.log(chalk.yellow(`Documentation: ${EXTENSIONS_DOC_URL}`));
 	console.log(chalk.dim(`\nPress any key to continue...`));
 
 	await new Promise<void>((resolve) => {

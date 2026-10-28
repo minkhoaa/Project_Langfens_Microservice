@@ -417,6 +417,8 @@ export { createToolSearchExtension } from "./extensions/tool-search/index.ts";
 export { type MainOptions, main } from "./main.ts";
 // Run modes for programmatic SDK usage
 export {
+	createInteractiveTui,
+	createInteractiveTuiReference,
 	InteractiveMode,
 	type InteractiveModeOptions,
 	type JsonAgentSessionEvent,
@@ -435,7 +437,6 @@ export {
 } from "./modes/index.ts";
 // UI components for extensions
 export {
-	ArminComponent,
 	AssistantMessageComponent,
 	BashExecutionComponent,
 	BorderedLoader,

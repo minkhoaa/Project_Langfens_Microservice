@@ -1,3 +1,9 @@
+/**
+ * Layout composition for chat viewport.
+ *
+ * Source attribution: Adapted from upstream commit b3a29f1111114fac696e2cfcd65acdb382a6ed5e under MIT License.
+ */
+
 import { type Component, ScrollView, type ScrollViewScrollbar, VStack } from "generation-tui";
 
 export interface ChatViewportOptions {

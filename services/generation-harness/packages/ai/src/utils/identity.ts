@@ -1,11 +1,11 @@
 import type { Models, MutableModels } from "../models.ts";
-import { PI_AI_VERSION } from "./version.ts";
+import { GENERATION_AI_VERSION } from "./version.ts";
 
 /**
  * The `User-Agent` sent to providers:
- * - `"detailed"`: `pi/<version> (<platform>; <runtime>/<runtime version>; <arch>)`, or `pi/<version> (browser)`
- *   outside Node.js and Bun.
- * - `"short"`: `pi`.
+ * - `"detailed"`: `generation-harness/<version> (<platform>; node/<runtime version>; <arch>)`, or `generation-harness/<version> (browser)`
+ *   outside Node.js.
+ * - `"short"`: `generation-harness`.
  * - `{ custom }`: the given value.
  */
 export type UserAgentMode = "short" | "detailed" | { custom: string };
@@ -21,18 +21,18 @@ export interface ClientAttribution {
 }
 
 export const GENERATION_ATTRIBUTION: ClientAttribution = { name: "generation-harness", url: "https://langfens.local", categories: ["cli-agent"] };
-export const PI_ATTRIBUTION: ClientAttribution = GENERATION_ATTRIBUTION;
+
 
 /**
- * How pi-ai identifies the calling app to providers. Every field is optional; absent fields use pi-ai's defaults:
- * a detailed `User-Agent` with pi-ai's version and no attribution headers. Plain JSON, so it can be persisted.
+ * How generation-ai identifies the calling app to providers. Every field is optional; absent fields use generation-ai's defaults:
+ * a detailed `User-Agent` with generation-ai's version and no attribution headers. Plain JSON, so it can be persisted.
  */
 export interface ClientIdentity {
 	/** Default: `"detailed"`. */
 	userAgent?: UserAgentMode;
 	/** Provider attribution headers. Absent or `null`: none; `null` also turns off attribution set by a merged identity. */
 	attribution?: ClientAttribution | null;
-	/** Version in the detailed `User-Agent`. Default: the pi-ai version. */
+	/** Version in the detailed `User-Agent`. Default: the generation-ai version. */
 	version?: string;
 }
 
@@ -60,13 +60,12 @@ export function mergeClientIdentity(...sources: (ClientIdentity | undefined)[]):
 
 /** The version in the detailed `User-Agent`. */
 export function getClientVersion(identity?: ClientIdentity): string {
-	return identity?.version ?? PI_AI_VERSION;
+	return identity?.version ?? GENERATION_AI_VERSION;
 }
 
 function runtimeDescription(): string | undefined {
 	if (typeof process === "undefined") return undefined;
 	const versions = process.versions;
-	if (versions?.bun) return `bun/${versions.bun}`;
 	if (versions?.node) return `node/${process.version}`;
 	return undefined;
 }
@@ -117,7 +116,7 @@ export function getAttributionHeaders(target: ClientIdentityTarget, identity?: C
 				: { "X-OpenRouter-Categories": categories.join(",") }),
 		};
 	}
-	// NVIDIA expects a capitalized origin, such as `Pi`.
+	// NVIDIA expects a capitalized origin, such as `Generation`.
 	if (isNvidiaNim(target)) return { "X-BILLING-INVOKE-ORIGIN": name.charAt(0).toUpperCase() + name.slice(1) };
 	if (isOpenCode(target)) return { "x-opencode-client": name };
 	return {};

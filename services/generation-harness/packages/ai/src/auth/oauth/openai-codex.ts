@@ -7,7 +7,7 @@
 
 // NEVER convert to top-level imports - breaks browser/Vite builds
 let _randomBytes: typeof import("node:crypto").randomBytes | null = null;
-if (typeof process !== "undefined" && (process.versions?.node || process.versions?.bun)) {
+if (typeof process !== "undefined" && Boolean(process.versions?.node)) {
 	import("node:crypto").then((m) => {
 		_randomBytes = m.randomBytes;
 	});
@@ -38,7 +38,7 @@ type OAuthToken = { access: string; refresh: string; expires: number };
 type TokenOperation = "exchange" | "refresh";
 
 function getCallbackHost(): string {
-	return getProviderEnvValue("PI_OAUTH_CALLBACK_HOST") || "127.0.0.1";
+	return getProviderEnvValue("GENERATION_HARNESS_OAUTH_CALLBACK_HOST") || "127.0.0.1";
 }
 
 type DeviceAuthInfo = {
@@ -287,7 +287,7 @@ async function pollOpenAICodexDeviceAuth(device: DeviceAuthInfo, signal: AbortSi
 }
 
 async function createAuthorizationFlow(
-	originator: string = "pi",
+	originator: string = "generation",
 ): Promise<{ verifier: string; state: string; url: string }> {
 	const { verifier, challenge } = await generatePKCE();
 	const state = createState();

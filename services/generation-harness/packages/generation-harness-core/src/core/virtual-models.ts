@@ -26,12 +26,12 @@ import {
 import type { SessionEntry } from "./session-manager.ts";
 
 /** API id of virtual catalog entries. Requests for it fail unless routed first. */
-export const VIRTUAL_MODEL_API = "pi-virtual";
+export const VIRTUAL_MODEL_API = "generation-virtual";
 
 /** Custom entry type that stores router state on the session branch. */
-export const VIRTUAL_MODEL_STATE_ENTRY = "pi.virtual-model-state";
+export const VIRTUAL_MODEL_STATE_ENTRY = "generation.virtual-model-state";
 
-/** Data of a `pi.virtual-model-state` custom entry. */
+/** Data of a virtual model state custom entry. */
 export interface VirtualModelStateData<TState = unknown> {
 	provider: string;
 	modelId: string;
@@ -90,7 +90,7 @@ export interface VirtualModelDefinition<TState = unknown> {
 	/** Thinking levels offered for selection. Defaults to `["off"]`. */
 	thinkingLevels?: readonly ModelThinkingLevel[];
 	/**
-	 * Limits shown before the first response. Afterwards, Pi uses the limits of the physical model
+	 * Limits shown before the first response. Afterwards, the harness uses the limits of the physical model
 	 * that answered. Unset limits are unknown (0).
 	 */
 	contextWindow?: number;

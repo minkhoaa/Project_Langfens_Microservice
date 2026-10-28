@@ -1,3 +1,3 @@
 export function areExperimentalFeaturesEnabled(): boolean {
-	return process.env.PI_EXPERIMENTAL === "1";
+	return process.env.GENERATION_HARNESS_EXPERIMENTAL === "1";
 }

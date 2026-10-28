@@ -19,4 +19,10 @@ Workspaces:
 - Do not introduce dependencies on global executables, global npm modules, or external directories.
 - All runtime configurations, sessions, and workspaces must resolve through the local Langfens/generation runtime (`.runtime`).
 - Built-in tools are strictly restricted to `read`, `bash`, `edit`, and `write`.
-- All tests must run offline (`GENERATION_HARNESS_OFFLINE=1`). No live LLM calls.
+- All tests must run strictly offline (`GENERATION_HARNESS_OFFLINE=1`). No live LLM or API calls.
+
+## Test Safety & Network Isolation (CRITICAL)
+- **Zero Global Credential Discovery**: Tests and test helpers must never read, write, or refresh credentials from `~/.pi/agent/auth.json`, `~/.config`, or any host path outside the repository.
+- **Environment Sanitization**: Host provider API keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `AWS_*`, `CLOUDFLARE_*`, `ZAI_*`, etc.) are purged during test bootstrap (`test/offline.mjs`).
+- **Hard Network Guard**: `test/offline.mjs` installs multi-layered interceptors for `globalThis.fetch`, `http.request`, `https.request`, `net.Socket.prototype.connect`, `tls.connect`, and `WebSocket`. Only local loopback connections (`127.0.0.0/8`, `::1`, `::ffff:127.0.0.1`, `0.0.0.0`, `*.localhost`) are permitted for mock servers; all external network requests throw `[NetworkBlocked]`.
+- **E2E Suite Exclusion**: Live provider suites are excluded by default from automated test execution. Never run unmocked provider tests.

@@ -16,6 +16,7 @@ function parseDeploymentNameMap(value: string | undefined): Map<string, string> 
 }
 
 export function hasAzureOpenAICredentials(): boolean {
+	if (process.env.GENERATION_HARNESS_OFFLINE === "1") return false;
 	const hasKey = !!process.env.AZURE_OPENAI_API_KEY;
 	const hasBaseUrl = !!(process.env.AZURE_OPENAI_BASE_URL || process.env.AZURE_OPENAI_RESOURCE_NAME);
 	return hasKey && hasBaseUrl;

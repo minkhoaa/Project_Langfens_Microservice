@@ -32,7 +32,7 @@ import { buildInitialMessage } from "./cli/initial-message.ts";
 import { listModels } from "./cli/list-models.ts";
 import { createProjectTrustContext } from "./cli/project-trust.ts";
 import { selectSession } from "./cli/session-picker.ts";
-import { shouldRunFirstTimeSetup, showFirstTimeSetup, showStartupSelector } from "./cli/startup-ui.ts";
+import { showStartupSelector } from "./cli/startup-ui.ts";
 import { APP_NAME, ENV_SESSION_DIR, expandTildePath, getAgentDir, getPackageDir, VERSION } from "./config.ts";
 import { type CreateAgentSessionRuntimeFactory, createAgentSessionRuntime } from "./core/agent-session-runtime.ts";
 import {
@@ -61,15 +61,13 @@ import { collectSettingsDiagnostics, deduplicateDiagnostics } from "./core/setti
 import { SettingsManager } from "./core/settings-manager.ts";
 import { printTimings, resetTimings, time } from "./core/timings.ts";
 import { hasTrustRequiringProjectResources, ProjectTrustStore } from "./core/trust-manager.ts";
-import { builtInExtensions } from "./extensions/index.ts";
+import { auxiliaryExtensions, builtInExtensions } from "./extensions/index.ts";
 import { loadMcpCommand } from "./extensions/mcp/cli.lazy.ts";
 import { runMigrations, showDeprecationWarnings } from "./migrations.ts";
 import { InteractiveMode, runPrintMode, runRpcMode } from "./modes/index.ts";
 import { initTheme, setThemeJsonValidator, stopThemeWatcher } from "./modes/interactive/theme/theme.ts";
 import { validateThemeJson } from "./modes/interactive/theme/theme-schema.ts";
-import { cleanupManagedInstall, handleConfigCommand, handlePackageCommand } from "./package-manager-cli.ts";
 import { isLocalPath, normalizePath, resolvePath } from "./utils/paths.ts";
-import { cleanupWindowsSelfUpdateQuarantine } from "./utils/windows-self-update.ts";
 
 const EXTENSION_LOAD_FAILURE_HINT = `Hint: Start without extensions using "${APP_NAME} -ne".`;
 
@@ -96,6 +94,51 @@ async function readPipedStdin(): Promise<string | undefined> {
 	});
 }
 
+function findFirstCommand(args: string[]): string | undefined {
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+		if (arg === "--") break;
+		if (arg.startsWith("-")) {
+			if (
+				[
+					"-e",
+					"--extension",
+					"-t",
+					"--tools",
+					"-xt",
+					"--exclude-tools",
+					"-m",
+					"--model",
+					"--provider",
+					"--api-key",
+					"--system-prompt",
+					"--append-system-prompt",
+					"--mode",
+					"-n",
+					"--name",
+					"--session",
+					"--session-id",
+					"--fork",
+					"--session-dir",
+					"--models",
+					"--thinking",
+					"--skill",
+					"--prompt-template",
+					"--theme",
+					"--use-theme",
+					"--export",
+					"--tui-mode",
+				].includes(arg)
+			) {
+				i++;
+			}
+			continue;
+		}
+		return arg;
+	}
+	return undefined;
+}
+
 function reportDiagnostics(diagnostics: readonly AgentSessionRuntimeDiagnostic[]): void {
 	for (const diagnostic of diagnostics) {
 		const color = diagnostic.type === "error" ? chalk.red : diagnostic.type === "warning" ? chalk.yellow : chalk.dim;
@@ -116,7 +159,7 @@ function resolveAppMode(parsed: Args, stdinIsTTY: boolean, stdoutIsTTY: boolean)
 	if (parsed.mode === "json") {
 		return "json";
 	}
-	if (parsed.print || !stdinIsTTY || !stdoutIsTTY) {
+	if (parsed.print) {
 		return "print";
 	}
 	return "interactive";
@@ -575,21 +618,18 @@ export async function main(args: string[], options?: MainOptions) {
 	resetTimings();
 	// Commands and startup selectors can load user-authored themes before runtime creation.
 	setThemeJsonValidator(validateThemeJson);
-	const extensionFactories = [...builtInExtensions, ...(options?.extensionFactories ?? [])];
-	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);
+	const enableAuxiliary = args.includes("--auxiliary") || isTruthyEnvFlag(process.env.GENERATION_HARNESS_AUXILIARY);
+	const baseExtensions = enableAuxiliary ? auxiliaryExtensions : builtInExtensions;
+	const extensionFactories = [...baseExtensions, ...(options?.extensionFactories ?? [])];
+	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.GENERATION_HARNESS_OFFLINE);
 	if (offlineMode) {
-		process.env.PI_OFFLINE = "1";
-		process.env.PI_SKIP_VERSION_CHECK = "1";
+		process.env.GENERATION_HARNESS_OFFLINE = "1";
+		process.env.GENERATION_HARNESS_SKIP_VERSION_CHECK = "1";
 	}
 
 	if (await runAuthCommand(args)) {
 		return;
 	}
-
-	if (process.platform === "win32") {
-		cleanupWindowsSelfUpdateQuarantine(getPackageDir());
-	}
-	cleanupManagedInstall();
 
 	const cwd = process.cwd();
 	const agentDir = getAgentDir();
@@ -597,26 +637,29 @@ export async function main(args: string[], options?: MainOptions) {
 	applyHttpProxySettings(bootstrapSettingsManager.getGlobalSettings().httpProxy);
 	configureHttpDispatcher();
 
-	if (await handlePackageCommand(args, { extensionFactories })) {
-		const exitCode = process.exitCode ?? 0;
-		if (process.platform === "win32" && exitCode === 0 && args[0] === "update") {
-			// We normally prefer process.exit(0) for package commands so bad extensions cannot keep
-			// one-shot commands alive. On Windows, Node can assert after fetch() if process.exit(0)
-			// runs during teardown; let successful `pi update` drain naturally instead.
-			// https://github.com/nodejs/node/issues/56645
-			return;
-		}
-		process.exit(exitCode);
-		return;
+	const blockedCommands = new Set([
+		"install",
+		"remove",
+		"uninstall",
+		"update",
+		"publish",
+		"telemetry",
+		"bug",
+		"bug-report",
+		"easter-egg",
+		"share",
+		"config",
+	]);
+	const firstCommand = findFirstCommand(args);
+	if (firstCommand && blockedCommands.has(firstCommand)) {
+		console.error(chalk.red(`Error: Unknown command "${firstCommand}".`));
+		process.exit(1);
 	}
 
-	if (await handleConfigCommand(args, { extensionFactories })) {
-		return;
-	}
-
-	if (args[0] === "mcp") {
+	if (firstCommand === "mcp") {
+		const mcpIndex = args.indexOf("mcp");
 		const { runMcpCommand } = await loadMcpCommand();
-		process.exitCode = await runMcpCommand(args.slice(1), { cwd, agentDir });
+		process.exitCode = await runMcpCommand(args.slice(mcpIndex + 1), { cwd, agentDir });
 		return;
 	}
 
@@ -672,12 +715,7 @@ export async function main(args: string[], options?: MainOptions) {
 	const startupSettingsManager = SettingsManager.create(cwd, agentDir);
 	const startupSettingsDiagnostics = collectSettingsDiagnostics(startupSettingsManager);
 
-	// Experimental first-time setup: theme choice and analytics opt-in.
-	// Runs before any runtime services are created so the chosen settings apply everywhere.
-	if (appMode === "interactive" && !parsed.help && parsed.listModels === undefined && shouldRunFirstTimeSetup()) {
-		await showFirstTimeSetup(startupSettingsManager);
-		time("firstTimeSetup");
-	}
+
 
 	if (appMode === "interactive" && parsed.useTheme !== undefined) {
 		startupSettingsManager.applyOverrides({ theme: parsed.useTheme });
@@ -891,13 +929,10 @@ export async function main(args: string[], options?: MainOptions) {
 		process.exit(0);
 	}
 
-	// Read piped stdin content (if any) - skip for RPC mode which uses stdin for JSON-RPC
+	// Read piped stdin content (if any) - only for print/json modes; interactive TUI manages its own stdin stream
 	let stdinContent: string | undefined;
-	if (appMode !== "rpc") {
+	if (appMode === "print" || appMode === "json") {
 		stdinContent = await readPipedStdin();
-		if (stdinContent !== undefined && appMode === "interactive") {
-			appMode = "print";
-		}
 	}
 	time("readPipedStdin");
 
@@ -930,9 +965,9 @@ export async function main(args: string[], options?: MainOptions) {
 		process.exit(1);
 	}
 
-	const startupBenchmark = isTruthyEnvFlag(process.env.PI_STARTUP_BENCHMARK);
+	const startupBenchmark = isTruthyEnvFlag(process.env.GENERATION_HARNESS_STARTUP_BENCHMARK);
 	if (startupBenchmark && appMode !== "interactive") {
-		console.error(chalk.red("Error: PI_STARTUP_BENCHMARK only supports interactive mode"));
+		console.error(chalk.red("Error: GENERATION_HARNESS_STARTUP_BENCHMARK only supports interactive mode"));
 		process.exit(1);
 	}
 
@@ -970,6 +1005,7 @@ export async function main(args: string[], options?: MainOptions) {
 			await new Promise((resolve) => setTimeout(resolve, 150));
 			interactiveMode.stop();
 			stopThemeWatcher();
+			await runtime.dispose();
 			printTimings();
 			if (process.stdout.writableLength > 0) {
 				await new Promise<void>((resolve) => process.stdout.once("drain", resolve));
@@ -981,7 +1017,13 @@ export async function main(args: string[], options?: MainOptions) {
 		}
 
 		printTimings();
-		await interactiveMode.run();
+		try {
+			await interactiveMode.run();
+		} finally {
+			interactiveMode.stop();
+			stopThemeWatcher();
+			await runtime.dispose();
+		}
 	} else {
 		printTimings();
 		const exitCode = await runPrintMode(runtime, {

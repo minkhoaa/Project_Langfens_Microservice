@@ -1,7 +1,8 @@
 import "./offline.mjs";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -23,8 +24,13 @@ test("workspace installation exposes generation packages and the local harness c
 	assert.equal(core.generationConfig.configDir, ".generation");
 });
 
-test("local CLI identifies itself without global executable or configuration", () => {
-	const launch = runtimeLaunch(["--source", "--help"]);
+test("local CLI identifies itself without global executable or configuration", (t) => {
+	const cwd = mkdtempSync(join(tmpdir(), "generation-branding-"));
+	t.after(() => rmSync(cwd, { recursive: true, force: true }));
+	const launch = runtimeLaunch(["--source", "--help"], {
+		...process.env,
+		GENERATION_HARNESS_RUNTIME_DIR: join(cwd, "runtime"),
+	});
 	const help = execFileSync(launch.command, launch.args, {
 		cwd: launch.cwd,
 		env: launch.env,

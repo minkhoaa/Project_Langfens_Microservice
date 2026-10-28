@@ -57,9 +57,9 @@ const CODEMODE_MEMORY_LIMIT_BYTES = 256 * 1024 * 1024;
 // Shared across calls and sessions. Allow one replacement while a cancelled worker is still exiting.
 const DEFAULT_MAX_CODEMODE_WORKERS = 2;
 
-/** `PI_CODEMODE_MAX_WORKERS` if it is a positive integer. Read per call so SDK hosts can set it at runtime. */
+/** `GENERATION_HARNESS_CODEMODE_MAX_WORKERS` if it is a positive integer. Read per call so SDK hosts can set it at runtime. */
 function maxCodemodeWorkers(): number {
-	const value = Number(process.env.PI_CODEMODE_MAX_WORKERS);
+	const value = Number(process.env.GENERATION_HARNESS_CODEMODE_MAX_WORKERS);
 	return Number.isInteger(value) && value > 0 ? value : DEFAULT_MAX_CODEMODE_WORKERS;
 }
 /**
@@ -392,7 +392,7 @@ function formatError(result: Extract<CodemodeResult, { ok: false }>, calls: read
 /** Write the full text output to a temp file, like bash does for truncated output. */
 async function spillOutput(text: string): Promise<{ path: string } | { error: string }> {
 	try {
-		return { path: await writeOutputFile("pi-codemode", ".txt", text) };
+		return { path: await writeOutputFile("generation-codemode", ".txt", text) };
 	} catch (error) {
 		return { error: error instanceof Error ? error.message : String(error) };
 	}
@@ -421,7 +421,7 @@ async function saveImages(items: (TextContent | ImageContent)[]): Promise<(TextC
 		// A failed write (disk full, unwritable temp dir) must not discard the result of a script whose
 		// tool calls already ran, so it becomes part of the label.
 		try {
-			const path = await writeOutputFile("pi-codemode", extension, bytes);
+			const path = await writeOutputFile("generation-codemode", extension, bytes);
 			return `[Image saved to ${path} (${kind})]`;
 		} catch (error) {
 			return `[Image (${kind}) could not be saved: ${error instanceof Error ? error.message : String(error)}]`;

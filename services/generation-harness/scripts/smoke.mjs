@@ -2,14 +2,28 @@
 
 import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import readline from "node:readline";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "..");
 const codingAgentDir = join(repoRoot, "packages", "generation-harness-core");
 const cliBundle = join(codingAgentDir, "dist", "bundle", "cli.js");
+
+const smokeRuntime = mkdtempSync(join(tmpdir(), "generation-smoke-runtime-"));
+const offlineUrl = pathToFileURL(join(repoRoot, "test", "offline.mjs")).href;
+const smokeEnv = {
+	...process.env,
+	GENERATION_HARNESS_RUNTIME_DIR: smokeRuntime,
+	GENERATION_HARNESS_OFFLINE: "1",
+	GENERATION_HARNESS_TELEMETRY: "0",
+	GENERATION_HARNESS_SKIP_VERSION_CHECK: "1",
+};
+
+try {
 
 console.log("=== Running Minimal Runtime Smoke Tests ===");
 
@@ -64,6 +78,7 @@ console.log("2. Verifying CLI Binaries...");
 
 const versionOutput = execFileSync(process.execPath, [cliBundle, "--version"], {
 	cwd: repoRoot,
+	env: smokeEnv,
 	encoding: "utf8",
 	timeout: 15_000,
 }).trim();
@@ -72,6 +87,7 @@ console.log(`   ✓ CLI version: ${versionOutput}`);
 
 const helpOutput = execFileSync(process.execPath, [cliBundle, "--help"], {
 	cwd: repoRoot,
+	env: smokeEnv,
 	encoding: "utf8",
 	timeout: 15_000,
 });
@@ -85,15 +101,11 @@ console.log("3. Verifying Headless RPC Mode...");
 await new Promise((resolvePromise, rejectPromise) => {
 	const rpcProcess = spawn(
 		process.execPath,
-		[cliBundle, "--mode", "rpc", "--no-session", "--no-tools", "--offline"],
+		["--import", offlineUrl, cliBundle, "--mode", "rpc", "--no-session", "--no-tools", "--offline"],
 		{
 			cwd: repoRoot,
 			stdio: ["pipe", "pipe", "pipe"],
-			env: {
-				...process.env,
-				GENERATION_HARNESS_OFFLINE: "1",
-				GENERATION_HARNESS_TELEMETRY: "0",
-			},
+			env: smokeEnv,
 		},
 	);
 
@@ -151,6 +163,7 @@ console.log("4. Verifying Launcher Scripts...");
 
 const launcherVersion = execFileSync(process.execPath, [join(repoRoot, "scripts", "run.mjs"), "--version"], {
 	cwd: repoRoot,
+	env: smokeEnv,
 	encoding: "utf8",
 	timeout: 15_000,
 }).trim();
@@ -158,6 +171,7 @@ assert.equal(launcherVersion, "1.4.0");
 
 const launcherHelp = execFileSync(process.execPath, [join(repoRoot, "scripts", "run.mjs"), "--help"], {
 	cwd: repoRoot,
+	env: smokeEnv,
 	encoding: "utf8",
 	timeout: 15_000,
 });
@@ -165,3 +179,6 @@ assert.match(launcherHelp, /generation-harness/);
 assert.doesNotMatch(launcherHelp, /@(?:earendil-works|mariozechner)\/pi-|~\/\.pi\b/);
 
 console.log("=== All Smoke Tests Passed! ===");
+} finally {
+	rmSync(smokeRuntime, { recursive: true, force: true });
+}
