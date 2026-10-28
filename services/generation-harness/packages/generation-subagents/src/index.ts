@@ -2,7 +2,6 @@ import type { ExtensionFactory } from "generation-harness-core";
 import registerNativeExtension from "./extension/index.ts";
 import { createSubagentExtension as createConfiguredExtension } from "./compat/index.ts";
 import type { SubagentExtensionOptions } from "./compat/types.ts";
-import { HERDR_PI_MODE_ENV } from "./runs/shared/herdr-pi-protocol.ts";
 import { loadedPackageVersion, readInstalledPackageVersion } from "./shared/package-version.ts";
 
 // Preserve the existing programmatic foreground API while the default package
@@ -17,8 +16,7 @@ export function createSubagentExtension(options?: SubagentExtensionOptions): Ext
 		? createConfiguredExtension(options)
 		: api => {
 			if (readInstalledPackageVersion() !== loadedPackageVersion) throw new Error("Generation Subagents was updated in this process; restart the harness to load the installed version.");
-			if (process.env[HERDR_PI_MODE_ENV] === "1") return import("./extension/herdr-pi-bridge.ts").then(module => module.default(api));
-			else if (process.env.GENERATION_SUBAGENT_CHILD !== "1") registerNativeExtension(api);
+			if (process.env.GENERATION_SUBAGENT_CHILD !== "1") registerNativeExtension(api);
 		};
 }
 

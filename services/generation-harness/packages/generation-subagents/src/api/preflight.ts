@@ -6,7 +6,6 @@ import { projectScopeRequiresTrustMessage, resolveExecutionAgentScope } from "..
 import { normalizeSkillInput, resolveSkillsWithFallback } from "../agents/skills.ts";
 import { inheritsParentModel, resolveEffectiveSubagentModel, resolveModelOrigin, resolveModelSelection, type AvailableModelInfo, type ParentModel } from "../runs/shared/model-resolution.ts";
 import { resolveModelScopesForAgent } from "../runs/shared/model-scope.ts";
-import { assertClaudeCodeModelScope, isClaudeCodeAdapterId, resolveClaudeCodeOverride } from "../runs/shared/claude-code-adapter.ts";
 import { applyThinkingSuffix, resolvePiLaunchToolPlan, type PiLaunchToolPlan } from "../runs/shared/child-tool-plan.ts";
 import { buildEffectiveSystemPrompt } from "../runs/shared/effective-system-prompt.ts";
 import { normalizeSingleOutputOverride, resolveSingleOutputPath } from "../runs/shared/single-output.ts";
@@ -208,17 +207,6 @@ export interface SubagentLaunchContract {
 export type SubagentLaunchContractResult =
 	| { ok: true; contract: SubagentLaunchContract }
 	| { ok: false; code: SubagentLaunchContractReasonCode; message: string; diagnostics: SubagentLaunchContractDiagnostic[] };
-
-/**
- * Classify a Claude Code override failure for the launch contract. The messages
- * are owned by the adapter and the scope check, so this maps them explicitly
- * instead of defaulting every rejection to the ceiling.
- */
-function claudeCodeFailureCode(message: string): SubagentLaunchContractReasonCode {
-	if (message.includes("subagent model scope")) return "model_scope";
-	if (message.startsWith("Thinking level '")) return "thinking_ceiling";
-	return "unsupported_mode";
-}
 
 function packageVersion(): string {
 	const packagePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "package.json");
@@ -425,26 +413,10 @@ export async function resolveSubagentLaunchContract(input: SubagentLaunchContrac
 			return { ok: false, code: "thinking_ceiling", message, diagnostics };
 		}
 	}
-	// The Claude Code adapters accept a model and a level that never become a Pi child
-	// model, so validate has to run the same two checks the launch runs, or validate
-	// would report ok for a launch that then fails.
-	if (agent.runner?.type === "external-cli" && isClaudeCodeAdapterId(agent.runner.adapter)) {
-		try {
-			const override = resolveClaudeCodeOverride({
-				model: typeof input.model === "string" ? input.model : undefined,
-				agent,
-				thinking: typeof effectiveThinkingConfig === "string" ? effectiveThinkingConfig : undefined,
-				thinkingCeiling: intersectThinkingCeilings(discovered.maxThinking, input.thinkingCeiling, input.inheritedThinkingCeiling),
-				agentName: agent.name,
-				runId,
-			});
-			assertClaudeCodeModelScope({ scopes: modelScopes, model: override?.model, agent: agent.name, runId });
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			const code = claudeCodeFailureCode(message);
-			diagnostics.push({ code, severity: "error", message });
-			return { ok: false, code, message, diagnostics };
-		}
+	if (agent.runner?.type === "external-cli") {
+		const message = "External CLI runners are not supported in the Node.js-native runtime.";
+		diagnostics.push({ code: "unsupported_mode", severity: "error", message });
+		return { ok: false, code: "unsupported_mode", message, diagnostics };
 	}
 	let toolPlan: PiLaunchToolPlan;
 	const permissionRules = resolvePermissionRules(loadConfig().permissions, agent.permissions);

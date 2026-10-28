@@ -59,8 +59,8 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
-		"directory": "packages/codemode"
+		"url": "git+https://github.com/minkhoaa/Project_Langfens_Microservice.git",
+		"directory": "services/generation-harness/packages/codemode"
 	},
 	"engines": {
 		"node": ">=22.19.0"

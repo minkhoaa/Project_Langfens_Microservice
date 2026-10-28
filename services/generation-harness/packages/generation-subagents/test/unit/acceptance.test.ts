@@ -67,7 +67,7 @@ function tempGitRepo(): string {
 describe("acceptance gates", () => {
 	it("applies checked acceptance to declared builtin writer profiles", () => {
 		const builtins = discoverAgentsAll(tempRepo()).builtin;
-		const writerNames = ["worker", "claude-code-writer", "codex-exec-writer", "cursor-agent-writer"];
+		const writerNames = ["worker"];
 		assert.deepEqual(writerNames.map((name) => builtins.find((agent) => agent.name === name)?.acceptanceRole), writerNames.map(() => "writer"));
 		assert.equal(builtins.find((agent) => agent.name === "delegate")?.acceptanceRole, undefined);
 		const worker = builtins.find((agent) => agent.name === "worker");

@@ -754,22 +754,13 @@ let activeFactoryModule: string | undefined;
 
 /** The process-wide factory foreground runs use unless a run passes its own. */
 export function childSessionFactory(): ChildSessionFactory {
-	activeFactory ??= createLazyPlacementFactory(createDefaultChildSessionFactory());
+	activeFactory ??= createDefaultChildSessionFactory();
 	return activeFactory;
 }
 
-function createLazyPlacementFactory(local: ChildSessionFactory): ChildSessionFactory {
-	let placed: ChildSessionFactory | undefined;
-	const factory = async () => placed ??= (await import("./herdr-placed-run.ts")).createPlacementAwareChildSessionFactory(local);
-	return {
-		async create(launch) { return launch.machine ? (await factory()).create(launch) : local.create(launch); },
-		async dispose() { if (placed) await placed.dispose(); else await local.dispose(); },
-	};
-}
-
-/** Default factory including pane-native placement; detached runners use the same boundary. */
+/** Default factory; detached runners use the same boundary. */
 export function createPlacementChildSessionFactory(options: DefaultChildSessionFactoryOptions = {}): ChildSessionFactory {
-	return createLazyPlacementFactory(createDefaultChildSessionFactory(options));
+	return createDefaultChildSessionFactory(options);
 }
 
 /**

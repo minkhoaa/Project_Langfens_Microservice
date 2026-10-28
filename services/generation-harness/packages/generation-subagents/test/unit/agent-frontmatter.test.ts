@@ -367,47 +367,20 @@ describe("blank lines in nested frontmatter blocks", () => {
 });
 
 describe("agent runner frontmatter", () => {
-	it("parses and serializes an external-cli runner", () => withTempHome(() => {
+	it("rejects external-cli runners as unsupported in the Node.js-native runtime", () => withTempHome(() => {
 		const project = fs.mkdtempSync(path.join(os.tmpdir(), "generation-subagents-runner-agent-"));
 		tempDirs.push(project);
 		writeAgent(path.join(project, ".generation", "agents", "external.md"), `---
 name: external
- description: External runner
+description: External runner
 runner:
   type: external-cli
-  command: ${JSON.stringify(process.execPath)}
-  args: ["-e", "process.stdin.pipe(process.stdout)"]
-  promptDelivery: stdin
-async: true
+  command: node
 ---
-Review carefully.`.replace(" description:", "description:"));
-
-		const external = discoverAgents(project, "project").agents.find((agent) => agent.name === "external")!;
-		assert.deepEqual(external.runner, { type: "external-cli", command: process.execPath, args: ["-e", "process.stdin.pipe(process.stdout)"], promptDelivery: "stdin" });
-		assert.match(serializeAgent(external), /runner:\n  type: external-cli\n  command:/);
-		assert.deepEqual(discoverAgents(project, "project").agents.find((agent) => agent.name === "external")?.runner, external.runner);
-	}));
-
-	it("keeps external-cli stop code-owned while refusing capability widening", () => withTempHome(() => {
-		const project = fs.mkdtempSync(path.join(os.tmpdir(), "generation-subagents-runner-capabilities-"));
-		tempDirs.push(project);
-		const agentPath = path.join(project, ".generation", "agents", "external.md");
-		writeAgent(agentPath, `---\nname: external\ndescription: External runner\nrunner:\n  type: external-cli\n  command: node\n  capabilities:\n    steer: false\n---\nReview.`);
-		assert.deepEqual(discoverAgents(project, "project").agents.find((agent) => agent.name === "external")?.runner, {
-			type: "external-cli",
-			command: "node",
-			capabilities: { steer: false },
-		});
-
-		writeAgent(agentPath, `---\nname: external\ndescription: External runner\nrunner:\n  type: external-cli\n  command: node\n  capabilities:\n    stop: false\n---\nReview.`);
-		const narrowedStop = discoverAgents(project, "project");
-		assert.equal(narrowedStop.agents.some((agent) => agent.name === "external"), false);
-		assert.match(narrowedStop.agentDiagnostics?.[0]?.error ?? "", /capabilities has unsupported fields: stop/);
-
-		writeAgent(agentPath, `---\nname: external\ndescription: External runner\nrunner:\n  type: external-cli\n  command: node\n  capabilities:\n    steer: true\n---\nReview.`);
-		const widened = discoverAgents(project, "project");
-		assert.equal(widened.agents.some((agent) => agent.name === "external"), false);
-		assert.match(widened.agentDiagnostics?.[0]?.error ?? "", /steer may only be false; user config cannot widen code-owned external adapter capabilities/);
+Review carefully.`);
+		const discovered = discoverAgents(project, "project");
+		assert.equal(discovered.agents.some((agent) => agent.name === "external"), false);
+		assert.match(discovered.agentDiagnostics?.[0]?.error ?? "", /External CLI runners are not supported in the Node.js-native runtime/);
 	}));
 
 	it("parses and serializes an external-job runner", () => withTempHome(() => {
@@ -430,13 +403,10 @@ Review carefully.`);
 		assert.match(serializeAgent(gptPro), /runner:\n  type: external-job\n  provider: surf-oracle/);
 	}));
 
-	it("rejects invalid and Pi-only external runner fields", () => withTempHome(() => {
+	it("rejects invalid external runner fields", () => withTempHome(() => {
 		const invalidCases = [
 			"type: unknown\n  command: node",
-			"type: external-cli\n  command: ''",
-			"type: external-cli\n  command: node\n  args: nope",
-			"type: external-cli\n  command: node\n  args: [ok, 1]",
-			"type: external-cli\n  command: node\n  promptDelivery: argv",
+			"type: external-cli\n  command: node",
 			"type: external-job\n  provider: ''",
 			"type: external-job\n  provider: surf-oracle\n  options: []",
 		];
@@ -446,14 +416,8 @@ Review carefully.`);
 			writeAgent(path.join(project, ".generation", "agents", "external.md"), `---\nname: external\ndescription: External\nrunner:\n  ${runner}\n---\nBody`);
 			const discovered = discoverAgents(project, "project");
 			assert.equal(discovered.agents.some((agent) => agent.name === "external"), false);
-			assert.match(discovered.agentDiagnostics?.[0]?.error ?? "", /invalid runner\.type|non-empty command|args must be an array of strings|promptDelivery must be 'stdin'|provider string|options must be a JSON-serializable object/);
+			assert.match(discovered.agentDiagnostics?.[0]?.error ?? "", /invalid runner\.type|External CLI runners are not supported|provider string|options must be a JSON-serializable object/);
 		}
-		const project = fs.mkdtempSync(path.join(os.tmpdir(), "generation-subagents-runner-pi-only-"));
-		tempDirs.push(project);
-		writeAgent(path.join(project, ".generation", "agents", "external.md"), `---\nname: external\ndescription: External\nrunner:\n  type: external-cli\n  command: node\nmodel: provider/model\n---\nBody`);
-		assert.match(discoverAgents(project, "project").agentDiagnostics?.[0]?.error ?? "", /unsupported Pi-only fields: model/);
-		writeAgent(path.join(project, ".generation", "agents", "external.md"), `---\nname: external\ndescription: External\nrunner:\n  type: external-cli\n  command: node\nallowedAgents: worker\n---\nBody`);
-		assert.match(discoverAgents(project, "project").agentDiagnostics?.[0]?.error ?? "", /unsupported Pi-only fields: allowedAgents/);
 	}));
 
 	it("keeps valid agents executable when another agent is malformed", () => withTempHome(() => {
@@ -1702,7 +1666,7 @@ describe("agent launcher frontmatter", () => {
 		assert.match(errorFor("placed"), /'launcher'.*cannot be combined with 'machine'/);
 		assert.match(errorFor("quoted"), /frontmatter 'launcher' "'net'" is invalid; launcher names must start with a letter or digit/);
 		assert.match(errorFor("spaced"), /frontmatter 'launcher' "a b" is invalid/);
-		assert.match(errorFor("external"), /'launcher'.*cannot be combined with runner\.type='external-cli'/);
+		assert.match(errorFor("external"), /External CLI runners are not supported in the Node.js-native runtime/);
 	});
 });
 

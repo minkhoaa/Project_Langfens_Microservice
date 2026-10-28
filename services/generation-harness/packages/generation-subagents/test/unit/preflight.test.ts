@@ -89,41 +89,6 @@ describe("public launch contract preflight", () => {
 		} finally { registration.dispose(); }
 	});
 
-	it("validates a Claude Code model and level the way the launch does", async () => {
-		const cwd = path.join(tempDir, "cc-repo");
-		fs.mkdirSync(cwd, { recursive: true });
-		writeAgent(path.join(cwd, ".generation", "agents", "cc.md"), `---\nname: cc\ndescription: Claude Code agent\nrunner:\n  type: external-cli\n  adapter: claude-code\n  command: claude\n---\nReview.\n`);
-
-		const overCeiling = await resolveSubagentLaunchContract({ agent: "cc", cwd, model: "sonnet:max", thinkingCeiling: "low" });
-		assert.equal(overCeiling.ok, false);
-		if (overCeiling.ok) return;
-		assert.equal(overCeiling.code, "thinking_ceiling");
-		assert.match(overCeiling.message, /exceeds configured maximum 'low'/u);
-
-		const invalidModel = await resolveSubagentLaunchContract({ agent: "cc", cwd, model: ":turbo" });
-		assert.equal(invalidModel.ok, false);
-		if (invalidModel.ok) return;
-		assert.equal(invalidModel.code, "unsupported_mode");
-		assert.match(invalidModel.message, /Invalid Claude Code model/u);
-
-		const agentDir = process.env.GENERATION_HARNESS_AGENT_DIR;
-		assert.equal(typeof agentDir, "string");
-		writeJson(path.join(agentDir!, "settings.json"), { subagents: { modelScope: { enforce: true, allow: ["anthropic/claude-opus-4-5"] } } });
-
-		// An enforced scope fails closed, for a model outside it and for a launch with none.
-		const outsideScope = await resolveSubagentLaunchContract({ agent: "cc", cwd, model: "opus" });
-		assert.equal(outsideScope.ok, false);
-		if (outsideScope.ok) return;
-		assert.equal(outsideScope.code, "model_scope");
-		assert.match(outsideScope.message, /outside the configured subagent model scope/u);
-
-		const unnamed = await resolveSubagentLaunchContract({ agent: "cc", cwd });
-		assert.equal(unnamed.ok, false);
-		if (unnamed.ok) return;
-		assert.equal(unnamed.code, "model_scope");
-		assert.match(unnamed.message, /cannot be checked against an enforced subagent model scope/u);
-	});
-
 	it("resolves models from user settings when the session declined project trust", async () => {
 		const cwd = path.join(tempDir, "untrusted-repo");
 		const agentDir = process.env.GENERATION_HARNESS_AGENT_DIR!;
@@ -480,32 +445,6 @@ Project prompt.
 		assert.equal(result.contract.model, "gpu-b/gpt-5-mini");
 	});
 
-	it("bypasses native model validation for external CLI runners", async () => {
-		const cwd = path.join(tempDir, "repo-external-model");
-		fs.mkdirSync(cwd, { recursive: true });
-		writeJson(path.join(process.env.HOME!, ".generation", "agent", "settings.json"), {
-			subagents: { defaultModel: "mock/default-model" },
-		});
-		writeAgent(path.join(cwd, ".generation", "agents", "external.md"), `---
-name: external
-description: External runner
-runner:
-  type: external-cli
-  command: ${JSON.stringify(process.execPath)}
----
-Project prompt.
-`);
-
-		const result = await resolveSubagentLaunchContract({
-			agent: "external",
-			cwd,
-			availableModels: [{ provider: "other", id: "known", fullId: "other/known" }],
-		});
-
-		assert.equal(result.ok, true);
-		assert.equal(result.contract.model, undefined);
-	});
-
 	it("resolves agent aliases to the canonical launch contract agent", async () => {
 		const cwd = path.join(tempDir, "repo-alias");
 		fs.mkdirSync(cwd, { recursive: true });
@@ -840,7 +779,7 @@ Project prompt.
 		assert.deepEqual(result.contract.tools.effectiveMcpTools, ["mcp__docs__search"]);
 	});
 
-	it("inherits agent structured output and honors false for native and external runners", async () => {
+	it("inherits agent structured output and honors false for native runners", async () => {
 		const cwd = path.join(tempDir, "schema-default-repo");
 		fs.mkdirSync(cwd, { recursive: true });
 		writeAgent(path.join(cwd, ".generation", "agents", "typed.md"), `---\nname: typed\ndescription: Typed\noutputSchema: {"type":"object","required":["ok"]}\n---\nPrompt.\n`);
@@ -853,12 +792,6 @@ Project prompt.
 		if (!disabled.ok) return;
 		assert.deepEqual(disabled.contract.tools.internalTools, []);
 		assert.notEqual(inherited.contract.launchContractDigest, disabled.contract.launchContractDigest);
-
-		writeAgent(path.join(cwd, ".generation", "agents", "external.md"), `---\nname: external\ndescription: External\noutputSchema: {"type":"object"}\nrunner:\n  type: external-cli\n  command: ${JSON.stringify(process.execPath)}\n---\nPrompt.\n`);
-		const rejected = await resolveSubagentLaunchContract({ agent: "external", cwd });
-		assert.equal(rejected.ok, false);
-		assert.equal(rejected.code, "unsupported_mode");
-		assert.equal((await resolveSubagentLaunchContract({ agent: "external", cwd, outputSchema: false })).ok, true);
 	});
 
 	it("projects per-agent tool exclusions and binds them into launch identity", async () => {

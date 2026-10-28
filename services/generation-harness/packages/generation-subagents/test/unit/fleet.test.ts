@@ -19,8 +19,6 @@ import { FLEET_STATUS_WIDGET_KEY } from "../../src/tui/fleet-status.ts";
 import { setMainThinkingLevelSource } from "../../src/tui/running-tone.ts";
 import { registerLivePromptAudit, rewritePromptWithGuidance } from "../../src/runs/foreground/prompt-audit.ts";
 import { getArtifactPaths, getArtifactsDir, getProjectArtifactsDir } from "../../src/shared/artifacts.ts";
-import type { HerdrClient } from "../../src/inspectors/herdr/client.ts";
-import { createHerdrInspectorPlugin } from "../../src/inspectors/herdr/plugin.ts";
 import type { ForegroundResumeRun, SubagentState } from "../../src/shared/types.ts";
 import { fauxAssistantMessage } from "generation-ai/providers/faux";
 import { createAssistantMessageEventStream } from "generation-ai";
@@ -1852,14 +1850,6 @@ describe("native subagent fleet", () => {
 				updatedAt: 200,
 			});
 			const calls: string[][] = [];
-			const client: HerdrClient = {
-				run: async <T>(args: string[]) => {
-					calls.push(args);
-					if (args[0] === "--version") return { ok: true, data: "herdr 0.7.5" as T };
-					if (args[0] === "pane" && args[1] === "split") return { ok: true, data: { pane: { pane_id: "w1:p9" } } as T };
-					return { ok: true, data: {} as T };
-				},
-			};
 			const ctx = {
 				hasUI: true,
 				ui: {
@@ -1868,7 +1858,15 @@ describe("native subagent fleet", () => {
 						const component = factory({ terminal: { rows: 32, columns: 100 }, requestRender() {} }, theme, undefined, () => {});
 						try {
 							component.render(100);
-							registerInspector(owner, { ...createHerdrInspectorPlugin({ client }), name: "test-host", available: () => true });
+							registerInspector(owner, {
+								name: "test-host",
+								available: async () => true,
+								owns: () => true,
+								open: async (_context, _launch, params) => {
+									calls.push(["pane", "split", ...(params?.focus ? ["--focus"] : [])]);
+									return { content: [{ type: "text", text: "ok" }], isError: false };
+								},
+							});
 							component.handleInput("H");
 							for (let attempt = 0; attempt < 500 && !calls.some((args) => args[0] === "pane" && args[1] === "split"); attempt++) {
 								await new Promise((resolve) => setImmediate(resolve));

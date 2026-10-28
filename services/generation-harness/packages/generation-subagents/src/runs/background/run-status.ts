@@ -13,7 +13,6 @@ import { DIRS, type AsyncStatus, type Details, type ForegroundRunControl, type F
 import { inspectActiveAsyncCapacityOwner, type ActiveAsyncCapacityInspection } from "./active-async-capacity.ts";
 import { readStatus } from "../../shared/utils.ts";
 import { resolveSubagentIntercomTarget } from "../../intercom/intercom-bridge.ts";
-import { normalizeExternalCliRunnerStatus } from "../shared/external-cli-contract.ts";
 import { resolveSubagentResultStatus } from "../../intercom/result-intercom.ts";
 import { readProcessTerminal, sanitizeProcessTerminal } from "./process-terminal.ts";
 import { readWorkflowTerminalProof } from "./workflow-terminal-proof.ts";
@@ -656,24 +655,14 @@ export function inspectSubagentStatus(params: RunStatusParams, deps: RunStatusDe
 				if (step.structuredOutputPath) lines.push(`  Structured output path: ${step.structuredOutputPath}`);
 				lines.push(...formatTimeoutRecoveryLines(step.timeoutRecovery, "  "));
 				if (step.runner?.type === "external-cli") {
-					const runner = normalizeExternalCliRunnerStatus(step.runner);
-					if (runner) {
-						lines.push(`  Runner: external-cli (${runner.command}${runner.args.length ? ` ${runner.args.join(" ")}` : ""})`);
-						lines.push(`  Adapter: ${runner.adapter.id} v${runner.adapter.version} (${runner.adapter.executionMode})`);
-						if (runner.safety) {
-							if ("approvalPolicy" in runner.safety) lines.push(`  Safety: ${"access" in runner.safety ? `access=${runner.safety.access}, ` : ""}sandbox=${runner.safety.sandbox}, approval=${runner.safety.approvalPolicy}, ephemeral=${runner.safety.ephemeral}`);
-							else if ("mode" in runner.safety) lines.push(`  Safety: access=${runner.safety.access}, auth=${runner.safety.authentication}, mode=${runner.safety.mode}, sandbox=${runner.safety.sandbox}, workspaceTrust=${runner.safety.workspaceTrust}, sessionReuse=${runner.safety.sessionReuse}`);
-							else if ("authentication" in runner.safety) lines.push(`  Safety: access=${runner.safety.access}, auth=${runner.safety.authentication}, permission=${runner.safety.permissionMode}, tools=${runner.safety.tools}, mcp=${runner.safety.mcp}, settings=${runner.safety.settingSources}, settingsTrust=${runner.safety.userSettingsTrust}, persistence=${runner.safety.sessionPersistence}`);
-							else lines.push(`  Safety: access=read-only, permission=${runner.safety.permissionMode}, tools=${runner.safety.tools}, mcp=${runner.safety.mcp}, settings=${runner.safety.settingSources}, persistence=${runner.safety.sessionPersistence}`);
-						}
-						lines.push(`  Capabilities: stop=${runner.capabilities.stop}, steer=false, resume=false, structuredOutput=false, toolEvents=false, supervisor=unsupported, forkContext=false, extensionBindings=false`);
-						lines.push(`  Unsupported steer: ${runner.unsupportedReasons.steer}`);
-						lines.push(`  Unsupported resume: ${runner.nonResumableReason}`);
-						lines.push(`  Unsupported supervisor: ${runner.unsupportedReasons.supervisor}`);
-						lines.push(`  Context handoff: fresh only (${runner.unsupportedReasons.forkContext})`);
-					} else {
-						lines.push("  Runner: external-cli (invalid persisted runner metadata)");
-					}
+					const command = step.runner.command ?? "external";
+					lines.push(`  Runner: external-cli (${command})`);
+					lines.push(`  Adapter: external-cli v1 (one-shot-stdin)`);
+					lines.push(`  Capabilities: stop=true, steer=false, resume=false, structuredOutput=false, toolEvents=false, supervisor=unsupported, forkContext=false, extensionBindings=false`);
+					lines.push(`  Unsupported steer: The one-shot stdin adapter closes input after launch and cannot accept live steer messages.`);
+					lines.push(`  Unsupported resume: The one-shot stdin adapter has no durable external session identity.`);
+					lines.push(`  Unsupported supervisor: The generic external CLI adapter has no trusted supervisor event transport.`);
+					lines.push(`  Context handoff: fresh only (Native Pi fork context is not available without an adapter-owned handoff artifact.)`);
 					if (step.externalProcess?.pid !== undefined) lines.push(`  Process: ${step.externalProcess.pid}`);
 					if (step.externalProcess) {
 						lines.push(`  Stdout: ${step.externalProcess.stdoutPath}`, `  Stderr: ${step.externalProcess.stderrPath}`);

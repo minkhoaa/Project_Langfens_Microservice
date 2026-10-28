@@ -87,8 +87,8 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
-		"directory": "packages/coding-agent"
+		"url": "git+https://github.com/minkhoaa/Project_Langfens_Microservice.git",
+		"directory": "services/generation-harness/packages/generation-harness-core"
 	},
 	"engines": {
 		"node": ">=22.19.0"

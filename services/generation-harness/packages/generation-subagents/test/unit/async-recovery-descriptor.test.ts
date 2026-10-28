@@ -34,7 +34,7 @@ describe("async recovery descriptor", () => {
 		const registration = registerRequiredChildExtensions({ sessionId: "required-all-runners", extensions: [{ id: "host-policy", path: import.meta.filename }], requireForAllRunners: true });
 		try {
 			const result = executeAsyncSingle(runId, {
-				agent: "external", task: "Review", agentConfig: makeAgent("external", { runner: { type: "external-cli", command: process.execPath, args: ["fake.mjs"] } }),
+				agent: "external", task: "Review", agentConfig: makeAgent("external", { runner: { type: "external-job", provider: "mock-job" } }),
 				ctx: { pi: { events: { emit() {} } }, cwd: root, currentSessionId: "required-all-runners" },
 				artifactConfig: { enabled: false, includeInput: false, includeOutput: false, includeJsonl: false, includeMetadata: false, cleanupDays: 7 },
 				shareEnabled: false, sessionRoot: path.join(root, "sessions"), maxSubagentDepth: 1,

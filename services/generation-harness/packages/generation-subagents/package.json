@@ -1,10 +1,15 @@
 {
   "name": "generation-subagents",
   "version": "0.83.1",
-  "description": "Native Generation Harness adaptation of Pi Subagents 0.83.1",
+  "description": "Node.js-native Generation Harness subagent orchestration",
   "type": "module",
   "license": "MIT",
   "author": "Nico Bailon",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minkhoaa/Project_Langfens_Microservice.git",
+    "directory": "services/generation-harness/packages/generation-subagents"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -67,10 +72,6 @@
     "./shared-types": {
       "types": "./dist/api/shared-types.d.ts",
       "import": "./dist/api/shared-types.js"
-    },
-    "./project-panes": {
-      "types": "./dist/api/project-panes.d.ts",
-      "import": "./dist/api/project-panes.js"
     }
   },
   "files": [

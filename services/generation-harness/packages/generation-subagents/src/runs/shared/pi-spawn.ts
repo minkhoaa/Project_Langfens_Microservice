@@ -85,7 +85,6 @@ export interface PiSpawnDeps {
 	platform?: NodeJS.Platform;
 	execPath?: string;
 	argv1?: string;
-	bunVersion?: string;
 	existsSync?: (filePath: string) => boolean;
 	realpathSync?: (filePath: string) => string;
 	readFileSync?: (filePath: string, encoding: "utf-8") => string;
@@ -93,15 +92,6 @@ export interface PiSpawnDeps {
 	resolvePackageEntry?: () => string;
 	piPackageRoot?: string;
 	env?: NodeJS.ProcessEnv;
-}
-
-/** Compiled Pi's entrypoint is virtual; execPath is the real (possibly renamed) image. */
-export function resolveBunPiExecutable(deps: PiSpawnDeps = {}): string | undefined {
-	const bunVersion = deps.bunVersion ?? process.versions.bun;
-	const entry = deps.argv1 ?? process.argv[1];
-	if (!bunVersion || !entry || !/^(?:\/\$bunfs\/|B:[\\/]~BUN[\\/])/.test(entry)) return undefined;
-	const env = deps.env ?? process.env;
-	return env[PI_SUBAGENT_PI_BINARY_ENV]?.trim() || (deps.execPath ?? process.execPath);
 }
 
 interface PiSpawnCommand {
@@ -128,11 +118,6 @@ function isRunnableNodeScript(
 
 function normalizePath(filePath: string): string {
 	return path.isAbsolute(filePath) ? filePath : path.resolve(filePath);
-}
-
-function isStandalonePiExecutable(execPath: string): boolean {
-	const executableName = execPath.split(/[\\/]/).pop();
-	return /^pi(?:\.exe)?$/i.test(executableName ?? "");
 }
 
 function readPiPackageJson(
@@ -223,11 +208,10 @@ export function getPiSpawnCommand(
 	args: string[],
 	deps: PiSpawnDeps = {},
 ): PiSpawnCommand {
-	const platform = deps.platform ?? process.platform;
 	const env = deps.env ?? process.env;
 	const piBinary = env[PI_SUBAGENT_PI_BINARY_ENV]?.trim();
 	if (piBinary) {
-		if (platform === "win32" && isNodeScriptPath(piBinary)) {
+		if (isNodeScriptPath(piBinary)) {
 			return {
 				command: deps.execPath ?? process.execPath,
 				args: [piBinary, ...args],
@@ -237,21 +221,12 @@ export function getPiSpawnCommand(
 	}
 
 	const execPath = deps.execPath ?? process.execPath;
-	if (isStandalonePiExecutable(execPath)) {
-		return { command: execPath, args };
-	}
-
 	const piCliPath = resolvePiCliScript(deps);
 	if (piCliPath) {
 		return {
 			command: execPath,
 			args: [piCliPath, ...args],
 		};
-	}
-	if (platform === "win32") {
-		throw new Error(
-			`Could not resolve the Pi CLI on Windows. Set ${PI_SUBAGENT_PI_BINARY_ENV} or ensure ${PI_CODING_AGENT_PACKAGE} is installed.`,
-		);
 	}
 
 	throw new Error("The runtime-owned Generation Harness CLI could not be resolved; global executables are not used.");

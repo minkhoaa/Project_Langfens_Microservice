@@ -67,7 +67,6 @@ import { formatControlIntercomMessage, formatControlNoticeMessage, resolveContro
 import { formatSpawnBudget, getSpawnBudgetSnapshot, grantSpawnBudget, preflightSpawnBudget, preflightSpawnBudgetGrant, reserveSpawnBudget } from "../shared/spawn-budget.ts";
 import { claimRunFanoutBatch, claimRunFanoutBatchWithCommit, createRunFanoutBudget, formatRunFanoutBudget, getRunFanoutBudgetSnapshot, readRunFanoutBudgetDescriptor, RunFanoutLimitError, writeRunFanoutBudgetDescriptor } from "../shared/run-fanout-budget.ts";
 import { retainLiveForegroundNestedRoute } from "../../integrations/pi-web-session-liveness.ts";
-import { HERDR_FOREGROUND_CONTROL_CHANGED_EVENT } from "../../integrations/herdr-status.ts";
 import { validateToolBudgetConfig } from "../shared/tool-budget.ts";
 import { usageBudgetExceededMessage, usageBudgetState, validateUsageBudgetConfig } from "../shared/usage-budget.ts";
 import { assertAgentAllowedByCapabilityCeiling, intersectSubagentCapabilityCeilings, resolveCurrentSubagentCapabilityCeiling, type ResolvedSubagentCapabilityCeiling } from "../shared/capability-ceiling.ts";
@@ -113,8 +112,6 @@ import { isStoppableAsyncStatusStep, resolveAsyncStatusChild } from "../shared/c
 import { inspectSubagentStatus } from "../background/run-status.ts";
 import { getExternalJobProvider } from "../../api/external-job-provider.ts";
 import { externalJobFollowUpRequestDigest, externalJobFollowUpRequestId, externalJobFollowUpRunId, externalJobPromptDigest, externalJobStableJson } from "../shared/external-job-runner.ts";
-import { externalCliReceiptMetadata, normalizeExternalCliRunnerStatus } from "../shared/external-cli-contract.ts";
-import { formatHerdrMachineRunnerUnsupported, resolveMachinePlacement } from "../shared/herdr-machine.ts";
 import { lookupRunnerLauncher, resolveAgentRunnerLauncher } from "../shared/runner-launcher.ts";
 import { applyForceTopLevelAsyncOverride } from "../background/top-level-async.ts";
 import { handleMissionAction, MISSION_ACTIONS } from "../../missions/actions.ts";
@@ -125,7 +122,6 @@ import { createMissionWorkflowState } from "../../missions/workflow-state.ts";
 import { resolveAuthorityDecision } from "../../policy/authority.ts";
 import { handleInspectorAction, INSPECTOR_ACTIONS } from "../../inspectors/actions.ts";
 import { getInspectorPlugins } from "../../inspectors/plugins.ts";
-import { handleHerdrProjectPaneAction, HERDR_PROJECT_PANE_ACTIONS } from "../../inspectors/herdr/project-panes.ts";
 import { previewSimpleWorkflowRun, runWorkflowScript, validateWorkflowScript, WorkflowScriptError, type WorkflowChildSettledNotification, type WorkflowLanePlan, type WorkflowReceiptResumeReference, type WorkflowScriptChildResult, type WorkflowScriptTraceEntry, type WorkflowSteerOptions, type WorkflowSteerResult } from "../../workflows/scripted-workflow.ts";
 import { formatIncrementalChildCompletion, incrementalChildCompletionTriggersTurn } from "../background/notify.ts";
 import { COMPLETION_ACTION, STATUS_ACTION } from "../../shared/parent-wake.ts";
@@ -1771,14 +1767,9 @@ function externalJobFollowUpStarted(input: { sourceRunId: string; runId: string;
 function externalRunnerControlError(asyncDir: string, action: "steer" | "resume"): AgentToolResult<Details> | undefined {
 	const status = readStatus(asyncDir);
 	if (!status?.steps?.length || !status.steps.every((step) => step.runner?.type === "external-cli" || step.runner?.type === "external-job")) return undefined;
-	const externalCli = normalizeExternalCliRunnerStatus(status.steps.find((step) => step.runner?.type === "external-cli")?.runner);
-	const message = externalCli
-		? action === "steer"
-			? `External adapter '${externalCli.adapter.id}' does not support runs.steer: ${externalCli.unsupportedReasons.steer}`
-			: `External adapter '${externalCli.adapter.id}' cannot resume: ${externalCli.nonResumableReason}`
-		: action === "steer"
-			? "External runners do not accept live steer messages."
-			: "External runners do not persist Pi sessions and cannot be resumed.";
+	const message = action === "steer"
+		? "External runners do not accept live steer messages."
+		: "External runners do not persist Pi sessions and cannot be resumed.";
 	return { content: [{ type: "text", text: message }], isError: true, details: { mode: "management", results: [] } };
 }
 
@@ -2052,11 +2043,7 @@ async function resumeAsyncRun(input: {
 		};
 	}
 	if (target.source === "async" && target.runner?.type === "external-cli") {
-		const runner = normalizeExternalCliRunnerStatus(target.runner);
-		const message = runner
-			? `External adapter '${runner.adapter.id}' cannot resume: ${runner.nonResumableReason}`
-			: "External runners do not persist Pi sessions and cannot be resumed.";
-		return { content: [{ type: "text", text: message }], isError: true, details: { mode: "management", results: [] } };
+		return { content: [{ type: "text", text: "External runners do not persist Pi sessions and cannot be resumed." }], isError: true, details: { mode: "management", results: [] } };
 	}
 	if (input.params.baseRef !== undefined && "managedWorktree" in target && target.managedWorktree === true) {
 		return { content: [{ type: "text", text: "Cannot resume with baseRef: retained managed-worktree children continue in their existing worktree. Start a new worktree run from that base ref instead." }], isError: true, details: { mode: "management", results: [] } };
@@ -2627,9 +2614,9 @@ function canonicalizeExecutionParams(params: SubagentParamsLike, agents: AgentCo
 		if (result.error) return { error: result.error };
 		params = omitUndefinedProperties({ ...params, agent: result.name });
 		const agent = agents.find((candidate) => candidate.name === result.name);
-		if (params.extensionBindings !== undefined && (agent?.runner?.type === "external-cli" || agent?.runner?.type === "external-job")) return { error: `extensionBindings is not supported for runner.type='${agent.runner.type}'.` };
-		const machineError = agent ? formatHerdrMachineRunnerUnsupported({ machine: params.machine ?? agent.machine, agentName: agent.name, runnerType: agent.runner?.type, adapter: agent.runner?.type === "external-cli" ? agent.runner.adapter : undefined, worktree: params.worktree }) : undefined;
-		if (machineError) return { error: machineError };
+		if (params.machine !== undefined || agent?.machine !== undefined) return { error: "Remote machine execution is not supported in the Node.js-native runtime." };
+		if (agent?.runner?.type === "external-cli") return { error: "External CLI runners are not supported in the Node.js-native runtime." };
+		if (params.extensionBindings !== undefined && agent?.runner?.type === "external-job") return { error: `extensionBindings is not supported for runner.type='${agent.runner.type}'.` };
 	}
 	if (params.extensionBindings !== undefined) {
 		try {
@@ -4136,15 +4123,12 @@ async function runSinglePath(data: ExecutionContextData, deps: ExecutorDeps): Pr
 			details: { mode: "single", results: [] },
 		};
 	}
-	let foregroundMachine: import("../../shared/types.ts").PlacementMachineReference | undefined;
-	const requestedMachine = params.machine ?? agentConfig.machine;
 	const requiredExtensions = data.requiredExtensions ?? deps.childRuntime?.requiredExtensions ?? resolveRequiredChildExtensions(data.parentPiSessionId);
-	if (requestedMachine) {
-		try {
-			assertRequiredChildExtensionsAdmitted([requiredExtensions], { agent: agentConfig.name, runnerType: agentConfig.runner?.type, machine: requestedMachine });
-			foregroundMachine = resolveMachinePlacement({ machine: requestedMachine, cwd: ctx.cwd, stepCwd: params.machineCwd }).machine;
-		}
-		catch (error) { return toExecutionErrorResult(params, error instanceof Error ? error : new Error(String(error)), data.contextPolicy.contextSummary); }
+	if (params.machine !== undefined || agentConfig.machine !== undefined) {
+		return toExecutionErrorResult(params, new Error("Remote machine execution is not supported in the Node.js-native runtime."), data.contextPolicy.contextSummary);
+	}
+	if (agentConfig.runner?.type === "external-cli") {
+		return toExecutionErrorResult(params, new Error("External CLI runners are not supported in the Node.js-native runtime."), data.contextPolicy.contextSummary);
 	}
 	const effectiveToolBudget = resolveEffectiveToolBudget(omitUndefinedProperties({ runBudget: data.toolBudget, agentBudget: agentConfig.toolBudget, configBudget: data.configToolBudget }));
 	if (effectiveToolBudget.error) return toExecutionErrorResult(params, new Error(effectiveToolBudget.error), data.contextPolicy.contextSummary);
@@ -4183,7 +4167,7 @@ async function runSinglePath(data: ExecutionContextData, deps: ExecutorDeps): Pr
 	const maxSubagentDepth = resolveChildMaxSubagentDepth(currentMaxSubagentDepth, agentConfig.maxSubagentDepth);
 
 
-	const sourceCwd = foregroundMachine?.cwd ?? effectiveCwd;
+	const sourceCwd = effectiveCwd;
 	let pendingHandoff: Details["parallelHandoff"];
 	const { setup: worktreeSetup, errorResult: worktreeSetupError } = params.worktree ? await createSingleWorktreeSetup(
 		sourceCwd,
@@ -4259,7 +4243,7 @@ async function runSinglePath(data: ExecutionContextData, deps: ExecutorDeps): Pr
 	// Reads: caller override > agent defaultReads > none. `~`/`~/` expand to home;
 	// absolute paths pass through; relative paths resolve against the child cwd.
 	const reads = readsOverride !== undefined ? readsOverride : agentConfig.defaultReads ?? false;
-	const readPaths = !foregroundMachine && Array.isArray(reads) ? resolveExistingReadPaths(reads, singleCwd) : [];
+	const readPaths = Array.isArray(reads) ? resolveExistingReadPaths(reads, singleCwd) : [];
 	const readsInstruction = readPaths.length > 0
 		? `[Read from: ${readPaths.join(", ")}]\n\n`
 		: "";
@@ -4277,19 +4261,9 @@ async function runSinglePath(data: ExecutionContextData, deps: ExecutorDeps): Pr
 	let childSessionControls: ForegroundChildSessionControls | undefined;
 	let pendingRuntimeStop: string | undefined;
 	const foregroundControl = deps.state.foregroundControls.get(runId);
-	const syncHerdrForegroundChild = () => {
-		if (!foregroundControl?.parentWorkflowRunId) return;
-		try {
-			deps.pi.events.emit(HERDR_FOREGROUND_CONTROL_CHANGED_EVENT, { runId: foregroundControl.parentWorkflowRunId });
-		} catch (error) {
-			console.error("Failed to sync Herdr foreground child:", error);
-		}
-	};
 	const finishTrackedForegroundChild = () => {
 		if (!foregroundControl) return;
-		const wasActive = foregroundControl.activeChildren?.has(0) === true;
 		finishForegroundChild(foregroundControl, 0);
-		if (wasActive) syncHerdrForegroundChild();
 	};
 	if (foregroundControl) {
 		const thinking = resolveEffectiveThinking(modelOverride, thinkingOverrideForTask());
@@ -4326,7 +4300,6 @@ async function runSinglePath(data: ExecutionContextData, deps: ExecutorDeps): Pr
 		}));
 		// Capture the owned mailbox before a child can start and finish between polling ticks.
 		if (deps.childRuntime?.fanoutChild) deps.activateSupervisorTransport?.();
-		syncHerdrForegroundChild();
 	}
 
 	const modelResponseAliases = deps.config.modelResponseAliases === undefined ? undefined : structuredClone(deps.config.modelResponseAliases);
@@ -4366,10 +4339,8 @@ async function runSinglePath(data: ExecutionContextData, deps: ExecutorDeps): Pr
 			parentWorkflowRunId: params.workflowParentRunId ?? foregroundControl?.parentWorkflowRunId,
 		});
 		const launched = await runSync(ctx.cwd, agents, params.agent!, task, compactOptional<Parameters<typeof runSync>[4]>({
-			machine: foregroundMachine,
 			parentProviderRegistry: ctx.modelRegistry,
 			projectTrusted: sessionProjectTrust(ctx),
-			remoteReads: foregroundMachine ? readsOverride : undefined,
 			permissions: deps.config.permissions,
 			runtimeSnapshotHost: deps.pi,
 			parentSessionId: ctx.sessionManager.getSessionId() ?? undefined,
@@ -4773,13 +4744,6 @@ function workflowChildResult(
 	const outputArtifactPath = running ? undefined : result.details.parallelHandoff?.path
 		?? result.details.results.find((child) => child.artifactPaths?.outputPath)?.artifactPaths?.outputPath;
 	const outputPathMapping = typeof childParams.task === "string" ? outputPathMappingFromTask(childParams.task, outputReference) : undefined;
-	const externalResult = result.details.results.length === 1 && result.details.results[0]?.runner?.type === "external-cli" ? result.details.results[0] : undefined;
-	const externalStatus = result.details.asyncDir ? readStatus(result.details.asyncDir) : undefined;
-	const externalStatusStep = externalStatus?.steps?.length === 1 && externalStatus.steps[0]?.runner?.type === "external-cli" ? externalStatus.steps[0] : undefined;
-	const externalRunner = normalizeExternalCliRunnerStatus(externalResult?.runner ?? externalStatusStep?.runner);
-	const externalProcess = externalResult?.externalProcess ?? externalStatusStep?.externalProcess;
-	const externalAdapter = externalRunner ? externalCliReceiptMetadata({ runner: externalRunner, externalProcess, outputReference }) : undefined;
-	if (externalAdapter) resumability = { state: "not-resumable", reason: externalAdapter.nonResumableReason };
 	const lane = normalizeWorkflowLaneMetadata(childParams.lane, `workflow child '${key}'.lane`);
 	assertWorkflowLaneKey(lane, key, `workflow child '${key}'.lane`);
 	return {
@@ -4803,7 +4767,6 @@ function workflowChildResult(
 		...(outputArtifactPath ? { outputArtifactPath } : {}),
 		...(acceptanceRecovery ? { recovery: acceptanceRecovery } : {}),
 		...(outputPathMapping ? { outputPathMapping } : {}),
-		...(externalAdapter ? { externalAdapter } : {}),
 		resumability,
 		continuation: { runIds: runId ? [runId] : [] },
 		artifactPaths: [...artifactPaths],
@@ -5356,7 +5319,6 @@ function createScheduledOwnerState(source: SubagentState, ownerSessionId: string
 		parentSessionFile: ctx.sessionManager.getSessionFile() ?? null,
 		subagentInProgress: false,
 		...(ownerSpawns ? { subagentSpawns: ownerSpawns } : { subagentSpawns: undefined }),
-		herdrProjectPanes: new Map(),
 		asyncJobs: new Map(),
 		fleetJobs: new Map(),
 		foregroundRuns: new Map(),
@@ -7013,12 +6975,8 @@ export function createSubagentExecutor(deps: ExecutorDeps): {
 					if (!confirmed) return { content: [{ type: "text", text: `Action '${action}' canceled; authority was not granted.` }], details: { mode: "management", results: [] } };
 				}
 			}
-			if ((HERDR_PROJECT_PANE_ACTIONS as readonly string[]).includes(action)) {
-				if (deps.allowMutatingManagementActions === false && MUTATING_MANAGEMENT_ACTIONS.has(action)) {
-					return { content: [{ type: "text", text: `Action '${action}' is not available from child-safe subagent fanout mode.` }], isError: true, details: { mode: "management", results: [] } };
-				}
-				deps.state.currentSessionId = resolveCurrentSessionId(ctx.sessionManager);
-				return handleHerdrProjectPaneAction(action as (typeof HERDR_PROJECT_PANE_ACTIONS)[number], paramsWithResolvedCwd, { cwd: requestCwd, state: deps.state, signal });
+			if (action === "project.open" || action === "project.status" || action === "project.close") {
+				return { content: [{ type: "text", text: "Project panes are not supported in the Node.js-native runtime." }], isError: true, details: { mode: "management", results: [] } };
 			}
 			if ((INSPECTOR_ACTIONS as readonly string[]).includes(action)) {
 				if (deps.allowMutatingManagementActions === false && MUTATING_MANAGEMENT_ACTIONS.has(action)) {

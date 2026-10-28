@@ -90,26 +90,26 @@ describe("builtin agent overrides", () => {
 
 	it("applies machine placement overrides with project beating user and false clearing a pin", () => {
 		writeJson(path.join(tempHome, ".generation", "agent", "settings.json"), {
-			subagents: { agentOverrides: { "claude-code": { machine: "workmac" }, "codex-exec": { machine: "workmac" }, "cursor-agent": { machine: "workmac" } } },
+			subagents: { agentOverrides: { "worker": { machine: "workmac" }, "reviewer": { machine: "workmac" }, "scout": { machine: "workmac" } } },
 		});
 		writeJson(path.join(tempProject, ".generation", "settings.json"), {
-			subagents: { agentOverrides: { "codex-exec": { machine: "gpu-box" }, "cursor-agent": { machine: false } } },
+			subagents: { agentOverrides: { "reviewer": { machine: "gpu-box" }, "scout": { machine: false } } },
 		});
 
 		const builtins = discoverAgentsAll(tempProject).builtin;
-		assert.equal(builtins.find((agent) => agent.name === "claude-code")?.machine, "workmac");
-		assert.equal(builtins.find((agent) => agent.name === "codex-exec")?.machine, "gpu-box");
-		assert.equal(builtins.find((agent) => agent.name === "cursor-agent")?.machine, undefined);
-		assert.deepEqual(builtins.find((agent) => agent.name === "cursor-agent")?.override?.fields, ["machine"]);
+		assert.equal(builtins.find((agent) => agent.name === "worker")?.machine, "workmac");
+		assert.equal(builtins.find((agent) => agent.name === "reviewer")?.machine, "gpu-box");
+		assert.equal(builtins.find((agent) => agent.name === "scout")?.machine, undefined);
+		assert.deepEqual(builtins.find((agent) => agent.name === "scout")?.override?.fields, ["machine"]);
 
 		// The disable/reset rewrite keeps a placement: the override is rebuilt from the agent's current fields.
-		const claude = builtins.find((agent) => agent.name === "claude-code")!;
-		assert.deepEqual(buildBuiltinOverrideConfig({ ...claude.override!.base }, { ...claude }), { machine: "workmac" });
-		assert.deepEqual(buildBuiltinOverrideConfig({ ...claude.override!.base, machine: "pinned" }, { ...claude, machine: undefined }), { machine: false });
+		const wrk = builtins.find((agent) => agent.name === "worker")!;
+		assert.deepEqual(buildBuiltinOverrideConfig({ ...wrk.override!.base }, { ...wrk }), { machine: "workmac" });
+		assert.deepEqual(buildBuiltinOverrideConfig({ ...wrk.override!.base, machine: "pinned" }, { ...wrk, machine: undefined }), { machine: false });
 	});
 
 	it("rejects malformed machine overrides", () => {
-		writeJson(path.join(tempHome, ".generation", "agent", "settings.json"), { subagents: { agentOverrides: { "claude-code": { machine: 7 } } } });
+		writeJson(path.join(tempHome, ".generation", "agent", "settings.json"), { subagents: { agentOverrides: { "worker": { machine: 7 } } } });
 		assert.throws(() => discoverAgentsAll(tempProject), /field 'machine' must be a non-empty string or false/u);
 	});
 

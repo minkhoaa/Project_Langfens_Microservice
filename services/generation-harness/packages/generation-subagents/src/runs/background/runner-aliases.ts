@@ -30,13 +30,6 @@ export const HOST_PEER_ALIASES: ReadonlyArray<{ specifier: string; pkg: string; 
 	{ specifier: "typebox/value", pkg: "typebox", subpath: "./value" },
 ];
 
-/** Pi manifests declare chord from 0.85.0 through 1.1.x; earlier hosts and 1.2.0+ do not ship it. */
-const CHORD_PACKAGE = "@earendil-works/chord";
-const CHORD_PEER_ALIASES: typeof HOST_PEER_ALIASES = [
-	{ specifier: "@earendil-works/chord", pkg: "@earendil-works/chord", subpath: "." },
-	{ specifier: "@earendil-works/chord/context", pkg: "@earendil-works/chord", subpath: "./context" },
-];
-
 interface PackageManifest {
 	name?: unknown;
 	version?: unknown;
@@ -144,18 +137,14 @@ export function resolveHostPeerAliases(piPackageRoot: string): { aliases: Record
 	const aliases: Record<string, string> = {};
 	const missing: string[] = [];
 	const hostManifest = readManifest(piPackageRoot);
-	// Chord is aliased whenever the host provides it, but required only when the host
-	// manifest declares it (Pi 0.85 through 1.1), so a declared-but-missing chord still
-	// fails closed. An unreadable host manifest keeps it required rather than hiding a broken install.
-	const chordRequired = !hostManifest || declaresDependency(hostManifest, CHORD_PACKAGE);
-	for (const { specifier, pkg, subpath, optional } of [...HOST_PEER_ALIASES, ...CHORD_PEER_ALIASES]) {
+	for (const { specifier, pkg, subpath, optional } of HOST_PEER_ALIASES) {
 		const packageDir = findPeerPackageDir(piPackageRoot, pkg, hostManifest?.name);
 		const target = packageDir ? resolvePackageSubpath(packageDir, subpath) : undefined;
 		// An optional subpath the package does not declare is unreachable, so skip it; a declared but missing file still fails.
 		if (optional && packageDir && target === undefined) continue;
 		// Native loaders short-circuit resolution, so aliases must retain the real package's dependency scope.
 		if (target && fs.existsSync(target)) aliases[specifier] = fs.realpathSync(target);
-		else if (pkg !== CHORD_PACKAGE || chordRequired) missing.push(specifier);
+		else if (!optional) missing.push(specifier);
 	}
 	return { aliases, missing };
 }

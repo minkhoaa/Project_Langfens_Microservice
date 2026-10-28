@@ -27,8 +27,8 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
-		"directory": "packages/tui"
+		"url": "git+https://github.com/minkhoaa/Project_Langfens_Microservice.git",
+		"directory": "services/generation-harness/packages/tui"
 	},
 	"engines": {
 		"node": ">=22.19.0"

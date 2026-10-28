@@ -14,9 +14,8 @@ import {
 import { updateActiveRunIndex } from "../background/active-run-index.ts";
 import { resultFilePath, writeAsyncResultFile } from "../background/result-files.ts";
 import { resolveAsyncResumeTarget } from "../background/async-resume.ts";
-import { externalCliReceiptMetadata, normalizeExternalCliRunnerStatus } from "../shared/external-cli-contract.ts";
 import { outputPathMappingFromTask } from "../shared/single-output.ts";
-import { readWorkflowReceipt, workflowReceiptPath, writeWorkflowReceipt, type WorkflowReceipt } from "../../workflows/workflow-receipt.ts";
+import { readWorkflowReceipt, workflowReceiptPath, writeWorkflowReceipt, type WorkflowReceipt, type WorkflowReceiptEntry } from "../../workflows/workflow-receipt.ts";
 import {
 	applyDetachedChildSettlement,
 	classifyWorkflowSettlement,
@@ -104,7 +103,7 @@ function reconcileWorkflowReceipt(status: AsyncStatus, childRunId: string, resul
 	if (!key) throw new Error(`Workflow receipt '${status.runId}' cannot identify detached child '${childRunId}' by stable key.`);
 	const entry = receipt.entries[key];
 	if (!entry) throw new Error(`Workflow receipt '${status.runId}' has no detached child key '${key}'.`);
-	let resumability: typeof entry.resumability;
+	let resumability: WorkflowReceiptEntry["resumability"];
 	try {
 		const target = resolveAsyncResumeTarget({ id: childRunId, dir: path.join(DIRS.async, childRunId) }, {}, { requireSessionFile: true, sessionId: status.sessionId });
 		resumability = target.kind === "revive" ? { state: "resumable" } : { state: "not-resumable", reason: "child is still running" };
@@ -114,31 +113,43 @@ function reconcileWorkflowReceipt(status: AsyncStatus, childRunId: string, resul
 	const outputReference = result.savedOutputPath ?? result.outputReference?.path ?? entry.outputReference;
 	const childStatus = readStatus(path.join(DIRS.async, childRunId));
 	const externalStep = childStatus?.steps?.length === 1 && childStatus.steps[0]?.runner?.type === "external-cli" ? childStatus.steps[0] : undefined;
-	const externalRunner = normalizeExternalCliRunnerStatus(result.runner?.type === "external-cli" ? result.runner : externalStep?.runner);
-	const externalProcess = result.externalProcess ?? externalStep?.externalProcess;
-	const externalAdapter = externalRunner ? externalCliReceiptMetadata({ runner: externalRunner, externalProcess, outputReference }) : entry.externalAdapter;
+	const externalAdapter = entry.externalAdapter ?? (externalStep?.runner ? {
+		adapter: { id: "external-cli" as const, version: 1 as const, executionMode: "one-shot-stdin" as const },
+		capabilities: { stop: true as const, steer: false as const, resume: false as const, structuredOutput: false as const, toolEvents: false as const, supervisor: "unsupported" as const, forkContext: false as const, extensionBindings: false as const },
+		nonResumableReason: "The one-shot stdin adapter has no durable external session identity.",
+		...(outputReference ? { outputArtifacts: { outputReference } } : {}),
+	} : undefined);
 	const childTerminalOutcome = workflowTerminalOutcomeForResult(result) ?? entry.terminalOutcome;
-	if (externalAdapter) resumability = { state: "not-resumable", reason: externalAdapter.nonResumableReason };
-	const updatedEntry: WorkflowReceipt["entries"][string] = resumability.state === "resumable"
+	if (externalAdapter) resumability = { state: "not-resumable" as const, reason: externalAdapter.nonResumableReason };
+	const updatedEntry = (resumability.state === "resumable"
 		? {
-			...entry,
-			...(step.agent ? { agent: step.agent } : {}),
-			...(step.context ? { resolvedContext: step.context } : {}),
+			key: entry.key,
+			continuation: entry.continuation,
+			...(entry.lane ? { lane: entry.lane } : {}),
+			...(entry.acceptanceRecovery ? { acceptanceRecovery: entry.acceptanceRecovery } : {}),
+			...(entry.requestedContext ? { requestedContext: entry.requestedContext } : {}),
+			...(step.agent ?? entry.agent ? { agent: step.agent ?? entry.agent } : {}),
+			...(step.context ?? entry.resolvedContext ? { resolvedContext: step.context ?? entry.resolvedContext } : {}),
 			latestRunId: entry.latestRunId ?? childRunId,
-			resumability,
+			resumability: { state: "resumable" as const },
 			...(outputReference ? { outputReference } : {}),
 			...(childTerminalOutcome ? { terminalOutcome: childTerminalOutcome } : {}),
 			...(externalAdapter ? { externalAdapter } : {}),
 		}
 		: {
-			...entry,
-			...(step.agent ? { agent: step.agent } : {}),
-			...(step.context ? { resolvedContext: step.context } : {}),
+			key: entry.key,
+			continuation: entry.continuation,
+			...(entry.lane ? { lane: entry.lane } : {}),
+			...(entry.acceptanceRecovery ? { acceptanceRecovery: entry.acceptanceRecovery } : {}),
+			...(entry.requestedContext ? { requestedContext: entry.requestedContext } : {}),
+			...(step.agent ?? entry.agent ? { agent: step.agent ?? entry.agent } : {}),
+			...(step.context ?? entry.resolvedContext ? { resolvedContext: step.context ?? entry.resolvedContext } : {}),
+			...(entry.latestRunId ? { latestRunId: entry.latestRunId } : {}),
 			resumability,
 			...(outputReference ? { outputReference } : {}),
 			...(childTerminalOutcome ? { terminalOutcome: childTerminalOutcome } : {}),
 			...(externalAdapter ? { externalAdapter } : {}),
-		};
+		}) as WorkflowReceiptEntry;
 	const next: WorkflowReceipt = {
 		...receipt,
 		state: status.state === "complete" ? "complete" : status.state === "stopped" ? "stopped" : status.state === "paused" ? "paused" : "failed",

@@ -3,15 +3,18 @@
   "commit": "312082429bda07714fe0fe7729fe8d4935de4c5a",
   "version": "0.83.1",
   "license": "MIT",
-  "nativeSourceFiles": 339,
+  "nativeSourceFiles": 312,
   "adaptations": [
-    "Local Generation SDK/package/resource/environment namespaces",
+    "Node.js-only execution runtime; external Pi binaries, Bun, Deno, and standalone Pi executable support removed",
+    "Local Generation SDK/package/resource/environment namespaces; all @earendil-works/* runtime aliases purged",
     "Runtime-owned configuration, artifact and package scopes instead of global discovery",
     "Runtime-owned SDK selection; no global Pi CLI fallback",
+    "Unnecessary external integrations removed: SSH/Herdr/Rex remote execution, external CLI adapters (Claude Code, Codex, Cursor), and legacy external agent profiles",
+    "Upstream self-update / upgrade-reminder mechanism removed for independent package maintenance",
     "Isolated foreground provider runtimes and extension-first model resolution retained from upstream",
     "Public empty-native-loader reload replaces upstream private cache-flag mutation; native ESM cache boundary tested differentially",
     "Explicitly selected search definitions use existing public SDK factories as child-only tools; Core defaults remain four",
-    "Existing Generation programmatic foreground ABI retained in src/compat; default extension is the full upstream runtime"
+    "Existing Generation programmatic foreground ABI retained in src/compat; default extension is the full Node.js-native runtime"
   ],
   "files": [
     {
@@ -42,7 +45,7 @@
     {
       "path": "src/agents/agent-management.ts",
       "upstreamSha256": "5922f2fe01c42278b880f77d7582e30217e5ba5c80d5e1b08f90d2c58e13bdc6",
-      "adaptedSha256": "0aac0c77261feccebe407aee44cfff8dd60da70f8029ca01045518b2ca8b97e7"
+      "adaptedSha256": "ffb0ec842190305927062f2e8be8cb20752a83246cb335112f3856738fe3c53d"
     },
     {
       "path": "src/agents/agent-memory.ts",
@@ -72,7 +75,7 @@
     {
       "path": "src/agents/agents.ts",
       "upstreamSha256": "a3ebd2a1fdf61d50b5f73918c994f8dcafc6ee34d9a6e303dacc6c01380325c6",
-      "adaptedSha256": "fe05c7022481bdbbcc8418c9eaf82cbaa648ec6f9e2c27d3b94dbc28389c4826"
+      "adaptedSha256": "59d6d212663ceb875c7aaaf0aa65955a3aad33977ae9a2c8f12a584c7d8601ed"
     },
     {
       "path": "src/agents/builtin-names.ts",
@@ -112,7 +115,7 @@
     {
       "path": "src/agents/runtime-agent-registry.ts",
       "upstreamSha256": "826d16a990b3312dc9849e3c21b78ad11a85dcb44b0df1879987b5a347122aa2",
-      "adaptedSha256": "c24050067a9eeb095d77fb81ae784a11762bbb7d4a9edb53a6db0546bd6db1fa"
+      "adaptedSha256": "250a6fc9d726a3d4600bac02acb0f0e2342ac8f455b1075ea13bd28edf8a6269"
     },
     {
       "path": "src/agents/skills.ts",
@@ -172,12 +175,13 @@
     {
       "path": "src/api/preflight.ts",
       "upstreamSha256": "ff960e504b5e22f50a49bd6e052f4b24dcd8953c282c3930cacbccca9f940507",
-      "adaptedSha256": "17793a8875fdb52d324363ada338833188c31cf33a030d6cab7fbb1e21eaefcb"
+      "adaptedSha256": "d8b46abc3218c12a196f5b85bd334f97adcb666ccbdb8f9a4686c066e324f51c"
     },
     {
       "path": "src/api/project-panes.ts",
       "upstreamSha256": "35993ca8ae5fc2ab74e57f0b1df48898414ceeb3421bda4aad16d845ea5cd27b",
-      "adaptedSha256": "35993ca8ae5fc2ab74e57f0b1df48898414ceeb3421bda4aad16d845ea5cd27b"
+      "status": "removed",
+      "reason": "Public Herdr project pane API removed for Node.js-native runtime"
     },
     {
       "path": "src/api/required-child-extensions.ts",
@@ -227,12 +231,13 @@
     {
       "path": "src/extension/herdr-pi-bridge.ts",
       "upstreamSha256": "879fe7d802a98778797a3ae42eea541f2fd0f2a4869f026fc60d47d92746ad1d",
-      "adaptedSha256": "51aa4b9b2f9654320da25a1317838acf5f2f5908d7ea88588073b2f4e83e817a"
+      "status": "removed",
+      "reason": "Herdr extension bridge protocol removed for Node.js-native runtime"
     },
     {
       "path": "src/extension/index.ts",
       "upstreamSha256": "59ee1eb45752b6c3d6f101e038b00a5b3906b9740e696f1e86f525ef8bd19e42",
-      "adaptedSha256": "2c0512a642ae7eaa737f9320ac6643b2117a2194ceb49d939563b10b25a7d821"
+      "adaptedSha256": "7450ad9d31b9fa9a810f59ccc16d26a6236024c539458705570c0462cc7f5863"
     },
     {
       "path": "src/extension/public-execution.ts",
@@ -252,7 +257,7 @@
     {
       "path": "src/extension/schemas.ts",
       "upstreamSha256": "c167702662ced3b8a5c5670dc595cbfa7f91e49cb53247869416627d70adc2f3",
-      "adaptedSha256": "c167702662ced3b8a5c5670dc595cbfa7f91e49cb53247869416627d70adc2f3"
+      "adaptedSha256": "e50ca0c05c379d74ca4cd2903c324619a2df9928632cc27be6152dd578a1e882"
     },
     {
       "path": "src/extension/steering-notices.ts",
@@ -287,7 +292,8 @@
     {
       "path": "src/extension/upgrade-notice.ts",
       "upstreamSha256": "8da65faad907138f35819bbe3dbab1312b311b8b0f503b5edc25d195134448c0",
-      "adaptedSha256": "b3052e0d8dacfae2deb012195d9fee29191273bd67fb5203b0911e99d4aaa617"
+      "status": "removed",
+      "reason": "Upstream self-update / upgrade-reminder mechanism removed for independent package maintenance"
     },
     {
       "path": "src/inspectors/actions.ts",
@@ -307,27 +313,32 @@
     {
       "path": "src/inspectors/herdr/actions.ts",
       "upstreamSha256": "885ab73f8f07c0c29f0a5e575d09572a9d8e64588f5a41cda47712197d60d808",
-      "adaptedSha256": "81ed26d0f2fd5d659deae0f8e80f6313523c0f77201065494dfa0e33d4e34085"
+      "status": "removed",
+      "reason": "Herdr inspector actions removed for Node.js-native runtime"
     },
     {
       "path": "src/inspectors/herdr/client.ts",
       "upstreamSha256": "2de5033041ed5dfc84176f224653aeaeca177f4d2d7c1111c779d8dd206c078d",
-      "adaptedSha256": "2de5033041ed5dfc84176f224653aeaeca177f4d2d7c1111c779d8dd206c078d"
+      "status": "removed",
+      "reason": "Herdr CLI process client removed for Node.js-native runtime"
     },
     {
       "path": "src/inspectors/herdr/focus.ts",
       "upstreamSha256": "baf08c80695992a9d3911d3c9f8d86a78c0b3d287dfa51b7bbbe2576c0dc6f4c",
-      "adaptedSha256": "baf08c80695992a9d3911d3c9f8d86a78c0b3d287dfa51b7bbbe2576c0dc6f4c"
+      "status": "removed",
+      "reason": "Herdr pane focus actions removed for Node.js-native runtime"
     },
     {
       "path": "src/inspectors/herdr/plugin.ts",
       "upstreamSha256": "9c4afe6d1459502258e980f4b89f638b0e33f84b6c1b0f49141834e4f0bdd563",
-      "adaptedSha256": "9c4afe6d1459502258e980f4b89f638b0e33f84b6c1b0f49141834e4f0bdd563"
+      "status": "removed",
+      "reason": "Herdr inspector plugin removed for Node.js-native runtime"
     },
     {
       "path": "src/inspectors/herdr/project-panes.ts",
       "upstreamSha256": "c293c6da5bc659e9cddc8f6909c726dde8a4ca6424f056ca8ca1d20a900c9b6e",
-      "adaptedSha256": "e8ba17c4b54c3fe5c44906e9fa8121c75889e09fe333aa4617df16103c587adc"
+      "status": "removed",
+      "reason": "Herdr project pane management removed for Node.js-native runtime"
     },
     {
       "path": "src/inspectors/inspector-runner.ts",
@@ -337,7 +348,7 @@
     {
       "path": "src/inspectors/plugins.ts",
       "upstreamSha256": "e2011fcebf8dc3a7ce48663209aad1b2a4ca26267f748ee83fa2c934725ccf70",
-      "adaptedSha256": "c4f9b3ac7c6b364b8d1bfd1d489d68a7df902af583628ba43e928fbd8c3f7aa2"
+      "adaptedSha256": "3128467505cc01fc4fb762491742f2105cb3cb8d9b1dc300b24d37172026de0f"
     },
     {
       "path": "src/inspectors/session-roots-codec.ts",
@@ -372,7 +383,8 @@
     {
       "path": "src/integrations/herdr-status.ts",
       "upstreamSha256": "57f64e89dad67ff5a9d0387acb21d4cf79bd7593afc54cf95ad949f02fb7f104",
-      "adaptedSha256": "48657d840700fdab134e49938784c4157cc7162788c22ed68d47a41cc4f2c6de"
+      "status": "removed",
+      "reason": "Herdr status reporter bridge removed for Node.js-native runtime"
     },
     {
       "path": "src/integrations/pi-web-session-liveness.ts",
@@ -457,7 +469,7 @@
     {
       "path": "src/runs/background/async-execution.ts",
       "upstreamSha256": "e5e4fa603468efda7991bfce2d93b9d2e51021270a44472a86c30dd58c45fa8f",
-      "adaptedSha256": "cde2bdc7d095e878224bb595799acb5a1f455c9ad5423808c467dd7092e09ab0"
+      "adaptedSha256": "9e7bfd364660a2f7b62cffddc2c5c3ff3fe236c6e62144aaadf013b96bb56b37"
     },
     {
       "path": "src/runs/background/async-job-tracker.ts",
@@ -497,7 +509,8 @@
     {
       "path": "src/runs/background/binary-bootstrap.ts",
       "upstreamSha256": "dd53f1543b663910eed3e94bdf2c360d874193bc682ec7db0d78c4572d448c91",
-      "adaptedSha256": "1b66175b12563ea76911a11e7092859b6ce2b8be1a490775b4f935c9e7e92835"
+      "status": "removed",
+      "reason": "Obsolete Bun/standalone binary bootstrap removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/background/boot-id.ts",
@@ -637,12 +650,12 @@
     {
       "path": "src/runs/background/run-status.ts",
       "upstreamSha256": "50fd7a5be99df6726e8f9b6e0a496a49170d1b5bc190bd587957cc7bb4787f21",
-      "adaptedSha256": "7647f982f290f6c58cf5b16e836b1cfb1a92064336ddb133286b7c99fad0d480"
+      "adaptedSha256": "67811cd1a5885134040828f7c9907a8d82e2db737d013e6cd158d5e33d0c6469"
     },
     {
       "path": "src/runs/background/runner-aliases.ts",
       "upstreamSha256": "68b920e0cc276f866d93c2c60bb995841ff59fcd388d4c7fd8a4f30327bdcc6a",
-      "adaptedSha256": "ef6c89156fc4c5b161116b9d860a8e9ce83c75747e244518c3534eacdef86bd2"
+      "adaptedSha256": "ba5338caf3dc1d6db3c5bece722fb303541232775136bc2a6141e17b0354b999"
     },
     {
       "path": "src/runs/background/runner-child-launch.ts",
@@ -687,7 +700,7 @@
     {
       "path": "src/runs/background/subagent-runner.ts",
       "upstreamSha256": "2c554e3910170ffcc03bb13e24a3f32f65befcbc79993855059219ff5c223c7d",
-      "adaptedSha256": "29a6500166fadc23810592aade7f5a3afeeca88908d3ae0094354aebd42aec4d"
+      "adaptedSha256": "2d224ff997fe1e82ff13e446b52252d6020c6fc2354ff0e919130774e879d96b"
     },
     {
       "path": "src/runs/background/subagent-wait.ts",
@@ -752,7 +765,7 @@
     {
       "path": "src/runs/foreground/execution.ts",
       "upstreamSha256": "9a61db9ccdc09b5f5ea84f8ad5f87fee95ec9916b15eb55ef2a7ad568f779ac4",
-      "adaptedSha256": "23ea02b3bab37a62716ddb257e6ee8657ec7d586095861cb6d6a838372e0d881"
+      "adaptedSha256": "270f638d9a9f9ea10c1b26eee782f6a8ddf6c8f2ba5d9314aaf6ae6768fa65e8"
     },
     {
       "path": "src/runs/foreground/foreground-control.ts",
@@ -772,12 +785,12 @@
     {
       "path": "src/runs/foreground/subagent-executor.ts",
       "upstreamSha256": "1592917f78ba67a62c07bf5227303611ee6f1972680a1d8c4e37c3b713d6b21f",
-      "adaptedSha256": "5f4aa6637c3cb6749cb838275a923498cc7ebda67b54db3115e9b47f0851bbf0"
+      "adaptedSha256": "84ad8fca62e449c377946d67d8806aeae262a493240ffc57d8ccbe888288dabd"
     },
     {
       "path": "src/runs/foreground/workflow-detach-reconcile.ts",
       "upstreamSha256": "945538509a74f5172651c86e258c3fc00c90edadc05896323f13fa81c5c0efad",
-      "adaptedSha256": "945538509a74f5172651c86e258c3fc00c90edadc05896323f13fa81c5c0efad"
+      "adaptedSha256": "a6da469b5afd56f7449171dcc87d7eaad4fe1390b498610833728db91d85226f"
     },
     {
       "path": "src/runs/foreground/workflow-foreground-steering.ts",
@@ -857,7 +870,7 @@
     {
       "path": "src/runs/shared/child-session.ts",
       "upstreamSha256": "4ca5f7f5488787493b8767d4fe7c8f1a84d091287749fe47fd991c3611b35f8b",
-      "adaptedSha256": "29e8ec36888ed041668c5cd0518342b9c95827c2a3e231c72e2def26a78702ab"
+      "adaptedSha256": "8abbe4dc2574b62182923a148c2930c89d26f6e324ddc06155ea638aece581af"
     },
     {
       "path": "src/runs/shared/child-tool-plan.ts",
@@ -867,12 +880,14 @@
     {
       "path": "src/runs/shared/claude-code-adapter.ts",
       "upstreamSha256": "bb8bfdc0706d7d45ef186832b4f3adee86e79e6691f9092669972031ed05cc0e",
-      "adaptedSha256": "bb8bfdc0706d7d45ef186832b4f3adee86e79e6691f9092669972031ed05cc0e"
+      "status": "removed",
+      "reason": "External CLI adapter removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/codex-exec-adapter.ts",
       "upstreamSha256": "1ce2efd60aae251800196d3ad5b58a2852bcd5b65e8fb1e6b9505161788687a2",
-      "adaptedSha256": "1ce2efd60aae251800196d3ad5b58a2852bcd5b65e8fb1e6b9505161788687a2"
+      "status": "removed",
+      "reason": "External CLI adapter removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/context-mode.ts",
@@ -882,7 +897,8 @@
     {
       "path": "src/runs/shared/cursor-agent-adapter.ts",
       "upstreamSha256": "b0ea563c6bc1956dfe77f0d9511cb45e998e5f38e098d7b8aa88d56b9ef00096",
-      "adaptedSha256": "b0ea563c6bc1956dfe77f0d9511cb45e998e5f38e098d7b8aa88d56b9ef00096"
+      "status": "removed",
+      "reason": "External CLI adapter removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/dynamic-fanout.ts",
@@ -902,17 +918,20 @@
     {
       "path": "src/runs/shared/external-cli-contract.ts",
       "upstreamSha256": "8e7ebdaa830dcfaa2e63002658167dee4a60e4c81d94712ae69092a91da8871b",
-      "adaptedSha256": "8e7ebdaa830dcfaa2e63002658167dee4a60e4c81d94712ae69092a91da8871b"
+      "status": "removed",
+      "reason": "External CLI adapter contract removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/external-cli-preflight.ts",
       "upstreamSha256": "d7dc1ad448fe68ae82c3e123335a5320f66934ed02d82b051cc134bd1f8bc414",
-      "adaptedSha256": "d7dc1ad448fe68ae82c3e123335a5320f66934ed02d82b051cc134bd1f8bc414"
+      "status": "removed",
+      "reason": "External CLI preflight removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/external-cli-runner.ts",
       "upstreamSha256": "d9887be3705fa3aae063a102b1ab7b7aebc72c69352917738eec146eda15201e",
-      "adaptedSha256": "d9887be3705fa3aae063a102b1ab7b7aebc72c69352917738eec146eda15201e"
+      "status": "removed",
+      "reason": "External CLI execution runner removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/external-job-bridge.ts",
@@ -937,32 +956,38 @@
     {
       "path": "src/runs/shared/herdr-connection.ts",
       "upstreamSha256": "e0ab81f3424679e5c1e99ebc0ba72eb154de92877b97ed4681763b247777072c",
-      "adaptedSha256": "e401b4355fef4ae327fbf6f581bd5be4c6c6bec4db150de69def49ad545693fb"
+      "status": "removed",
+      "reason": "Remote SSH/Herdr execution integration removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/herdr-external-adapters.ts",
       "upstreamSha256": "e41f06c46ecb5d4ab5541243a75b4779af80991fd14c456d2694eec17432f850",
-      "adaptedSha256": "e41f06c46ecb5d4ab5541243a75b4779af80991fd14c456d2694eec17432f850"
+      "status": "removed",
+      "reason": "Herdr external execution adapter removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/herdr-machine.ts",
       "upstreamSha256": "79a4dbd797eaa851bdd0d5ae689140c41e8632413e9be7c358f7be375303e2ee",
-      "adaptedSha256": "591dd13eb939ccf394344134ac839f77d97e0c137047f91572b5b1052d8f55db"
+      "status": "removed",
+      "reason": "Herdr saved machine placement removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/herdr-pane-host.ts",
       "upstreamSha256": "463cc5f0b8f39fab2a410cc881ff9e75975609702f4d1320d21eed64b1feef37",
-      "adaptedSha256": "dc69a4fec40c4aedc91e92bf79ec7d4a3d306f161590f9c6736a9010b63dcd4c"
+      "status": "removed",
+      "reason": "Herdr multiplexer pane host removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/herdr-pi-protocol.ts",
       "upstreamSha256": "01dade84bd9885db7e10b5a2dec3932d1531db721be2cc3c698a154db4913379",
-      "adaptedSha256": "19f2c86f30c177bcb054270989a233b5e0dd146bff357a70e6bb992693e1d948"
+      "status": "removed",
+      "reason": "Herdr bridge wire protocol removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/herdr-placed-run.ts",
       "upstreamSha256": "c939fba4e963b41051f678dac9c52111709a6abc20bbb0bf184e16551dbddb92",
-      "adaptedSha256": "4b94915e728c7b4c7a0a92afa251f6f9eb5281ca484a9e4f85e287e2b140501a"
+      "status": "removed",
+      "reason": "Herdr placed run integration removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/host-step-status.ts",
@@ -982,7 +1007,8 @@
     {
       "path": "src/runs/shared/local-machine-access.ts",
       "upstreamSha256": "68d129f889756aeab3b45f6186a3e457543259d708a3be87a6da55ec34c5955f",
-      "adaptedSha256": "68d129f889756aeab3b45f6186a3e457543259d708a3be87a6da55ec34c5955f"
+      "status": "removed",
+      "reason": "Local multiplexer machine access removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/long-running-guard.ts",
@@ -1067,17 +1093,19 @@
     {
       "path": "src/runs/shared/pi-spawn.ts",
       "upstreamSha256": "37ea142e233ee29f69ab905d953f73bc5fe736b7a7ac09c134b0450adb2f8fad",
-      "adaptedSha256": "e0a8ef688116ccc5b207ced758870397070a4b46871537c565b16566ce1063e7"
+      "adaptedSha256": "43873051aac3b1b553f168e81b4f462e63bd8a42efc761bc254eede5a0c71fa7"
     },
     {
       "path": "src/runs/shared/placed-run-owner.ts",
       "upstreamSha256": "3a20d3d0a3c9b87df803a84485981e737d586c25debdfa14457463928672f420",
-      "adaptedSha256": "d3676d6d26a3e68fd49f6c3c5c11450961bdfa954dbcd3ca58ee0c9e7c33e3e8"
+      "status": "removed",
+      "reason": "Placed run lifecycle owner removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/placement-host.ts",
       "upstreamSha256": "4b2c3b26b742305f1b670eb0b38cfde282754aa296b34da37fdfb94dc596e2ed",
-      "adaptedSha256": "93b4765c5e0ebed8f20ad33a148636185297222e56201136a40b385099aaae0f"
+      "status": "removed",
+      "reason": "Placed run host abstractions removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/process-signal.ts",
@@ -1092,12 +1120,14 @@
     {
       "path": "src/runs/shared/rex-machine.ts",
       "upstreamSha256": "f49ba5347de7741fb87362f9ee9d00b87dcf71994ca813de893c1838eb2fe1fb",
-      "adaptedSha256": "f49ba5347de7741fb87362f9ee9d00b87dcf71994ca813de893c1838eb2fe1fb"
+      "status": "removed",
+      "reason": "Rex machine execution removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/rex-pane-host.ts",
       "upstreamSha256": "734af566261c504c6c1ab86cf7aad83151e5268dd3a4e18af1eccecdbc85b2f7",
-      "adaptedSha256": "dc89bf066d54ceb60e43be33ecdb75480eb7d5cdedfe34c3f41a97a0f59e1c32"
+      "status": "removed",
+      "reason": "Rex multiplexer pane host removed for Node.js-native runtime"
     },
     {
       "path": "src/runs/shared/run-fanout-budget.ts",
@@ -1502,7 +1532,7 @@
     {
       "path": "src/tui/fleet-status.ts",
       "upstreamSha256": "2e59e15a626ec6e4f1cf18f51255745cdcac1ca6ce4d192a303162dffa7ed677",
-      "adaptedSha256": "3e7a6aa2a97893d41abe301a710644be72da8a0f2dfc42a6d9f9c63dfbd2db76"
+      "adaptedSha256": "32a628a34d6bcc56e2a93e427e106042f4b0f5b34254716ddf775755719cf19d"
     },
     {
       "path": "src/tui/fleet-transcript.ts",

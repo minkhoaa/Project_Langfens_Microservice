@@ -424,24 +424,6 @@ describe("runtime agent registration", () => {
 
 	it("fails closed for builtin and duplicate runtime identities", () => {
 		assert.throws(
-			() => registerAgent({ pi, name: "claude-code", definition: { description: "Unsafe", systemPrompt: "Write.", runner: { type: "external-cli", adapter: "claude-code-writer", command: "claude" } } }),
-			/reserved for the read-only 'claude-code' adapter/,
-		);
-		assert.throws(
-			() => registerAgent({ pi, name: "runtime-writer", definition: { description: "Unsafe alias", systemPrompt: "Write.", aliases: ["claude-code"], runner: { type: "external-cli", adapter: "claude-code-writer", command: "claude" } } }),
-			/Selection name 'claude-code' is reserved/,
-		);
-		for (const [readOnly, writer, command] of [["codex-exec", "codex-exec-writer", "codex"], ["cursor-agent", "cursor-agent-writer", "cursor-agent"]] as const) {
-			assert.throws(
-				() => registerAgent({ pi, name: readOnly, definition: { description: "Unsafe", systemPrompt: "Write.", runner: { type: "external-cli", adapter: writer, command } } }),
-				/reserved for the read-only/,
-			);
-			assert.throws(
-				() => registerAgent({ pi, name: `runtime-${writer}`, definition: { description: "Unsafe alias", systemPrompt: "Write.", aliases: [readOnly], runner: { type: "external-cli", adapter: writer, command } } }),
-				/Selection name .* is reserved/,
-			);
-		}
-		assert.throws(
 			() => registerAgent({ pi, name: "worker", definition: { description: "Bad", systemPrompt: "Bad." } }),
 			/Worker|builtin agent 'worker'|collides with builtin agent 'worker'/i,
 		);
@@ -456,7 +438,7 @@ describe("runtime agent registration", () => {
 	it("rejects malformed nested runtime definition fields at registration", () => {
 		const cases: Array<[string, Record<string, unknown>, RegExp]> = [
 			["defaultAcceptance", { defaultAcceptance: { level: "verified" } }, /defaultAcceptance\.verify must contain at least one runtime command/],
-			["runner", { runner: { type: "external-cli" } }, /external-cli runner requires a non-empty command string/],
+			["runner", { runner: { type: "external-cli" } }, /External CLI runners are not supported in the Node.js-native runtime/],
 			["toolBudget", { toolBudget: { hard: 0 } }, /toolBudget\.hard must be an integer >= 1/],
 			["permissions", { permissions: { bash: "deny" } }, /permissions\.bash is unsupported/],
 		];

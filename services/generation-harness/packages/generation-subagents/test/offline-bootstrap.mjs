@@ -1,7 +1,10 @@
 import "../../../test/offline.mjs";
+import { register } from "node:module";
 import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+register(new URL("./support/ts-loader.mjs", import.meta.url));
 
 // Install isolation before importing any SDK or upstream test module. Node
 // children inherit the network guard, not another bootstrap that changes scope.

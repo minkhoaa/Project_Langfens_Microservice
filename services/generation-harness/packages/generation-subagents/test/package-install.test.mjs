@@ -29,7 +29,7 @@ test("clean package exposes every public subpath and executes its packaged workf
 	}
 	const manifest = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
 	assert.equal(manifest.upstream.commit, "312082429bda07714fe0fe7729fe8d4935de4c5a");
-	assert.equal(Object.keys(manifest.exports).length, 16);
+	assert.equal(Object.keys(manifest.exports).length, 15);
 	const script = join(root, "verify.mjs");
 	writeFileSync(script, `import assert from "node:assert/strict";import {mkdirSync,writeFileSync,readFileSync} from "node:fs";import {join} from "node:path";
 		import {createAgentSession,DefaultResourceLoader,ModelRuntime,SettingsManager,SessionManager} from "generation-harness-core";

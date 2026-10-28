@@ -15,15 +15,13 @@ import { childCacheRetentionEnv } from "../../shared/child-cache-retention.ts";
 import { buildEffectiveSystemPrompt } from "../shared/effective-system-prompt.ts";
 import { currentCompletionOwnerId } from "../../shared/completion-owner.ts";
 import { planChildLaunch, projectChainOutputSchemas, resolveStepBehavior, suppressProgressForReadOnlyTask, type ResolvedStepBehavior } from "../shared/child-launch-plan.ts";
-import { formatHerdrMachineRunnerUnsupported, PLACED_RESTORE_UNSUPPORTED, resolveMachinePlacement } from "../shared/herdr-machine.ts";
 import { applyThinkingSuffix, projectLaunchResolvedChildExtensions, resolvePiLaunchToolPlan } from "../shared/child-tool-plan.ts";
-import { assertClaudeCodeModelScope, isClaudeCodeAdapterId, resolveClaudeCodeOverride, type ClaudeCodeOverride } from "../shared/claude-code-adapter.ts";
 import { injectSingleOutputInstruction, normalizeSingleOutputOverride, resolveSingleOutputPath, validateFileOnlyOutputMode } from "../shared/single-output.ts";
 import { applyWatchdogLaunchRules, sendRuleViolationWarning } from "../../watchdog/rules.ts";
 import { buildChainInstructions, getStepAgents, isDynamicParallelStep, isParallelStep, resolveExistingReadInstructionPaths, resolveExistingReadPaths, writeInitialProgressFile, type ChainStep, type SequentialStep, type StepOverrides } from "../../shared/settings.ts";
 import { isDynamicRunnerGroup, isParallelGroup, type RunnerStep } from "../shared/parallel-utils.ts";
 import type { ContextMode } from "../shared/context-mode.ts";
-import { PI_CODING_AGENT_PACKAGE, resolveBunPiExecutable, resolveHostPiPackageRoot } from "../shared/pi-spawn.ts";
+import { PI_CODING_AGENT_PACKAGE, resolveHostPiPackageRoot } from "../shared/pi-spawn.ts";
 import { JITI_ALIAS_ENV, resolveHostPeerAliases } from "./runner-aliases.ts";
 import { preflightLaunchCwd } from "../shared/launch-cwd.ts";
 import { resolveNodeExecutable } from "../../shared/node-executable.ts";
@@ -424,7 +422,7 @@ export function formatAsyncStartedMessage(headline: string, interactive: boolean
 
 /** Check whether detached async execution has a supported runtime. */
 export function isAsyncAvailable(): boolean {
-	return resolveBunPiExecutable() !== undefined || supportsNativeRunner(resolveNodeExecutable()) || jitiCliPath !== undefined;
+	return supportsNativeRunner(resolveNodeExecutable()) || jitiCliPath !== undefined;
 }
 
 export function resolveAsyncRunnerLogPaths(cfg: object): { stdoutPath: string; stderrPath: string } | undefined {
@@ -677,24 +675,20 @@ function spawnRunner(cfg: object, suffix: string, cwd: string, initialStatus: Om
 		: (isDynamicRunnerGroup(step) ? step.parallel.parentSessionId : step.parentSessionId) !== launchParentSessionId);
 	if (inconsistentParent) return { error: "Background runner steps have inconsistent parent session identities." };
 
-	// The compiled host exposes its SDK only through Pi's extension loader.
-	const binaryHost = resolveBunPiExecutable();
-	if (!binaryHost && "error" in piPackageSelection) throw piPackageSelection.error;
+	if ("error" in piPackageSelection) throw piPackageSelection.error;
 	const nodeExecutable = resolveNodeExecutable();
 	const nativeRunnerSupported = supportsNativeRunner(nodeExecutable);
 	const runner = asyncRunnerSourcePath();
 	const runnerIsJavaScript = path.extname(runner) === ".js";
-	const bootstrap = resolveRuntimeModulePath(path.dirname(runner), "binary-bootstrap");
-	if (binaryHost && !fs.existsSync(bootstrap)) return { error: `Background runner bootstrap not found: ${bootstrap}` };
-	if (!binaryHost && !runnerIsJavaScript && !nativeRunnerSupported && !jitiCliPath) {
+	if (!runnerIsJavaScript && !nativeRunnerSupported && !jitiCliPath) {
 		return { error: sourceUnderNodeModules()
 			? "Background runner source is installed under node_modules, so upstream jiti is required for TypeScript execution."
 			: "Background runner requires enabled native TypeScript with synchronous module hooks, or installed upstream jiti for TypeScript execution." };
 	}
-	if (!binaryHost && !piPackageRoot) {
-		return { error: `Background children require a supported standalone Pi host or the installed npm package (${PI_CODING_AGENT_PACKAGE}); neither is available.` };
+	if (!piPackageRoot) {
+		return { error: `Background children require the installed npm package (${PI_CODING_AGENT_PACKAGE}); it is not available.` };
 	}
-	const hostPeerAliases = !binaryHost && piPackageRoot ? resolveHostPeerAliases(piPackageRoot) : { aliases: {}, missing: [] };
+	const hostPeerAliases = resolveHostPeerAliases(piPackageRoot);
 	if (hostPeerAliases.missing.length > 0) {
 		return { error: `Background children require the host npm package (${PI_CODING_AGENT_PACKAGE}) with its dependencies; ${piPackageRoot} does not provide ${hostPeerAliases.missing.join(", ")}.` };
 	}
@@ -711,7 +705,7 @@ function spawnRunner(cfg: object, suffix: string, cwd: string, initialStatus: Om
 	const bootId = launcher ? undefined : currentBootId();
 	const launchConfig = { ...cfg, runnerProcessInstanceId, ...(launchBarrierToken ? { launchBarrierToken } : {}), ...(bootId ? { bootId } : {}) };
 	writePrivateAtomicJson(cfgPath, launchConfig);
-	const command = binaryHost ?? nodeExecutable;
+	const command = nodeExecutable;
 	const launchForStartup = launchConfig as typeof launchConfig & { asyncDir?: unknown; id?: unknown; sessionId?: unknown; completionOwnerId?: unknown; revivalLease?: unknown };
 	const launchAsyncDir = typeof launchForStartup.asyncDir === "string" ? launchForStartup.asyncDir : undefined;
 	const launchRunId = typeof launchForStartup.id === "string" ? launchForStartup.id : suffix;
@@ -761,22 +755,18 @@ function spawnRunner(cfg: object, suffix: string, cwd: string, initialStatus: Om
 		const preload = Object.keys(hostPeerAliases.aliases).length > 0
 			? ["--import", new URL("../../../runner-peer-preload.mjs", import.meta.url).href]
 			: [];
-		const args = binaryHost
-			? ["--no-extensions", "--no-skills", "--no-prompt-templates", "--no-session", "--mode", "rpc", "--extension", bootstrap]
-			: runnerIsJavaScript
-				? [...preload, runner, cfgPath]
-				: nativeRunnerSupported
-				? [...preload, "--experimental-strip-types", runner, cfgPath]
-				: [...preload, jitiCliPath!, runner, cfgPath];
+		const args = runnerIsJavaScript
+			? [...preload, runner, cfgPath]
+			: nativeRunnerSupported
+			? [...preload, "--experimental-strip-types", runner, cfgPath]
+			: [...preload, jitiCliPath!, runner, cfgPath];
 		const runnerEnv: NodeJS.ProcessEnv = {
 			...omitGitRoutingEnv(omitExtensionBindingsEnv(process.env)),
 			...childCacheRetentionEnv(),
-			[PI_CODING_AGENT_PACKAGE_ROOT_ENV]: binaryHost ? undefined : piPackageRoot,
-			// npm must override inherited bundled layouts (#2071); binaries retain release assets.
-			GENERATION_PACKAGE_DIR: binaryHost ? process.env.GENERATION_PACKAGE_DIR : piPackageRoot,
-			[JITI_ALIAS_ENV]: binaryHost ? undefined : JSON.stringify(hostPeerAliases.aliases),
-			GENERATION_ASYNC_NATIVE_RUNNER: !binaryHost && (runnerIsJavaScript || nativeRunnerSupported) ? "1" : "0",
-			GENERATION_SUBAGENT_RUNNER_CONFIG: binaryHost ? cfgPath : undefined,
+			[PI_CODING_AGENT_PACKAGE_ROOT_ENV]: piPackageRoot,
+			GENERATION_PACKAGE_DIR: piPackageRoot,
+			[JITI_ALIAS_ENV]: JSON.stringify(hostPeerAliases.aliases),
+			GENERATION_ASYNC_NATIVE_RUNNER: runnerIsJavaScript || nativeRunnerSupported ? "1" : "0",
 		};
 		if (launchParentSessionId === undefined) delete runnerEnv[SUBAGENT_PARENT_SESSION_ENV];
 		else runnerEnv[SUBAGENT_PARENT_SESSION_ENV] = launchParentSessionId;
@@ -954,13 +944,6 @@ export function resolveClaudeCodeThinking(source: string | false | undefined, fa
 	return typeof value === "string" ? value : undefined;
 }
 
-/** A pinned Claude Code model cannot survive pane-native saved-machine placement, which
- * owns the remote model registry, so the combination fails instead of losing both flags. */
-export function assertClaudeCodeOverrideIsLocal(agent: string, machine: string | undefined, override: ClaudeCodeOverride | undefined): void {
-	if (!machine || !override) return;
-	throw new Error(`Agent '${agent}' requested machine '${machine}', but a Claude Code model or thinking level cannot be honored on a saved machine. Remove the model or thinking request, or run the agent locally.`);
-}
-
 function formatAsyncStartError(mode: SubagentRunMode, message: string): AsyncExecutionResult {
 	return {
 		content: [{ type: "text", text: message }],
@@ -1070,10 +1053,14 @@ export function buildAsyncRunnerSteps(id: string, params: AsyncRunnerStepBuildPa
 		const a = agents.find((x) => x.name === s.agent)!;
 		const effectiveBehavior = resolvedBehavior ?? suppressProgressForReadOnlyTask(resolveStepBehavior(a, buildStepOverrides(s), chainSkills), s.task, originalTask);
 		const requestedMachine = s.machine ?? launchMachine ?? a.machine;
-		const externalRunner = a.runner?.type === "external-cli" || a.runner?.type === "external-job";
+		if (requestedMachine !== undefined) {
+			throw new AsyncStartValidationError("Remote machine execution is not supported in the Node.js-native runtime.");
+		}
+		if (a.runner?.type === "external-cli") {
+			throw new AsyncStartValidationError("External CLI runners are not supported in the Node.js-native runtime.");
+		}
+		const externalRunner = a.runner?.type === "external-job";
 		const externalRunnerType = a.runner?.type;
-		const machineUnsupported = formatHerdrMachineRunnerUnsupported({ machine: requestedMachine, agentName: a.name, runnerType: a.runner?.type, adapter: a.runner?.type === "external-cli" ? a.runner.adapter : undefined, worktree: s.worktree });
-		if (machineUnsupported) throw new AsyncStartValidationError(machineUnsupported);
 		const launcherError = runnerLauncherPlacementError(a, requestedMachine);
 		if (launcherError) throw new AsyncStartValidationError(launcherError);
 		const registeredExtensions = resolveRequiredChildExtensions(ctx.parentSessionId ?? ctx.currentSessionId ?? undefined);
@@ -1084,21 +1071,9 @@ export function buildAsyncRunnerSteps(id: string, params: AsyncRunnerStepBuildPa
 		}
 		let machine: PlacementMachineReference | undefined;
 		let machineEnv: Record<string, string> | undefined;
-		if (requestedMachine) {
-			try {
-				const placement = resolveMachinePlacement({ machine: requestedMachine, cwd: runnerCwd, stepCwd: s.cwd ?? params.machineCwd });
-				machine = placement.machine;
-				machineEnv = placement.env;
-			} catch (error) {
-				throw new AsyncStartValidationError(error instanceof Error ? error.message : String(error));
-			}
-		}
-		// A code-owned Claude Code adapter owns its argv, but it does accept an explicit
-		// model/thinking request; those become --model/--effort on the launch below.
-		const claudeCodeAdapter = a.runner?.type === "external-cli" && isClaudeCodeAdapterId(a.runner.adapter);
 		if (externalRunner) {
 			const unsupported: string[] = [];
-			if (s.model !== undefined && !claudeCodeAdapter) unsupported.push("model override");
+			if (s.model !== undefined) unsupported.push("model override");
 			if (effectiveBehavior.outputSchema !== undefined) unsupported.push("structured output");
 			if (s.acceptance !== undefined || params.agentContract !== undefined || s.agentContract !== undefined) unsupported.push("acceptance/agent contract");
 			if (s.toolBudget !== undefined || params.toolBudget !== undefined || a.toolBudget !== undefined || params.configToolBudget !== undefined) unsupported.push("tool budget");
@@ -1173,23 +1148,6 @@ export function buildAsyncRunnerSteps(id: string, params: AsyncRunnerStepBuildPa
 			{ scope: modelScopes, source: modelOrigin === "explicit" ? "explicit" : "inherited" },
 		);
 		const thinkingOverride = flatIndex === undefined ? undefined : thinkingOverridesByFlatIndex?.[flatIndex];
-		let claudeCodeOverride: ClaudeCodeOverride | undefined;
-		if (claudeCodeAdapter) {
-			try {
-				claudeCodeOverride = resolveClaudeCodeOverride({
-					model: typeof s.model === "string" ? s.model : undefined,
-					agent: a,
-					thinking: resolveClaudeCodeThinking(thinkingOverride, a.thinking),
-					thinkingCeiling: intersectThinkingCeilings(params.thinkingCeiling, a.maxThinking, ctx.childRuntime?.thinkingCeiling),
-					agentName: a.name,
-					runId: id,
-				});
-				assertClaudeCodeModelScope({ scopes: modelScopes, model: claudeCodeOverride?.model, agent: a.name, runId: id });
-				assertClaudeCodeOverrideIsLocal(a.name, machine ? requestedMachine : undefined, claudeCodeOverride);
-			} catch (error) {
-				throw new AsyncStartValidationError(error instanceof Error ? error.message : String(error));
-			}
-		}
 		const effectiveThinking = externalRunner ? undefined : thinkingOverride ?? a.thinking;
 		const model = externalRunner ? undefined : applyThinkingSuffix(primaryModel, effectiveThinking, thinkingOverride !== undefined);
 		const contextLimit = model ? findModelInfo(model, availableModels, a.modelProvider ?? ctx.currentModelProvider)?.contextWindow : undefined;
@@ -1259,7 +1217,6 @@ export function buildAsyncRunnerSteps(id: string, params: AsyncRunnerStepBuildPa
 			agent: s.agent,
 			task,
 			...(a.runner ? { runner: a.runner } : {}),
-			...(claudeCodeOverride ? { claudeCodeOverrideArgs: claudeCodeOverride.args } : {}),
 			...(machine ? { machine } : {}),
 			...(machineEnv ? { machineEnv } : {}),
 			...(params.contextForAgent ? { context: params.contextForAgent(s.agent) } : {}),
@@ -1872,14 +1829,11 @@ export function executeAsyncSingle(
 	const externalRunner = agentConfig.runner?.type === "external-cli" || agentConfig.runner?.type === "external-job";
 	const externalRunnerType = agentConfig.runner?.type;
 	const permissionRules = resolvePermissionRules(ctx.permissions, agentConfig.permissions);
-	// See the chain path: the Claude Code adapter accepts an explicit model/thinking
-	// request even though no other external runner does.
-	const claudeCodeAdapter = agentConfig.runner?.type === "external-cli" && isClaudeCodeAdapterId(agentConfig.runner.adapter);
 	if (externalRunner) {
 		const unsupported: string[] = [];
-		if (params.modelOverride !== undefined && !claudeCodeAdapter) unsupported.push("model override");
+		if (params.modelOverride !== undefined) unsupported.push("model override");
 		if ((params.fast ?? agentConfig.fast) === true) unsupported.push("fast mode");
-		if (params.thinkingOverride !== undefined && !claudeCodeAdapter) unsupported.push("thinking override");
+		if (params.thinkingOverride !== undefined) unsupported.push("thinking override");
 		if (params.structuredOutputSchema !== undefined) unsupported.push("structured output");
 		if (params.acceptance !== undefined || params.agentContract !== undefined) unsupported.push("acceptance/agent contract");
 		if (params.toolBudget !== undefined || agentConfig.toolBudget !== undefined || params.configToolBudget !== undefined) unsupported.push("tool budget");
@@ -1897,10 +1851,12 @@ export function executeAsyncSingle(
 	}
 	const runnerCwd = resolveChildCwd(ctx.cwd, cwd);
 	const requestedMachine = params.machine ?? agentConfig.machine;
-	const machineUnsupported = formatHerdrMachineRunnerUnsupported({ machine: requestedMachine, agentName: agentConfig.name, runnerType: agentConfig.runner?.type, adapter: agentConfig.runner?.type === "external-cli" ? agentConfig.runner.adapter : undefined, worktree: params.worktree });
-	if (machineUnsupported) return formatAsyncStartError("single", machineUnsupported);
-	// Refuse before the runner starts; the placed launch would refuse only after the run exists.
-	if (requestedMachine && params.revivalLease) return formatAsyncStartError("single", PLACED_RESTORE_UNSUPPORTED);
+	if (requestedMachine !== undefined) {
+		return formatAsyncStartError("single", "Remote machine execution is not supported in the Node.js-native runtime.");
+	}
+	if (agentConfig.runner?.type === "external-cli") {
+		return formatAsyncStartError("single", "External CLI runners are not supported in the Node.js-native runtime.");
+	}
 	const resolvedLauncher = resolveAgentRunnerLauncher(agentConfig, ctx.runnerLaunchers, requestedMachine);
 	if (resolvedLauncher.error) return formatAsyncStartError("single", resolvedLauncher.error);
 	const launcher = resolvedLauncher.launcher;
@@ -1912,15 +1868,6 @@ export function executeAsyncSingle(
 	}
 	let machine: PlacementMachineReference | undefined;
 	let machineEnv: Record<string, string> | undefined;
-	if (requestedMachine) {
-		try {
-			const placement = resolveMachinePlacement({ machine: requestedMachine, cwd: runnerCwd, stepCwd: params.machineCwd });
-			machine = placement.machine;
-			machineEnv = placement.env;
-		} catch (error) {
-			return formatAsyncStartError("single", error instanceof Error ? error.message : String(error));
-		}
-	}
 	let managedWorktreeProvider: "native" | "worktrunk" | undefined;
 	if (params.worktree === true) {
 		try {
@@ -2010,23 +1957,6 @@ export function executeAsyncSingle(
 			);
 	} catch (error) {
 		return formatAsyncStartError("single", error instanceof Error ? error.message : String(error));
-	}
-	let singleClaudeCodeOverride: ClaudeCodeOverride | undefined;
-	if (claudeCodeAdapter) {
-		try {
-			singleClaudeCodeOverride = resolveClaudeCodeOverride({
-				model: typeof params.modelOverride === "string" ? params.modelOverride : undefined,
-				agent: agentConfig,
-				thinking: resolveClaudeCodeThinking(params.thinkingOverride, agentConfig.thinking),
-				thinkingCeiling: intersectThinkingCeilings(params.thinkingCeiling, agentConfig.maxThinking, ctx.childRuntime?.thinkingCeiling),
-				agentName: agentConfig.name,
-				runId: id,
-			});
-			assertClaudeCodeModelScope({ scopes: modelScopes, model: singleClaudeCodeOverride?.model, agent: agentConfig.name, runId: id });
-			assertClaudeCodeOverrideIsLocal(agentConfig.name, machine ? requestedMachine : undefined, singleClaudeCodeOverride);
-		} catch (error) {
-			return formatAsyncStartError("single", error instanceof Error ? error.message : String(error));
-		}
 	}
 	const effectiveThinking = externalRunner ? undefined : params.thinkingOverride ?? agentConfig.thinking;
 	const model = externalRunner ? undefined : applyThinkingSuffix(primaryModel, effectiveThinking, params.thinkingOverride !== undefined);
@@ -2210,7 +2140,6 @@ export function executeAsyncSingle(
 						agent,
 						task: taskText,
 						...(agentConfig.runner ? { runner: agentConfig.runner } : {}),
-						...(singleClaudeCodeOverride ? { claudeCodeOverrideArgs: singleClaudeCodeOverride.args } : {}),
 						...(machine ? { machine } : {}),
 						...(!externalRunner && machine && params.reads !== undefined ? { remoteReads: params.reads } : {}),
 						...(machineEnv ? { machineEnv } : {}),
