@@ -15,9 +15,10 @@
 		"start": "node scripts/run.mjs",
 		"start:tui": "node scripts/run.mjs",
 		"start:rpc": "node scripts/run.mjs --mode rpc",
+		"start:reading": "node scripts/run.mjs --cwd . --approve",
 		"typecheck": "tsc --noEmit && npm run typecheck -w generation-subagents",
 		"smoke": "node scripts/smoke.mjs",
-		"test": "node --test test/branding.test.mjs test/isolation.test.mjs test/tools.test.mjs test/runtime.test.mjs test/subagents.test.mjs test/consolidation.test.mjs test/tui.test.mjs && npm run test -w generation-subagents"
+		"test": "node --test test/branding.test.mjs test/isolation.test.mjs test/tools.test.mjs test/runtime.test.mjs test/subagents.test.mjs test/reading.test.mjs test/consolidation.test.mjs test/tui.test.mjs && npm run test -w generation-subagents"
 	},
 	"devDependencies": {
 		"@types/node": "22.19.19",

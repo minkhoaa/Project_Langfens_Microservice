@@ -32,6 +32,6 @@
 			"generation-tui/*": ["./packages/tui/src/*"]
 		}
 	},
-	"include": ["packages/*/src/**/*"],
+	"include": ["packages/*/src/**/*", ".generation/extensions/**/*.ts"],
 	"exclude": ["**/dist/**"]
 }
