@@ -1,0 +1,14 @@
+{
+  "name": "generation-harness-core",
+  "version": "0.0.0-generation-subagents-test-shim",
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./dist/index.d.ts",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./index.mjs"
+    }
+  }
+}

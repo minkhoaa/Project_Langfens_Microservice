@@ -1,7 +1,7 @@
 {
   "name": "generation-subagents",
-  "version": "0.83.0",
-  "description": "generation-harness creation",
+  "version": "0.83.1",
+  "description": "Native Generation Harness adaptation of Pi Subagents 0.83.1",
   "type": "module",
   "license": "MIT",
   "author": "Nico Bailon",
@@ -11,22 +11,121 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./background-work": {
+      "types": "./dist/api/background-work.d.ts",
+      "import": "./dist/api/background-work.js"
+    },
+    "./external-job-provider": {
+      "types": "./dist/api/external-job-provider.d.ts",
+      "import": "./dist/api/external-job-provider.js"
+    },
+    "./external-runs": {
+      "types": "./dist/api/external-runs.d.ts",
+      "import": "./dist/api/external-runs.js"
+    },
+    "./agents": {
+      "types": "./dist/api/agents.d.ts",
+      "import": "./dist/api/agents.js"
+    },
+    "./inspectors": {
+      "types": "./dist/api/inspectors.d.ts",
+      "import": "./dist/api/inspectors.js"
+    },
+    "./delegation": {
+      "types": "./dist/api/delegation.d.ts",
+      "import": "./dist/api/delegation.js"
+    },
+    "./capability-ceiling": {
+      "types": "./dist/api/capability-ceiling.d.ts",
+      "import": "./dist/api/capability-ceiling.js"
+    },
+    "./workflow-resources": {
+      "types": "./dist/api/workflow-resources.d.ts",
+      "import": "./dist/api/workflow-resources.js"
+    },
+    "./required-child-extensions": {
+      "types": "./dist/api/required-child-extensions.d.ts",
+      "import": "./dist/api/required-child-extensions.js"
+    },
+    "./preflight": {
+      "types": "./dist/api/preflight.d.ts",
+      "import": "./dist/api/preflight.js"
+    },
+    "./control-channel": {
+      "types": "./dist/api/control-channel.d.ts",
+      "import": "./dist/api/control-channel.js"
+    },
+    "./intercom-bridge": {
+      "types": "./dist/api/intercom-bridge.d.ts",
+      "import": "./dist/api/intercom-bridge.js"
+    },
+    "./child-tool-plan": {
+      "types": "./dist/api/child-tool-plan.d.ts",
+      "import": "./dist/api/child-tool-plan.js"
+    },
+    "./shared-types": {
+      "types": "./dist/api/shared-types.d.ts",
+      "import": "./dist/api/shared-types.js"
+    },
+    "./project-panes": {
+      "types": "./dist/api/project-panes.d.ts",
+      "import": "./dist/api/project-panes.js"
     }
   },
   "files": [
     "dist",
-    "LICENSE"
+    "agents",
+    "skills",
+    "prompts",
+    "docs",
+    "*.mjs",
+    "workflow-script-worker.cjs",
+    "LICENSE",
+    "README.md",
+    "UPSTREAM-README.md",
+    "CHANGELOG.md",
+    "PARITY-AUDIT.md",
+    "UPSTREAM-PROVENANCE.json"
   ],
   "scripts": {
     "clean": "shx rm -rf dist",
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit -p tsconfig.build.json"
+    "build": "shx rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json",
+    "test": "node --import ./test/offline-bootstrap.mjs --test --test-concurrency=6 test/unit/*.test.ts test/native-parity.test.mjs test/native-integration.test.mjs test/package-install.test.mjs",
+    "test:differential": "node --import ./test/offline-bootstrap.mjs --test test/differential.test.mjs"
   },
   "peerDependencies": {
     "generation-harness-core": "1.4.0",
+    "generation-agent-core": "1.4.0",
+    "generation-ai": "1.4.0",
+    "generation-tui": "1.4.0",
     "typebox": "1.3.27"
   },
   "engines": {
     "node": ">=22.19.0"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "0.5.1",
+    "acorn": "8.18.0",
+    "jiti": "2.7.0",
+    "undici": "8.10.2",
+    "yaml": "2.9.0"
+  },
+  "generation": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "skills": [
+      "./skills"
+    ],
+    "prompts": [
+      "./prompts"
+    ]
+  },
+  "upstream": {
+    "repository": "https://github.com/nicobailon/pi-subagents",
+    "commit": "312082429bda07714fe0fe7729fe8d4935de4c5a",
+    "version": "0.83.1"
   }
 }
