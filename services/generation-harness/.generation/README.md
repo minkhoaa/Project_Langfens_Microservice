@@ -9,19 +9,30 @@ From `services/generation-harness`, run:
 
 ```sh
 GENERATION_HARNESS_OFFLINE=1 npm run start:reading -- --mode rpc
-# Equivalent: node scripts/run.mjs --cwd "$PWD" --approve --mode rpc
+# Equivalent: node scripts/run.mjs --reading --approve --mode rpc
 ```
 
-`start:reading` deliberately selects the project cwd and passes native `--approve`
-to trust this project's settings and executable resources **for this run**. Run it
-only from a trusted checkout. Cwd alone is insufficient: a fresh headless runtime
-otherwise suppresses project extensions at Core's project-trust gate. An explicit
-`--no-approve` still overrides this flag and leaves the IELTS extension unloaded.
-The default `npm start` launcher uses `.runtime/workspace`, **not** this directory;
-dropping a file in this project's `.generation/extensions` does not load it there.
-The native resource loader discovers `extensions/reading.ts` from the trusted
-project cwd. Native subagents discover `agents/*.md`; their child-only extension
-paths resolve relative to each agent file. The integration test launches the
+`start:reading` creates a UUID workspace under `.runtime/reading-runs/`, selects
+an IELTS author/editor role, and passes native `--approve` for its linked immutable
+domain resources **for this run**. Run only from a trusted checkout. The real
+per-run `.generation` root retains native discovery of the seven tools and four
+specialists without putting the model at repository cwd. `--no-approve` still
+leaves project tools unloaded; the explicit workspace guard remains installed.
+The four built-ins remain available with workspace-scoped filesystem guards;
+bash executes only a small read-only command language with the configured verified
+Bubblewrap capability (`config/reading.json`, overridable using `--reading-bwrap`),
+otherwise calls are denied. Authoring/test now accepts natural tasks and selected
+file snapshots in per-child folders. Independent tasks use `workflow:"parallel"`;
+ordered/parallel JSON plans use `workflow:"reading.plan"` or files in workflows/,
+expanded on the native workflow substrate. Strict-blind is an explicit profile;
+key debugging needs an operator-issued grant and a separate NON_BLIND child.
+Use `/reading-new` for a fresh native session AND folder; native `/new` cannot
+change cwd through the frozen public API. See the isolation guide for exact limits. Approved inputs are copied
+using `--reading-input`. See [READING-ISOLATION.md](READING-ISOLATION.md) for layout,
+permissions, revision/diagnostic retention and exact unsupported security cases.
+The default Development launcher still uses `.runtime/workspace`; Development
+`--cwd .` is not isolated Reading Mode. Native child-only extension paths resolve
+relative to each agent file. The integration test launches the
 actual npm entry point under the network guard, checks the seven registrations,
 and resolves all four agents through the public native launch-contract preflight.
 Model tool calls and child sessions separately exercise registration and invocation.
@@ -29,6 +40,11 @@ Model tool calls and child sessions separately exercise registration and invocat
 No providers, credentials, backend endpoints, publication, coordinator, retry
 engine or replacement runtime are added. Choose models through the existing
 harness configuration; offline tests use only the in-memory faux provider.
+Run `npm run config` for the Global Resources manager (Tab: Project; Space:
+toggle; F2: Settings), or `npm run config -- --scope project` to start with
+`.generation/settings.json` resource overrides.
+See [config/README.md](config/README.md) for model/endpoint settings and scopes.
+This panel never creates a model session or authorizes a live run.
 
 ## Native tools
 
@@ -129,16 +145,23 @@ Important distinctions:
 ## Native specialists and blind isolation
 
 `reading-generator`, `question-validator`, `blind-solver`, `semantic-reviewer`
-are native markdown configurations, with explicit tool allowlists and no file,
-shell, network or delegation tools. They explicitly select fresh context, replace
-the system prompt, disable inherited project/global context, skills and ambient
-extensions, and exclude automatically injected supervisor/intercom tools. Use
-existing `executeSubagent`/native subagent delegation and lifecycle APIs. Never
-explicitly override a blind launch to fork or widen its tools/context.
+remain the four native markdown definitions. Their original narrow tool lists
+remain the legacy VS fixture baseline. Reading launches add native project agent
+overrides for scoped read/write/edit (guarded bash on non-solvers) and a required
+child policy. Every authoring child gets its own actual cwd/input snapshots/output
+folder and fresh context, without parent/global context, skills, ambient extensions
+or supervisor/intercom tools. Strict-blind explicitly narrows the solver back to
+get_question_spec; default authoring is flexible and content blindness UNVERIFIED.
+Never fork/resume a key-exposed child and call it blind. See
+[READING-ISOLATION.md](READING-ISOLATION.md) for file-task/model/output/cwd options,
+operator-approved debug, frozen original answers and fresh strict rechecks.
 
-**Enforced Security Boundary:** the blind solver's input boundary is enforced
-fail-closed via a dedicated child-only native extension (`.generation/reading/blind-guard.ts`)
-loaded in child sessions via `subagentOnlyExtensions: ../extensions/reading.ts, ../reading/blind-guard.ts`.
+**Strict-blind/legacy fixture boundary:** strict projection input is enforced
+fail-closed by `.generation/reading/blind-guard.ts`. Legacy definitions load it
+through subagentOnlyExtensions; scoped Reading children install it only for the
+explicit strict-blind profile. Flexible authoring does not impose this schema
+or silently count as independent blind validation. Native child policy keeps
+file scopes separate regardless of content profile.
 Direct `executeSubagent` calls with private artifact fields, plain-text tasks,
 malformed projections, unknown question types, or tested smuggled/encoded markers
 are rejected before model invocation. The guard requires strict public projection

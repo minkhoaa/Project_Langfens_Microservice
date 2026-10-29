@@ -59,8 +59,15 @@ public static class GrpcSnapshotSanitizer
         foreach (var grp in sec.QuestionGroups)
         foreach (var q in grp.Questions)
         {
-            q.CompletionAccepts.Clear();
-            q.MatchPairs.Clear();
+            // Slot identities are public rendering metadata; accepted values
+            // and regex patterns must never reach the exam-taking client.
+            foreach (var blank in q.CompletionAccepts)
+            {
+                blank.AcceptedTexts.Clear();
+                blank.AcceptedRegex.Clear();
+            }
+            foreach (var pair in q.MatchPairs)
+                pair.AcceptedValues.Clear();
             q.OrderCorrects.Clear();
             q.ShortAnswerAcceptTexts.Clear();
             q.ShortAnswerAcceptRegex.Clear();

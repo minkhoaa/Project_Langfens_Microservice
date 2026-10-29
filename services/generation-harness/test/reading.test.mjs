@@ -80,6 +80,18 @@ function evidenceInput(g = group()) {
 
 registerVS3Tests({ fixture, names });
 
+test("VS4 UNCERTAIN remains outside native verify_evidence PASS/FAIL contract", async t => {
+  const { tools } = await fixture(t);
+  const input = evidenceInput();
+  const [legacy] = await tools([["verify_evidence", input]]);
+  assert.equal(legacy.status, "PASS");
+  assert.equal(legacy.ieltsQualityEstablished, false);
+  input.semanticReviews[0].verdict = "UNCERTAIN";
+  const [rejected] = await tools([["verify_evidence", input]]);
+  assert.equal(rejected.nativeError, true);
+  assert.match(rejected.text, /INPUT_SCHEMA_INVALID/);
+});
+
 test("all IELTS sources including child-only guards typecheck offline", () => {
   const result = spawnSync(process.execPath, [join(root, "node_modules/typescript/bin/tsc"), "--noEmit", "--project", join(root, ".generation/tsconfig.json")], {
     cwd: root, encoding: "utf8", timeout: 120000,
@@ -104,7 +116,7 @@ test("actual launcher cwd discovers seven tools and four native specialist defin
     assert.ok(!agent.tools.some(t => ["read", "bash", "edit", "write", "subagent"].includes(t)));
   }
   assert.deepEqual(agents.find(a => a.name === "blind-solver").tools, ["get_question_spec"]);
-  assert.match(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).scripts["start:reading"], /--cwd \./);
+  assert.match(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).scripts["start:reading"], /--reading/);
 });
 
 test("supported npm start:reading entry point discovers the extension in an actual guarded RPC process", t => {
@@ -119,7 +131,8 @@ import ${JSON.stringify(offline)};
 import cp from "node:child_process";
 import { syncBuiltinESMExports } from "node:module";
 const original = cp.spawn;
-cp.spawn = (command, args, options = {}) => original(command, args, { ...options, env: { ...(options.env ?? process.env), NODE_OPTIONS: ${JSON.stringify(`--import=${pathToFileURL(preload).href}`)} } });
+// Test-only trusted probe injection after application argument validation.
+cp.spawn = (command, args, options = {}) => original(command, args.some(a => a.endsWith('/dist/bundle/cli.js')) ? [...args, '--extension', ${JSON.stringify(probe)}] : args, { ...options, env: { ...(options.env ?? process.env), NODE_OPTIONS: ${JSON.stringify(`--import=${pathToFileURL(preload).href}`)} } });
 syncBuiltinESMExports();
 `);
   writeFileSync(probe, `
@@ -132,7 +145,7 @@ export default function probe(api) {
 }
 `);
   const launch = runtimeLaunch(["--cwd", root], { ...process.env, GENERATION_HARNESS_RUNTIME_DIR: join(temp, "runtime") });
-  const result = spawnSync("npm", ["run", "start:reading", "--", "--mode", "rpc", "--no-session", "--offline", "--extension", probe], {
+  const result = spawnSync("npm", ["run", "start:reading", "--", "--mode", "rpc", "--no-session", "--offline"], {
     cwd: root, env: { ...launch.env, NODE_OPTIONS: `--import=${pathToFileURL(preload).href}` }, encoding: "utf8", timeout: 20000,
     input: JSON.stringify({ type: "get_state", id: "reading-state" }) + "\n",
   });
@@ -141,7 +154,7 @@ export default function probe(api) {
   const messages = `${result.stdout}\n${result.stderr}`.split("\n").flatMap(line => { try { return [JSON.parse(line)]; } catch { return []; } });
   const discovery = messages.find(m => m.type === "reading-discovery");
   assert.ok(discovery, `${result.stdout}\n${result.stderr}`);
-  assert.equal(discovery.cwd, root);
+  assert.ok(discovery.cwd.startsWith(join(temp, "runtime", "reading-runs") + "/"));
   assert.equal(discovery.guarded, true);
   assert.equal(discovery.trusted, true);
   assert.deepEqual(discovery.tools.filter(n => names.includes(n)).sort(), [...names].sort());
@@ -157,13 +170,18 @@ export default function probe(api) {
     assert.equal(c.inheritGlobalContext, false);
     assert.equal(c.inheritSkills, false);
     assert.equal(c.tools.disableAmbientExtensions, true);
-    assert.ok(c.tools.extensionArgs.includes(join(root, ".generation/extensions/reading.ts")));
-    if (c.agent.name === "blind-solver") assert.deepEqual(c.tools.effectiveAllowlist, ["get_question_spec"]);
+    assert.ok(c.tools.extensionArgs.some(path => path.endsWith(".generation/extensions/reading.ts")));
+    assert.ok(c.tools.extensionArgs.some(path => path.endsWith(".generation/reading/child-guard.ts")));
+    for (const name of ["read", "write", "edit"]) assert.ok(c.tools.effectiveAllowlist.includes(name));
+    if (c.agent.name === "blind-solver") {
+      assert.deepEqual(c.tools.effectiveAllowlist, ["get_question_spec", "read", "write", "edit"]);
+      // Strict-blind narrows this list at child startup using its protected scope.
+    }
   }
   assert.equal(messages.find(m => m.id === "reading-state")?.success, true);
   assert.ok(!messages.some(m => m.type === "extension_error"), JSON.stringify(messages));
   assert.doesNotMatch(result.stderr, /NetworkBlocked|Failed to load|Extension.*error/i);
-  const denied = spawnSync("npm", ["run", "start:reading", "--", "--no-approve", "--mode", "rpc", "--no-session", "--offline", "--extension", probe], {
+  const denied = spawnSync("npm", ["run", "start:reading", "--", "--no-approve", "--mode", "rpc", "--no-session", "--offline"], {
     cwd: root, env: { ...launch.env, NODE_OPTIONS: `--import=${pathToFileURL(preload).href}` }, encoding: "utf8", timeout: 20000,
     input: JSON.stringify({ type: "get_state", id: "denied-state" }) + "\n",
   });

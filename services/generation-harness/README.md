@@ -154,11 +154,34 @@ npm run start:tui
 # Start headless JSON-lines RPC mode
 npm run start:rpc
 
+# IELTS author/editor role in a per-run workspace (not a coding agent)
+npm run start:reading
+
 # Run development mode directly against TypeScript sources
 npm run dev
 ```
 
 ## Provider & Model Configuration
+
+```sh
+npm run config                         # Global Resources TUI; Tab: Project, F2: Settings
+npm run config -- --show                # Preferences + native resource inventory
+npm run config -- --settings            # Open only the preferences panel
+npm run config -- --scope project       # Start in Project Resources
+npm run config -- --set defaultProvider openai
+npm run config -- --set defaultModel YOUR_EXACT_MODEL_ID
+npm run config -- --set defaultThinkingLevel high
+```
+
+The config command defaults to isolated user settings (`.runtime/agent/settings.json`);
+project overrides live in `.generation/settings.json` and require a trusted project
+cwd, such as `npm run start:reading`. Native model endpoints/sampling belong in the
+isolated agent's `models.json`, not settings. No model session, credential discovery
+or inference is performed by `npm run config`. Space toggles native resource filters;
+F2 keeps runtime Settings separate. The frozen Core's `config` CLI stays disabled;
+this adapter uses public native package discovery, settings, and TUI components.
+See [.generation/config/README.md](.generation/config/README.md) for scopes, endpoint
+examples, validation, and VS4's unchanged offline/authorization boundary.
 
 The harness resolves provider credentials from standard environment variables or stores them locally in `.runtime/agent/auth.json` via the `/login` interactive command.
 
@@ -206,6 +229,33 @@ In interactive TUI mode (`npm run start:tui`):
 | `npm test -w generation-mcp` | **PASS** | 5 test files, 45 tests passed. |
 | `npm test -w generation-agent-core` | **PASS** | 4 test files, 92 tests passed. |
 | `npm test -w generation-ai` | **PASS** | 139 test files passed, 7 skipped, 0 failed; 1329 tests passed, 30 skipped. |
+
+## Reading Mode isolation
+
+`start:reading` keeps `read`, `bash`, `edit`, `write` plus the seven IELTS tools and
+four native specialists. Each launch owns `.runtime/reading-runs/<uuid>/` with
+approved input snapshots, drafts, reviews, revisions, proposed final artifacts
+and protected revision/diagnostic history. Public extension hooks restrict model
+filesystem access; Development behavior and all `packages/*` remain unchanged.
+Children now have independent native cwd/input/output folders. Authoring accepts
+natural tasks and file snapshots; strict-blind is opt-in. `/reading-debug` grants
+selected key snapshots to a separate NON_BLIND debugger only after an original
+solve is frozen; a recheck starts a fresh child without debug history. Independent
+jobs use `workflow:"parallel"`; ordered stages use `reading.plan`/saved JSON plans
+on native `runs.all`. Arbitrary JS workflows remain blocked because public hooks
+cannot gate their native host-command launch controls. `/reading-new` creates a
+new session AND folder; native `/new` cannot rotate cwd in the frozen SDK and is
+cancelled with guidance instead of silently sharing an old folder. Bash permits only
+read-only `pwd`/`ls`/`wc` commands inside verified Linux Bubblewrap, selected by
+`.generation/config/reading.json` (default `/usr/bin/bwrap`) or `--reading-bwrap`,
+with actionable setup errors and no install/unsandboxed fallback. PASS proceeds
+to review, not acceptance/publication; UNCERTAIN requires human adjudication.
+
+See [.generation/READING-ISOLATION.md](.generation/READING-ISOLATION.md) for usage
+and precise limitations: hooks are not whole-process isolation, do not protect
+against malicious trusted extensions or external same-user filesystem races,
+and Core lacks a mandatory-extension startup gate. Reading uses fresh local
+agent configuration rather than inheriting Development extensions/shell settings.
 
 ## Actual Limitations
 

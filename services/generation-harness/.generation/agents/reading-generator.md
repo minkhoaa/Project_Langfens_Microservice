@@ -4,7 +4,7 @@ description: Generate requested canonical Academic Reading QuestionGroup(s) for 
 tools: get_question_spec, validate_question, validate_group
 excludeTools: contact_supervisor, intercom
 extensions:
-subagentOnlyExtensions: ../extensions/reading.ts
+subagentOnlyExtensions: ../extensions/reading.ts, ../reading/workspace-guard.ts
 systemPromptMode: replace
 inheritProjectContext: false
 inheritGlobalContext: false

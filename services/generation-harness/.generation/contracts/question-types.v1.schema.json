@@ -1,0 +1,625 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:langfens:question-types:1.0.0",
+  "title": "Langfens objective IELTS question types — canonical authoring contract v1",
+  "description": "Canonical private authoring Question for the 19 current platform types. Validate student artifacts with #/$defs/StudentQuestion, never with this private root. This specification is not an admin request, database export, or claim that current consumers are compatible. Cross-field semantic rules in x-langfens.semanticRules are mandatory in addition to JSON Schema validation.",
+  "oneOf": [
+    { "$ref": "#/$defs/MULTIPLE_CHOICE_SINGLE" },
+    { "$ref": "#/$defs/MULTIPLE_CHOICE_MULTIPLE" },
+    { "$ref": "#/$defs/TRUE_FALSE_NOT_GIVEN" },
+    { "$ref": "#/$defs/YES_NO_NOT_GIVEN" },
+    { "$ref": "#/$defs/MULTIPLE_CHOICE_SINGLE_IMAGE" },
+    { "$ref": "#/$defs/SUMMARY_COMPLETION" },
+    { "$ref": "#/$defs/TABLE_COMPLETION" },
+    { "$ref": "#/$defs/NOTE_COMPLETION" },
+    { "$ref": "#/$defs/FORM_COMPLETION" },
+    { "$ref": "#/$defs/SENTENCE_COMPLETION" },
+    { "$ref": "#/$defs/SHORT_ANSWER" },
+    { "$ref": "#/$defs/DIAGRAM_LABEL" },
+    { "$ref": "#/$defs/MAP_LABEL" },
+    { "$ref": "#/$defs/MATCHING_HEADING" },
+    { "$ref": "#/$defs/MATCHING_INFORMATION" },
+    { "$ref": "#/$defs/MATCHING_FEATURES" },
+    { "$ref": "#/$defs/MATCHING_ENDINGS" },
+    { "$ref": "#/$defs/CLASSIFICATION" },
+    { "$ref": "#/$defs/FLOW_CHART" }
+  ],
+  "$defs": {
+    "NonBlankText": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "LocalOrPersistedId": {
+      "type": "string", "minLength": 1, "pattern": "\\S",
+      "description": "Stable authoring identity: local ID or persisted UUID. A verified identity map to actual backend UUIDs is required before building submission/admin payloads. Never derive UUIDs from option positions."
+    },
+    "PositiveIndex": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+    "QuestionType": {
+      "type": "string",
+      "enum": [
+        "MULTIPLE_CHOICE_SINGLE", "MULTIPLE_CHOICE_MULTIPLE", "TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN", "MULTIPLE_CHOICE_SINGLE_IMAGE",
+        "SUMMARY_COMPLETION", "TABLE_COMPLETION", "NOTE_COMPLETION", "FORM_COMPLETION", "SENTENCE_COMPLETION", "SHORT_ANSWER",
+        "DIAGRAM_LABEL", "MAP_LABEL", "MATCHING_HEADING", "MATCHING_INFORMATION", "MATCHING_FEATURES", "MATCHING_ENDINGS", "CLASSIFICATION", "FLOW_CHART"
+      ]
+    },
+    "AcceptedTexts": {
+      "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/NonBlankText" },
+      "description": "Accepted alternatives for one scoring target, not additional answer slots."
+    },
+    "BlankTextMap": {
+      "type": "object", "minProperties": 1,
+      "propertyNames": { "pattern": "^[1-9][0-9]*$" },
+      "additionalProperties": { "$ref": "#/$defs/AcceptedTexts" },
+      "description": "Positive decimal blank IDs, without a blank-q prefix or leading zero. IDs need not start at 1 and are scoped to this Question."
+    },
+    "BlankRegexMap": {
+      "type": "object", "minProperties": 1,
+      "propertyNames": { "pattern": "^[1-9][0-9]*$" },
+      "additionalProperties": { "$ref": "#/$defs/AcceptedTexts" },
+      "description": ".NET regex patterns, not JavaScript RegExp. Canonical authoring requires accepted text for every regex-bearing blank as well."
+    },
+    "MatchPair": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "prefixItems": [ { "$ref": "#/$defs/NonBlankText" }, { "$ref": "#/$defs/NonBlankText" } ],
+      "items": false,
+      "description": "[gradingKey, displayLabel]. Classification also uses both elements. The current .NET grader accepts either value; do not assume the label is excluded from grading. Additional aliases and one-element legacy arrays are not canonical authoring."
+    },
+    "MatchMap": {
+      "type": "object", "minProperties": 1,
+      "propertyNames": { "pattern": "^[1-9][0-9]*$" },
+      "additionalProperties": { "$ref": "#/$defs/MatchPair" }
+    },
+    "FlowKey": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "PrivateOption": {
+      "type": "object", "additionalProperties": false,
+      "required": [ "id", "idx", "contentMd", "isCorrect" ],
+      "properties": {
+        "id": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "idx": { "$ref": "#/$defs/PositiveIndex" },
+        "contentMd": { "$ref": "#/$defs/NonBlankText" },
+        "isCorrect": { "type": "boolean" },
+        "imageUrl": { "$ref": "#/$defs/NonBlankText" },
+        "altText": { "$ref": "#/$defs/NonBlankText" }
+      },
+      "dependentRequired": { "imageUrl": [ "altText" ], "altText": [ "imageUrl" ] }
+    },
+    "PublicOption": {
+      "type": "object", "additionalProperties": false,
+      "required": [ "id", "idx", "contentMd" ],
+      "properties": {
+        "id": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "idx": { "$ref": "#/$defs/PositiveIndex" },
+        "contentMd": { "$ref": "#/$defs/NonBlankText" },
+        "imageUrl": { "$ref": "#/$defs/NonBlankText" },
+        "altText": { "$ref": "#/$defs/NonBlankText" }
+      },
+      "dependentRequired": { "imageUrl": [ "altText" ], "altText": [ "imageUrl" ] }
+    },
+    "QuestionBase": {
+      "type": "object",
+      "required": [ "id", "sectionId", "idx", "type", "skill", "difficulty", "promptMd", "options" ],
+      "properties": {
+        "id": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "sectionId": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "groupId": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "idx": { "$ref": "#/$defs/PositiveIndex" },
+        "type": { "$ref": "#/$defs/QuestionType" },
+        "skill": { "enum": [ "READING", "LISTENING" ] },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "promptMd": { "$ref": "#/$defs/NonBlankText" },
+        "explanationMd": { "$ref": "#/$defs/NonBlankText" },
+        "imageUrl": { "$ref": "#/$defs/NonBlankText" },
+        "options": { "type": "array", "items": { "$ref": "#/$defs/PrivateOption" } }
+      },
+      "description": "Private authoring base. Optional fields are omitted, not null. Group membership is optional because the backend permits ungrouped Questions. Final type schemas close unevaluated properties. Writing/Speaking and arbitrary extension fields are outside this contract."
+    },
+    "SingleChoiceQuestion": {
+      "allOf": [ { "$ref": "#/$defs/QuestionBase" } ],
+      "properties": {
+        "options": {
+          "minItems": 2,
+          "contains": { "type": "object", "required": [ "isCorrect" ], "properties": { "isCorrect": { "const": true } } },
+          "minContains": 1, "maxContains": 1
+        }
+      }
+    },
+    "MultipleChoiceQuestion": {
+      "allOf": [ { "$ref": "#/$defs/QuestionBase" } ],
+      "properties": {
+        "options": {
+          "minItems": 3,
+          "contains": { "type": "object", "required": [ "isCorrect" ], "properties": { "isCorrect": { "const": true } } },
+          "minContains": 2
+        }
+      },
+      "description": "At least two correct choices; at least one incorrect distractor is enforced by the concrete type."
+    },
+    "CompletionQuestion": {
+      "allOf": [ { "$ref": "#/$defs/QuestionBase" } ],
+      "required": [ "blankAcceptTexts" ],
+      "properties": {
+        "options": { "maxItems": 0 },
+        "blankAcceptTexts": { "$ref": "#/$defs/BlankTextMap" },
+        "blankAcceptRegex": { "$ref": "#/$defs/BlankRegexMap" }
+      }
+    },
+    "MatchingQuestion": {
+      "allOf": [ { "$ref": "#/$defs/QuestionBase" } ],
+      "required": [ "matchPairs" ],
+      "properties": {
+        "options": { "minItems": 2, "items": { "properties": { "isCorrect": { "const": false } } } },
+        "matchPairs": { "$ref": "#/$defs/MatchMap" }
+      },
+      "description": "Options are a public bank; isCorrect is always false. Correct assignments exist only in private matchPairs."
+    },
+    "MatchingExerciseQuestion": {
+      "allOf": [ { "$ref": "#/$defs/MatchingQuestion" } ],
+      "properties": { "options": { "minItems": 3 }, "matchPairs": { "minProperties": 2 } },
+      "description": "New MATCHING_* authoring is a complete exercise with at least two explicit numbered targets and an unused bank distractor. The whole Question is still one scoring unit."
+    },
+    "MULTIPLE_CHOICE_SINGLE": {
+      "allOf": [ { "$ref": "#/$defs/SingleChoiceQuestion" } ],
+      "properties": { "type": { "const": "MULTIPLE_CHOICE_SINGLE" } },
+      "unevaluatedProperties": false
+    },
+    "MULTIPLE_CHOICE_MULTIPLE": {
+      "allOf": [ { "$ref": "#/$defs/MultipleChoiceQuestion" } ],
+      "properties": {
+        "type": { "const": "MULTIPLE_CHOICE_MULTIPLE" },
+        "options": {
+          "contains": { "type": "object", "required": [ "isCorrect" ], "properties": { "isCorrect": { "const": false } } },
+          "minContains": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "TRUE_FALSE_NOT_GIVEN": {
+      "allOf": [ { "$ref": "#/$defs/SingleChoiceQuestion" } ],
+      "properties": {
+        "type": { "const": "TRUE_FALSE_NOT_GIVEN" },
+        "skill": { "const": "READING" },
+        "options": {
+          "minItems": 3, "maxItems": 3,
+          "items": { "properties": { "contentMd": { "enum": [ "True", "False", "Not Given" ] } } },
+          "allOf": [
+            { "contains": { "required": [ "contentMd" ], "properties": { "contentMd": { "const": "True" } } } },
+            { "contains": { "required": [ "contentMd" ], "properties": { "contentMd": { "const": "False" } } } },
+            { "contains": { "required": [ "contentMd" ], "properties": { "contentMd": { "const": "Not Given" } } } }
+          ]
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "YES_NO_NOT_GIVEN": {
+      "allOf": [ { "$ref": "#/$defs/SingleChoiceQuestion" } ],
+      "properties": {
+        "type": { "const": "YES_NO_NOT_GIVEN" },
+        "skill": { "const": "READING" },
+        "options": {
+          "minItems": 3, "maxItems": 3,
+          "items": { "properties": { "contentMd": { "enum": [ "Yes", "No", "Not Given" ] } } },
+          "allOf": [
+            { "contains": { "required": [ "contentMd" ], "properties": { "contentMd": { "const": "Yes" } } } },
+            { "contains": { "required": [ "contentMd" ], "properties": { "contentMd": { "const": "No" } } } },
+            { "contains": { "required": [ "contentMd" ], "properties": { "contentMd": { "const": "Not Given" } } } }
+          ]
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "MULTIPLE_CHOICE_SINGLE_IMAGE": {
+      "allOf": [ { "$ref": "#/$defs/SingleChoiceQuestion" } ],
+      "properties": { "type": { "const": "MULTIPLE_CHOICE_SINGLE_IMAGE" } },
+      "anyOf": [
+        { "required": [ "imageUrl" ] },
+        { "properties": { "options": { "items": { "required": [ "imageUrl", "altText" ] } } } }
+      ],
+      "unevaluatedProperties": false,
+      "description": "Either a question-context image or an image and alt text on every option. Never require a redundant question image when the images belong to options."
+    },
+    "SUMMARY_COMPLETION": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "properties": { "type": { "const": "SUMMARY_COMPLETION" } },
+      "unevaluatedProperties": false
+    },
+    "TABLE_COMPLETION": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "properties": { "type": { "const": "TABLE_COMPLETION" } },
+      "unevaluatedProperties": false
+    },
+    "NOTE_COMPLETION": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "properties": { "type": { "const": "NOTE_COMPLETION" } },
+      "unevaluatedProperties": false
+    },
+    "FORM_COMPLETION": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "properties": { "type": { "const": "FORM_COMPLETION" } },
+      "unevaluatedProperties": false
+    },
+    "SENTENCE_COMPLETION": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "properties": { "type": { "const": "SENTENCE_COMPLETION" } },
+      "unevaluatedProperties": false
+    },
+    "SHORT_ANSWER": {
+      "allOf": [ { "$ref": "#/$defs/QuestionBase" } ],
+      "required": [ "shortAnswerAcceptTexts" ],
+      "properties": {
+        "type": { "const": "SHORT_ANSWER" },
+        "options": { "maxItems": 0 },
+        "shortAnswerAcceptTexts": { "$ref": "#/$defs/AcceptedTexts" },
+        "shortAnswerAcceptRegex": { "$ref": "#/$defs/AcceptedTexts" }
+      },
+      "unevaluatedProperties": false
+    },
+    "DIAGRAM_LABEL": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "required": [ "imageUrl" ],
+      "properties": { "type": { "const": "DIAGRAM_LABEL" } },
+      "unevaluatedProperties": false
+    },
+    "MAP_LABEL": {
+      "allOf": [ { "$ref": "#/$defs/CompletionQuestion" } ],
+      "required": [ "imageUrl" ],
+      "properties": { "type": { "const": "MAP_LABEL" } },
+      "unevaluatedProperties": false
+    },
+    "MATCHING_HEADING": {
+      "allOf": [ { "$ref": "#/$defs/MatchingExerciseQuestion" } ],
+      "properties": { "type": { "const": "MATCHING_HEADING" } },
+      "unevaluatedProperties": false
+    },
+    "MATCHING_INFORMATION": {
+      "allOf": [ { "$ref": "#/$defs/MatchingExerciseQuestion" } ],
+      "properties": {
+        "type": { "const": "MATCHING_INFORMATION" },
+        "wordList": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/NonBlankText" } }
+      },
+      "unevaluatedProperties": false,
+      "description": "Canonical task is paragraph matching using explicit numbered statements and the options bank. An optional public wordList is preserved as data, not permission to reinterpret this type as completion; current admin/gRPC propagation is unsupported."
+    },
+    "MATCHING_FEATURES": {
+      "allOf": [ { "$ref": "#/$defs/MatchingExerciseQuestion" } ],
+      "properties": { "type": { "const": "MATCHING_FEATURES" } },
+      "unevaluatedProperties": false
+    },
+    "MATCHING_ENDINGS": {
+      "allOf": [ { "$ref": "#/$defs/MatchingExerciseQuestion" } ],
+      "properties": { "type": { "const": "MATCHING_ENDINGS" } },
+      "unevaluatedProperties": false
+    },
+    "CLASSIFICATION": {
+      "allOf": [ { "$ref": "#/$defs/MatchingQuestion" } ],
+      "properties": { "type": { "const": "CLASSIFICATION" } },
+      "unevaluatedProperties": false
+    },
+    "FLOW_CHART": {
+      "allOf": [ { "$ref": "#/$defs/QuestionBase" } ],
+      "required": [ "orderCorrects" ],
+      "properties": {
+        "type": { "const": "FLOW_CHART" },
+        "options": { "maxItems": 0 },
+        "orderCorrects": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/FlowKey" } }
+      },
+      "unevaluatedProperties": false,
+      "description": "Platform process ordering only. Standard IELTS flow-chart blank completion is not represented by this type. BlankAcceptTexts and MatchPairs are forbidden."
+    },
+    "FlowNode": {
+      "type": "object", "additionalProperties": false,
+      "required": [ "key", "label" ],
+      "properties": { "key": { "$ref": "#/$defs/FlowKey" }, "label": { "$ref": "#/$defs/NonBlankText" } }
+    },
+    "StudentQuestion": {
+      "type": "object", "additionalProperties": false,
+      "required": [ "id", "idx", "type", "skill", "difficulty", "promptMd", "options" ],
+      "properties": {
+        "id": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "sectionId": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "groupId": { "$ref": "#/$defs/LocalOrPersistedId" },
+        "idx": { "$ref": "#/$defs/PositiveIndex" },
+        "type": { "$ref": "#/$defs/QuestionType" },
+        "skill": { "enum": [ "READING", "LISTENING" ] },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "promptMd": { "$ref": "#/$defs/NonBlankText" },
+        "imageUrl": { "$ref": "#/$defs/NonBlankText" },
+        "options": { "type": "array", "items": { "$ref": "#/$defs/PublicOption" } },
+        "wordList": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/NonBlankText" } },
+        "flowChartNodes": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/FlowNode" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "enum": [ "MULTIPLE_CHOICE_SINGLE", "MULTIPLE_CHOICE_MULTIPLE", "TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN", "MULTIPLE_CHOICE_SINGLE_IMAGE", "MATCHING_HEADING", "MATCHING_INFORMATION", "MATCHING_FEATURES", "MATCHING_ENDINGS", "CLASSIFICATION" ] } } },
+          "then": { "properties": { "options": { "minItems": 2 } } },
+          "else": { "properties": { "options": { "maxItems": 0 } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "FLOW_CHART" } } },
+          "then": { "required": [ "flowChartNodes" ] },
+          "else": { "not": { "required": [ "flowChartNodes" ] } }
+        },
+        {
+          "if": { "properties": { "type": { "enum": [ "DIAGRAM_LABEL", "MAP_LABEL" ] } } },
+          "then": { "required": [ "imageUrl" ] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "MULTIPLE_CHOICE_SINGLE_IMAGE" } } },
+          "then": { "anyOf": [ { "required": [ "imageUrl" ] }, { "properties": { "options": { "items": { "required": [ "imageUrl", "altText" ] } } } } ] }
+        },
+        {
+          "if": { "properties": { "type": { "enum": [ "TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN" ] } } },
+          "then": { "properties": { "skill": { "const": "READING" }, "options": { "minItems": 3, "maxItems": 3 } } }
+        },
+        {
+          "if": { "not": { "properties": { "type": { "const": "MATCHING_INFORMATION" } } } },
+          "then": { "not": { "required": [ "wordList" ] } }
+        }
+      ],
+      "description": "Canonical student/blind-solver artifact, not the exact current HTTP/proto DTO. No grading keys, correctness flags, explanations, model answers, evidence or reviews, even if null/empty. Semantic privacy and faithful projection checks remain mandatory."
+    },
+    "Uuid": { "type": "string", "format": "uuid", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" },
+    "SubmissionBase": {
+      "type": "object",
+      "required": [ "questionId", "sectionId", "selectedOptionIds" ],
+      "properties": {
+        "questionId": { "$ref": "#/$defs/Uuid" },
+        "sectionId": { "$ref": "#/$defs/Uuid" },
+        "selectedOptionIds": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/Uuid" } }
+      }
+    },
+    "SingleChoiceSubmission": {
+      "allOf": [ { "$ref": "#/$defs/SubmissionBase" } ],
+      "properties": { "selectedOptionIds": { "minItems": 1, "maxItems": 1 } },
+      "unevaluatedProperties": false
+    },
+    "MultipleChoiceSubmission": {
+      "allOf": [ { "$ref": "#/$defs/SubmissionBase" } ],
+      "properties": { "selectedOptionIds": { "minItems": 2 } },
+      "unevaluatedProperties": false
+    },
+    "TextSubmission": {
+      "allOf": [ { "$ref": "#/$defs/SubmissionBase" } ],
+      "required": [ "textAnswer" ],
+      "properties": { "selectedOptionIds": { "maxItems": 0 }, "textAnswer": { "type": "string" } },
+      "unevaluatedProperties": false,
+      "description": "Completed textual answer or an explicit text clear. For completion/matching/flow, parse textAnswer and validate the decoded value against the registry's decodedAnswerSchema. JSON Schema alone does not parse JSON embedded inside a string."
+    },
+    "ClearSubmission": {
+      "allOf": [ { "$ref": "#/$defs/SubmissionBase" } ],
+      "required": [ "textAnswer" ],
+      "properties": { "selectedOptionIds": { "maxItems": 0 }, "textAnswer": { "const": "" } },
+      "unevaluatedProperties": false,
+      "description": "Explicitly clear selected and textual state. Absence/null is not a clear command. Applicable to every type; partial autosave validation is separate from completed-answer validation."
+    },
+    "CompletionAnswerValue": {
+      "type": "object", "minProperties": 1, "propertyNames": { "pattern": "^[1-9][0-9]*$" }, "additionalProperties": { "type": "string" }
+    },
+    "MatchingAnswerValue": {
+      "type": "object", "minProperties": 1, "propertyNames": { "pattern": "^[1-9][0-9]*$" }, "additionalProperties": { "type": "string" }
+    },
+    "ShortAnswerValue": { "type": "string" },
+    "FlowAnswerValue": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/FlowKey" } }
+  },
+  "x-langfens": {
+    "contractVersion": "1.0.0",
+    "scope": "Canonical new authoring and projection for the 19 objective IELTS Reading/Listening platform types. Not a Writing/Speaking contract or a database migration.",
+    "status": "CANONICAL_SPECIFICATION_NOT_YET_INTEGRATED",
+    "consumerCompatibility": "UNVERIFIED",
+    "sourceOfTruthPolicy": {
+      "normativeArtifact": "This file: $defs defines structural requirements; registry and semanticRules define mandatory cross-field behavior.",
+      "typeNames": "The 19 values must remain identical to the current shared backend QuestionType constants. Unknown types fail closed; never fall back to a completion schema.",
+      "wireCompatibility": "Existing backend DTOs and graders are not changed by this specification. Explicit adapters and actual consumer tests are required; never POST this private authoring object directly to an admin endpoint.",
+      "legacyData": "Legacy examples, nullable fields, missing IDs, scalar MatchPairs, zero-based classification keys, underscore blanks and candidate answer fields require explicit versioned import diagnostics, not silent coercion or canonical rule changes.",
+      "nullPolicy": "New authoring omits unused optional fields. Do not send null, empty unrelated answer families, or isCorrect into student artifacts.",
+      "gradingAuthority": "The actual .NET attempt grader is authoritative for existing backend behavior. Schema validity is not grading parity or IELTS semantic correctness.",
+      "versioning": "Breaking representation, type, key, scoring or semantic changes require a new major version. Never silently rewrite v1 or enable publication on schema PASS."
+    },
+    "sources": {
+      "sharedTypes": "services/_shared/Shared.PublicContracts/Contracts/Exam/Enums/QuestionType.cs",
+      "adminDto": "services/exam-service/Contracts/Exams/Dto.Admin.cs",
+      "adminValidation": "services/exam-service/Features/Exams/AdminEndpoint/QuestionEndpoint/AdminQuestion_Service.cs::ValidatePayload",
+      "grading": "services/attempt-service/Features/Helpers/{Grader.cs,GraderHelper.cs,BuildQuestionIdSet.cs,QuestionGraderRegistration.cs}",
+      "delivery": "services/exam-service/Application/Common/{ProtoHelper.cs,PaperWideNormalizer.ExamService.cs}",
+      "frontendContract": "../langfens-fe-app/src/app/admin/_lib/{autogenContract.json,questionSchemas.ts,validation.ts}",
+      "historicalMirror": "autonomous-generation:services/ai-service/app/prompts/{autogen_data.py,autogen_contract.json}",
+      "excludedCandidateContract": "autonomous-generation:services/generation-service/app/contracts/questions.py uses a different candidate representation and family registry; it is not this wire/authoring schema."
+    },
+    "referenceEvidence": {
+      "status": "VERIFIED_PUBLIC_API_ONLY",
+      "examId": "11111111-1111-1111-1111-111111111111",
+      "title": "IELTS Academic Reading — Standard Test (19 Types)",
+      "slug": "ielts-reading-standard-test",
+      "observedOn": "2026-10-29",
+      "publicSectionCount": 5,
+      "publicQuestionCount": 25,
+      "publicOptionCount": 65,
+      "publicTypeCount": 18,
+      "missingReferenceTypes": [ "SUMMARY_COMPLETION" ],
+      "persistedPrivateFields": "BLOCKED",
+      "persistedSectionAndGroupIdentities": "BLOCKED",
+      "productionDeploymentProvenance": "UNVERIFIED",
+      "rendererSubmissionGraderRoundTrip": "UNVERIFIED",
+      "fixturePolicy": "No private production keys or synthetic production fixtures are embedded. Historical source examples are not current database exports; SUMMARY_COMPLETION is a source-contract-only specialization.",
+      "publicGetPath": "/api/public/exam/getby/ielts-reading-standard-test",
+      "publicContentSha256WithoutGeneratedGroupIds": "3c57d01e7611768ca09ca3dc43b8225c0bb85da4334b4cb60b0f1657f14184b4",
+      "hashNormalization": "Take the public response data object, remove only each section.questionGroups[].id, serialize with Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False), encode UTF-8 and hash SHA-256. Preserve array order and all other fields."
+    },
+    "canonicalPolicyBeyondBackendValidation": [
+      "Explicit id, sectionId, skill, difficulty and options are required in private authoring; option IDs may be local but must be mapped before persistence/submission.",
+      "Unused key families and Reading modelAnswers/evidence/review fields are forbidden here; attach private evidence and reviews in a separate versioned artifact.",
+      "Options are empty for completion, short-answer and flow ordering. Matching pools have isCorrect=false.",
+      "Every MatchPairs value has exactly two strings, including CLASSIFICATION; current backend validation permits longer arrays but not canonical one-element classification arrays.",
+      "New MATCHING_* exercises have at least two targets and one unused distractor. MC multiple has at least two correct choices and one distractor.",
+      "Canonical truth questions are Reading-only and use the exact displayed casing in the schemas and all three distinct labels. Legacy skill/case normalization belongs in explicit import adapters.",
+      "Every completion blank has accepted text; regexes are optional supplements and require actual .NET validation.",
+      "New prompts use explicit [N] blank markers and numbered matching targets. Descriptive Diagram/Map markers may accompany but never replace explicit blank IDs in new authoring.",
+      "DIAGRAM_LABEL/MAP_LABEL require supplied question media; option media requires altText. Media presence does not establish renderability or licensing."
+    ],
+    "indexing": {
+      "questionIdx": "Paper-wide 1-based Question ordinal after section/group ordering. Not the ordinal of each blank or selection.",
+      "optionIdx": "1..N within the containing Question; unique and contiguous.",
+      "groupIdx": "1..N within the containing section; group bounds count Question rows, not slots.",
+      "blankAndTargetIds": "Exact positive decimal strings scoped to a Question. May start above 1. Do not force them to equal Question.idx or renumber classification statements minus one.",
+      "completionPositionalFallback": "Current backend sorts union(text keys, regex keys) by Int64 then ordinal fallback. Canonical submissions use keyed JSON, not positional fallback.",
+      "groupMembership": "Optional at authoring boundary; if present, must resolve to a real containing group. Synthesized delivery group IDs are not evidence of persisted rows."
+    },
+    "scoring": {
+      "status": "VERIFIED_SOURCE_ONLY_FOR_REFERENCE_APPLICATION",
+      "unit": "Question",
+      "questionPoints": 1,
+      "partialCredit": false,
+      "rule": "Current answer-key builders assign one point per Question. Every required slot/selection/pair/order position must match to receive that point; multiple slots do not become independent IELTS marks.",
+      "paperPolicy": "This question contract does not impose 3 sections/40 Questions on the 5-section/25-Question reference. A standard Academic paper profile is separate.",
+      "ieltsSemanticCorrectness": "UNVERIFIED_BY_SCHEMA"
+    },
+    "submissionPolicy": {
+      "completedAnswer": "Select the family's submissionSchema, then apply its decodedAnswerSchema and Question-bound semantic rules. Completed-choice schemas intentionally reject partial selection counts.",
+      "clearSubmissionSchema": "#/$defs/ClearSubmission",
+      "clearHandling": "Accept an explicit ClearSubmission for every type before checking completed-answer completeness; clear is not a correctly answered Question.",
+      "partialAutosave": "Partial answers are allowed by the application, but completed-answer schemas are not an autosave gate. Validate primitive types, actual UUID membership, exact slot identity and absence of foreign keys without demanding all slots are filled. The dedicated partial-autosave adapter is not implemented by this schema."
+    },
+    "answerFamilies": {
+      "single": { "submissionSchema": "#/$defs/SingleChoiceSubmission", "answerSlotCount": "1", "comparison": "Selected UUID belongs to this Question and identifies its one correct option. Current legacy grader also accepts GUID/content text fallback; canonical authoring/submission does not depend on that fallback." },
+      "multiple": { "submissionSchema": "#/$defs/MultipleChoiceSubmission", "answerSlotCount": "count(options where isCorrect=true)", "comparison": "Exact UUID set equality; order irrelevant. Canonical arrays contain unique UUIDs." },
+      "completion": { "submissionSchema": "#/$defs/TextSubmission", "decodedAnswerSchema": "#/$defs/CompletionAnswerValue", "answerSlotCount": "cardinality(union(blankAcceptTexts.keys, blankAcceptRegex.keys))", "comparison": "JSON textAnswer maps exact blank IDs to text. All slots must match TextNorm.Normalize or a valid .NET regex; extra/unknown submitted keys are rejected by canonical semantic validation." },
+      "short": { "submissionSchema": "#/$defs/TextSubmission", "decodedAnswerSchema": "#/$defs/ShortAnswerValue", "answerSlotCount": "1", "comparison": "Plain textAnswer, not JSON-wrapped text; accepted alternatives use backend TextNorm.Normalize and optional .NET regex." },
+      "matching": { "submissionSchema": "#/$defs/TextSubmission", "decodedAnswerSchema": "#/$defs/MatchingAnswerValue", "answerSlotCount": "cardinality(matchPairs.keys)", "comparison": "JSON textAnswer maps exact displayed target IDs to bank grading keys. Current grader accepts any pair value case-insensitively without trimming JSON values. Scalar fallback exists only for a single legacy pair." },
+      "flow": { "submissionSchema": "#/$defs/TextSubmission", "decodedAnswerSchema": "#/$defs/FlowAnswerValue", "answerSlotCount": "length(orderCorrects)", "comparison": "JSON array of node keys in the student's chosen order, not labels or sorted keys. Compare using actual .NET ordering grader. Legacy object fallback is case-sensitive Steps/Labels, not steps/labels; it is not canonical." }
+    },
+    "registry": {
+      "MULTIPLE_CHOICE_SINGLE": { "family": "single", "schema": "#/$defs/MULTIPLE_CHOICE_SINGLE", "presentation": "One stem and a text option bank; select one option.", "referenceQuestionIndices": [ 1, 16 ], "rules": [ "COMMON", "CHOICE", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MULTIPLE_CHOICE_MULTIPLE": { "family": "multiple", "schema": "#/$defs/MULTIPLE_CHOICE_MULTIPLE", "presentation": "One stem explicitly states how many options to select.", "referenceQuestionIndices": [ 17 ], "rules": [ "COMMON", "CHOICE", "MULTIPLE_SELECTION_COUNT", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "TRUE_FALSE_NOT_GIVEN": { "family": "single", "schema": "#/$defs/TRUE_FALSE_NOT_GIVEN", "presentation": "One factual statement, not an author's opinion task.", "referenceQuestionIndices": [ 2 ], "rules": [ "COMMON", "CHOICE", "TRUTH_EVIDENCE", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "YES_NO_NOT_GIVEN": { "family": "single", "schema": "#/$defs/YES_NO_NOT_GIVEN", "presentation": "One statement about the author's views or claims.", "referenceQuestionIndices": [ 8, 19 ], "rules": [ "COMMON", "CHOICE", "TRUTH_EVIDENCE", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MULTIPLE_CHOICE_SINGLE_IMAGE": { "family": "single", "schema": "#/$defs/MULTIPLE_CHOICE_SINGLE_IMAGE", "presentation": "One selected option; preserve question-context or per-option images and alt text.", "referenceQuestionIndices": [ 25 ], "rules": [ "COMMON", "CHOICE", "MEDIA", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "SUMMARY_COMPLETION": { "family": "completion", "schema": "#/$defs/SUMMARY_COMPLETION", "presentation": "A coherent summary with explicit numbered blanks.", "referenceQuestionIndices": [], "referenceStatus": "BLOCKED_ABSENT_FROM_REFERENCE", "rules": [ "COMMON", "BLANKS", "COMPLETION_LAYOUT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "TABLE_COMPLETION": { "family": "completion", "schema": "#/$defs/TABLE_COMPLETION", "presentation": "A real table with explicit numbered blank cells.", "referenceQuestionIndices": [ 4 ], "rules": [ "COMMON", "BLANKS", "COMPLETION_LAYOUT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "NOTE_COMPLETION": { "family": "completion", "schema": "#/$defs/NOTE_COMPLETION", "presentation": "Notes/bullets with explicit numbered blanks.", "referenceQuestionIndices": [ 18 ], "rules": [ "COMMON", "BLANKS", "COMPLETION_LAYOUT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "FORM_COMPLETION": { "family": "completion", "schema": "#/$defs/FORM_COMPLETION", "presentation": "Label/value form fields with explicit numbered blanks.", "referenceQuestionIndices": [ 24 ], "rules": [ "COMMON", "BLANKS", "COMPLETION_LAYOUT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "SENTENCE_COMPLETION": { "family": "completion", "schema": "#/$defs/SENTENCE_COMPLETION", "presentation": "Sentences with explicit numbered blanks. Do not silently relabel a flow ordering task as this type.", "referenceQuestionIndices": [ 3, 5 ], "rules": [ "COMMON", "BLANKS", "COMPLETION_LAYOUT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "SHORT_ANSWER": { "family": "short", "schema": "#/$defs/SHORT_ANSWER", "presentation": "Exactly one reachable free-text input; no marker is required.", "referenceQuestionIndices": [ 13, 14, 15 ], "rules": [ "COMMON", "SHORT_INPUT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "DIAGRAM_LABEL": { "family": "completion", "schema": "#/$defs/DIAGRAM_LABEL", "presentation": "Supplied diagram and explicit callouts/blank IDs mapped to answer slots.", "referenceQuestionIndices": [ 11 ], "rules": [ "COMMON", "BLANKS", "MEDIA", "LABEL_ALIGNMENT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MAP_LABEL": { "family": "completion", "schema": "#/$defs/MAP_LABEL", "presentation": "Supplied map and explicit location/blank IDs mapped to answer slots.", "referenceQuestionIndices": [ 21 ], "rules": [ "COMMON", "BLANKS", "MEDIA", "LABEL_ALIGNMENT", "REGEX", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MATCHING_HEADING": { "family": "matching", "schema": "#/$defs/MATCHING_HEADING", "presentation": "Numbered paragraph targets and a Roman-numeral heading bank; one selection per target.", "referenceQuestionIndices": [ 6 ], "rules": [ "COMMON", "MATCHING_TARGETS", "MATCHING_BANK", "HEADING", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MATCHING_INFORMATION": { "family": "matching", "schema": "#/$defs/MATCHING_INFORMATION", "presentation": "Numbered information statements and a paragraph-letter bank; reuse may be allowed by instructions.", "referenceQuestionIndices": [ 7 ], "rules": [ "COMMON", "MATCHING_TARGETS", "MATCHING_BANK", "INFORMATION", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MATCHING_FEATURES": { "family": "matching", "schema": "#/$defs/MATCHING_FEATURES", "presentation": "Numbered entities/items and a lettered feature bank; reuse may be allowed by instructions.", "referenceQuestionIndices": [ 9, 20 ], "rules": [ "COMMON", "MATCHING_TARGETS", "MATCHING_BANK", "FEATURES", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "MATCHING_ENDINGS": { "family": "matching", "schema": "#/$defs/MATCHING_ENDINGS", "presentation": "Numbered sentence beginnings and a lettered ending bank; one selection per beginning.", "referenceQuestionIndices": [ 10, 22 ], "rules": [ "COMMON", "MATCHING_TARGETS", "MATCHING_BANK", "ENDINGS", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "CLASSIFICATION": { "family": "matching", "schema": "#/$defs/CLASSIFICATION", "presentation": "Numbered statements and a lettered category bank; preserve the displayed statement IDs exactly.", "referenceQuestionIndices": [ 23 ], "rules": [ "COMMON", "MATCHING_TARGETS", "MATCHING_BANK", "CLASSIFICATION_KEYS", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] },
+      "FLOW_CHART": { "family": "flow", "schema": "#/$defs/FLOW_CHART", "presentation": "Reorder public process nodes. This platform type is not IELTS flow-chart blank completion.", "referenceQuestionIndices": [ 12 ], "rules": [ "COMMON", "FLOW_ORDERING", "PROJECTION", "SUBMISSION", "COMPATIBILITY" ] }
+    },
+    "semanticRules": {
+      "COMMON": {
+        "authority": "AUTHORING_POLICY_AND_BACKEND_IDENTITY_CONTRACT",
+        "errorCodes": [ "IDENTITY_DUPLICATE", "OPTION_INDEX_COVERAGE", "MEMBERSHIP_INVALID", "KEY_FAMILY_FORBIDDEN" ],
+        "requirements": [ "IDs are unique in their paper scope; option IDs compare case-insensitively and option idx covers 1..N.", "Section/group membership and paper-wide Question indices agree with the containing artifact.", "Unrelated grading keys, points overrides, model answers, reviews and undeclared fields are absent." ]
+      },
+      "CHOICE": {
+        "authority": "AUTHORING_POLICY_AND_GRADER_SOURCE",
+        "errorCodes": [ "OPTION_CONTENT_DUPLICATE", "DISTRACTOR_KEY_CONFLICT" ],
+        "requirements": [ "No duplicate normalized option texts, especially correct/distractor collisions under .NET trimmed case-insensitive text fallback.", "Option labels and displayed numbering do not replace option identity; selected UUIDs must belong to this Question." ]
+      },
+      "MULTIPLE_SELECTION_COUNT": {
+        "authority": "AUTHORING_POLICY",
+        "errorCodes": [ "CHOICE_COUNT_INSTRUCTION_MISMATCH" ],
+        "requirements": [ "The stated selection count equals the number of isCorrect=true options; at least two are correct and at least one distractor exists." ]
+      },
+      "TRUTH_EVIDENCE": {
+        "authority": "IELTS_SEMANTIC_REVIEW_REQUIREMENT",
+        "errorCodes": [ "TRUTH_AMBIGUOUS", "NOT_GIVEN_ABSENCE_UNVERIFIED" ],
+        "requirements": [ "Independent passage-based review distinguishes fact evaluation from author-view evaluation.", "Not Given requires verified absence of the relevant proposition; an arbitrary supporting quote is not proof of absence. Private evidence stays outside the student artifact." ]
+      },
+      "BLANKS": {
+        "authority": "AUTHORING_POLICY_AND_ADMIN_MARKER_CONTRACT",
+        "errorCodes": [ "BLANK_MARKER_KEY_MISMATCH", "BLANK_MARKER_DUPLICATE", "REGEX_KEY_WITHOUT_TEXT", "BLANK_KEY_OVERFLOW", "WORD_LIMIT_MISSING" ],
+        "requirements": [ "Visible explicit [N] blank IDs occur once each and equal blankAcceptTexts keys. Reject underscores, ___[N], space-padded markers and blank-q prefixes in new authoring.", "Regex key IDs are a subset of text key IDs; every slot has a non-empty accepted text list.", "Numeric IDs fit positive signed Int64 so the backend numeric sort cannot fall back unexpectedly.", "Instructions state the answer word/number limit and every accepted answer satisfies it. Word-limit counting conventions require an explicit tested profile, not an invented universal token rule.", "A prose range such as '[21] to [24]' is not four blank inputs. Each actual blank must be explicit." ]
+      },
+      "COMPLETION_LAYOUT": {
+        "authority": "AUTHORING_POLICY",
+        "errorCodes": [ "COMPLETION_LAYOUT_INVALID", "ANSWER_SLOT_UNREACHABLE" ],
+        "requirements": [ "Render exactly one input per keyed blank and preserve blank identity independent of encounter order.", "TABLE_COMPLETION renders a real table; NOTE_COMPLETION renders notes; FORM_COMPLETION renders fields; SUMMARY_COMPLETION renders a coherent summary; SENTENCE_COMPLETION renders sentences.", "Do not create extra inputs from decorative underscores or lose table structure by independently parsing Markdown fragments." ]
+      },
+      "REGEX": {
+        "authority": "GRADER_SOURCE",
+        "errorCodes": [ "DOTNET_REGEX_INVALID", "DOTNET_REGEX_PARITY_UNVERIFIED" ],
+        "requirements": [ "Validate patterns with the actual .NET engine in a bounded offline test. JavaScript RegExp or a Python engine is not parity evidence.", "Verify the grader's existing anchoring and TextNorm behavior; do not silently improve normalization in an adapter." ]
+      },
+      "SHORT_INPUT": {
+        "authority": "GRADER_SOURCE_AND_RENDERER_REQUIREMENT",
+        "errorCodes": [ "SHORT_INPUT_UNREACHABLE" ],
+        "requirements": [ "Render one free-text input for marker-free prompts. Accepted alternatives do not represent multiple subquestions." ]
+      },
+      "MEDIA": {
+        "authority": "AUTHORING_POLICY_AND_PUBLIC_REFERENCE",
+        "errorCodes": [ "MEDIA_ASSET_UNVERIFIED", "OPTION_MEDIA_DROPPED", "MEDIA_ALT_MISSING" ],
+        "requirements": [ "Use only supplied/authorized asset references, with license/provenance and renderability checked separately. Never fabricate asset URLs or treat placeholder URLs as useful diagrams.", "Preserve per-option imageUrl and altText. Do not move option images into a fabricated question-level image.", "A non-empty URL passes structure only; actual image content, accessibility and propagation require consumer evidence." ]
+      },
+      "LABEL_ALIGNMENT": {
+        "authority": "AUTHORING_POLICY",
+        "errorCodes": [ "LABEL_CALLOUT_KEY_MISMATCH" ],
+        "requirements": [ "Diagram/map callout identities, displayed part labels, explicit blank IDs and grading keys have a one-to-one mapping.", "A comma-separated Diagram/Map description is not sufficient proof of input count, callout identity, key order or diagram correctness." ]
+      },
+      "MATCHING_TARGETS": {
+        "authority": "FRONTEND_GENERATED_MATCHING_CONTRACT_AND_AUTHORING_POLICY",
+        "errorCodes": [ "MATCH_TARGET_MISSING", "MATCH_TARGET_KEY_MISMATCH", "MATCH_SLOT_UNREACHABLE" ],
+        "requirements": [ "Every target is visibly listed as 'N. text' with a unique positive ID; those IDs equal matchPairs keys.", "Render one independently editable choice for each target and emit a keyed JSON object, not one scalar letter for an entire multi-target Question.", "Never recover student-visible target statements from private matchPairs at delivery time; author them explicitly in the public prompt." ]
+      },
+      "MATCHING_BANK": {
+        "authority": "FRONTEND_GENERATED_MATCHING_CONTRACT_AND_AUTHORING_POLICY",
+        "errorCodes": [ "MATCH_BANK_KEY_UNKNOWN", "MATCH_BANK_LABEL_DUPLICATE", "MATCH_DISTRACTOR_MISSING", "MATCH_DISPLAY_INVALID" ],
+        "requirements": [ "Bank labels are unique and every matchPairs gradingKey names a real option label, never an option array position.", "New MATCHING_* exercises include at least one unused distractor. CLASSIFICATION need not include an unused category.", "Heading bank labels use 'i. text', 'ii. text'; other matching banks use 'A. text', 'B. text'. There is no canonical A-F/A-J renderer limit.", "For heading pairs, displayLabel is the chosen heading text without Roman prefix. For information/features/endings/classification, it is the exact target statement text.", "The backend also accepts displayLabel as an answer. Record that behavior; do not present it as exclusive gradingKey comparison." ]
+      },
+      "HEADING": {
+        "authority": "FRONTEND_GENERATED_MATCHING_CONTRACT",
+        "errorCodes": [ "HEADING_BANK_MISSING", "HEADING_REUSED" ],
+        "requirements": [ "List the complete heading bank under 'List of Headings:' in promptMd as well as options.", "Each heading is used at most once; preserve explicit paragraph target IDs." ]
+      },
+      "INFORMATION": {
+        "authority": "FRONTEND_GENERATED_MATCHING_CONTRACT",
+        "errorCodes": [ "PARAGRAPH_BANK_INVALID", "WORD_BANK_UNSUPPORTED" ],
+        "requirements": [ "Options use 'A. Paragraph A', 'B. Paragraph B', etc.; every target is a visible information statement.", "Instructions state whether paragraph letters may be reused. A wordList does not silently switch the canonical task to completion; unsupported propagation remains a blocker." ]
+      },
+      "FEATURES": {
+        "authority": "FRONTEND_GENERATED_MATCHING_CONTRACT",
+        "errorCodes": [ "FEATURE_REUSE_INSTRUCTION_MISMATCH" ],
+        "requirements": [ "Visible targets are entities/items and bank options are features; any allowed feature reuse is stated in the instructions and supported by the passage." ]
+      },
+      "ENDINGS": {
+        "authority": "FRONTEND_GENERATED_MATCHING_CONTRACT",
+        "errorCodes": [ "ENDING_REUSED", "ENDING_SENTENCE_INVALID" ],
+        "requirements": [ "Each ending is used at most once; target-plus-ending forms a grammatically and factually supported complete sentence." ]
+      },
+      "CLASSIFICATION_KEYS": {
+        "authority": "ADMIN_MATCHING_CONTRACT_AND_AUTHORING_POLICY",
+        "errorCodes": [ "CLASSIFICATION_KEY_REINDEXED", "CLASSIFICATION_CATEGORY_UNPARSED" ],
+        "requirements": [ "Canonical category lines use 'A. label'. Legacy 'A — label' imports need explicit presentation normalization without changing statement keys.", "Statement 23 serializes under key '23', never '22'. New private MatchPairs values contain both gradingKey and displayLabel." ]
+      },
+      "FLOW_ORDERING": {
+        "authority": "ADMIN_AND_GRADER_SOURCE_WITH_AUTHORING_POLICY",
+        "errorCodes": [ "FLOW_COMPLETION_UNSUPPORTED", "FLOW_PERMUTATION_INVALID", "FLOW_NODE_KEY_COLLISION", "FLOW_ORDER_LEAK" ],
+        "requirements": [ "The current platform FLOW_CHART means process ordering, not standard IELTS blank completion. Do not reinterpret the answer model silently.", "Use unique node keys, also distinct under backend NormNode normalization. The student answer is an exact permutation of the delivered node-key set.", "Generate public nodes from the key set and display them independently of the correct order. Do not copy orderCorrects as a public ordered list or disclose the solution in the prompt.", "Persist/restore/clear student sequence state without sorting away the chosen order. New authoring does not use legacy Steps/Labels objects or flow blank keys." ]
+      },
+      "PROJECTION": {
+        "authority": "PRIVACY_REQUIREMENT",
+        "errorCodes": [ "STUDENT_PRIVATE_FIELD", "STUDENT_ANSWER_HINT", "PUBLIC_FIELD_DROPPED" ],
+        "requirements": [ "Build an allowlisted StudentQuestion and validate it separately. Private keys, isCorrect, explanations, modelAnswers, evidence, reviews and private snapshots are forbidden even when null/empty.", "Compare visible content, media, banks, IDs, membership and slots against the private artifact without revealing keys.", "Check answer-bearing text and encoded hints in otherwise public fields. JSON Schema field allowlisting alone does not establish privacy.", "Never import this private source-of-truth schema's historical examples/keys into a student bundle; this file embeds no production answer keys." ]
+      },
+      "SUBMISSION": {
+        "authority": "ATTEMPT_DTO_AND_GRADER_SOURCE_WITH_AUTHORING_POLICY",
+        "errorCodes": [ "SUBMISSION_ID_UNMAPPED", "SUBMISSION_KEY_MISMATCH", "SUBMISSION_JSON_INVALID", "ANSWER_CLEAR_NOT_SERIALIZED", "ANSWER_COUNT_INVALID" ],
+        "requirements": [ "Resolve actual question/section/option UUIDs via a verified identity map. Selected IDs must belong to the Question.", "For text families, selectedOptionIds is empty. Parse the JSON string for completion/matching/flow, then validate the decoded answer and exact required key/node set against this Question.", "For complete answers all required slots/selections are present. Partial autosaves may be incomplete but must never shift slot identities or contain foreign keys.", "Clearing uses selectedOptionIds=[] and textAnswer=''. Omitting textAnswer or sending null is not an explicit clear.", "Do not rely on inline submit answers unless the actual endpoint consumes them. Verify autosave success before submission on current backend." ]
+      },
+      "COMPATIBILITY": {
+        "authority": "EVIDENCE_GATE",
+        "errorCodes": [ "REFERENCE_PRIVATE_ACCESS_BLOCKED", "CONSUMER_CAPABILITY_UNSUPPORTED", "ROUNDTRIP_UNVERIFIED", "SCHEMA_VALIDITY_ONLY" ],
+        "requirements": [ "Record separate schema, semantic-shape, ingestion, transport/privacy, renderer, actual-.NET-grading and independent IELTS review results.", "A schema PASS is not compatibility PASS. Missing required runtime evidence is BLOCKED/UNVERIFIED; never infer success from a rendered card, legacy snapshot or JavaScript grading simulation.", "Use artifact/fixture hashes and exact consumer revisions. Offline evidence is not publication, deployment or paid-inference authorization." ]
+      }
+    },
+    "knownConsumerGaps": [
+      { "status": "VERIFIED", "scope": "source", "code": "HARNESS_SCHEMA_DRIFT", "detail": "Current harness has one broad enum-bearing Question schema, lacks option media, requires question image for image MCQ, and does not consume this v1 file yet." },
+      { "status": "VERIFIED", "scope": "source", "code": "FRONTEND_SCHEMA_DRIFT", "detail": "FE admin examples/validators disagree on multiple-choice key count and classification pair shape. Historical autogen examples are not the current reference payload." },
+      { "status": "VERIFIED", "scope": "local route audit", "code": "FRONTEND_ROUTE_BLOCKED", "detail": "The audited Reading route returned HTTP 500 for missing mapApiQuestionToUi. This is recorded historical evidence, not an assertion that a later frontend revision remains broken." },
+      { "status": "VERIFIED", "scope": "source", "code": "MEDIA_BANK_SLOT_PROPAGATION", "detail": "Audited frontend mapping/dispatch loses media/banks and has short-answer, matching and classification input mismatches. Current proto lacks wordList; current admin DTO lacks WordList/GroupId." },
+      { "status": "VERIFIED", "scope": "source", "code": "STUDENT_SANITIZATION_GAPS", "detail": "Audited attempt sanitizers retain explanations and some legacy paths do not sanitize all private fields. A strict canonical student projection cannot certify those paths." },
+      { "status": "VERIFIED", "scope": "source", "code": "SUBMISSION_PERSISTENCE_GAPS", "detail": "Audited submit handler ignores inline answers; omitted textAnswer is not a clear. These require consumer verification/remediation, not answer-key generation workarounds." },
+      { "status": "BLOCKED", "scope": "reference audit", "code": "REFERENCE_PRIVATE_ACCESS_BLOCKED", "detail": "Private persisted keys and identities were not accessible. Source-derived rules must not be advertised as verified current database contents." },
+      { "status": "UNVERIFIED", "scope": "all 19 types", "code": "ROUNDTRIP_UNVERIFIED", "detail": "No complete actual-frontend-action to actual-.NET-grader reference round trip has been established." }
+    ]
+  }
+}

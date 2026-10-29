@@ -98,9 +98,9 @@ public class InternalExamDto
                     Questions = grp.Questions.Select(q => q with
                     {
                         Options = q.Options.Select(o => o with { IsCorrect = null }).ToList(),
-                        BlankAcceptTexts = new Dictionary<string, string[]?>(),
-                        BlankAcceptRegex = new Dictionary<string, string[]?>(),
-                        MatchPairs = new Dictionary<string, string[]?>(),
+                        BlankAcceptTexts = q.BlankAcceptTexts.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
+                        BlankAcceptRegex = q.BlankAcceptRegex.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
+                        MatchPairs = q.MatchPairs.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
                         OrderCorrects = Array.Empty<string>(),
                         ShortAnswerAcceptTexts = Array.Empty<string>(),
                         ShortAnswerAcceptRegex = Array.Empty<string>()

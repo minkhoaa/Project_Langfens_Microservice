@@ -4,7 +4,7 @@ description: Deterministic canonical Reading and backend-compatibility validatio
 tools: get_question_spec, validate_question, validate_group, validate_exam, check_grading_parity, inspect_delivery_projection
 excludeTools: contact_supervisor, intercom
 extensions:
-subagentOnlyExtensions: ../extensions/reading.ts
+subagentOnlyExtensions: ../extensions/reading.ts, ../reading/workspace-guard.ts
 systemPromptMode: replace
 inheritProjectContext: false
 inheritGlobalContext: false

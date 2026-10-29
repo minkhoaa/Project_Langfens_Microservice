@@ -1,0 +1,11 @@
+{
+  "version": "vs4.1",
+  "status": "PROVISIONAL_RESEARCH_NOT_OFFICIAL_IELTS",
+  "criteria": ["answerability", "evidence", "truth_status", "distractors", "matching_completion", "style", "difficulty", "format"],
+  "criticalCriteria": ["answerability", "evidence", "truth_status", "matching_completion"],
+  "verdicts": ["PASS", "FAIL", "UNCERTAIN"],
+  "pilot": {"sections": 1, "questions": 13, "answerable": 13, "maximumCriticalDefects": 0, "minimumQualityPass": 12, "reviewsPerQuestion": 2},
+  "offline": {"requiredPassRate": 1, "maximumLeaks": 0, "maximumUnauthorizedAccess": 0, "maximumUnresolvedCriticalCompatibilityDefects": 0},
+  "advancementProposal": {"minimumSections": 40, "minimumQuestions": 520, "maximumCriticalDefects": 0, "maximumUnresolved": 0, "minimumQualityPassRate": 0.95, "minimumQualityLower95": 0.90, "maximumItemCriticalUpper95": 0.01, "maximumSectionCriticalUpper95": 0.10},
+  "rationale": "13/13 protects answerability; 12/13 permits one noncritical imperfection only. Larger-sample cutoffs are conservative preregistration proposals, not production acceptance or official IELTS standards. Correlated items require section-level uncertainty and independent human review."
+}

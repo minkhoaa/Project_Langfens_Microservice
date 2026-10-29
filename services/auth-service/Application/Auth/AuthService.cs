@@ -299,6 +299,18 @@ public class AuthService(
         var check = await signInManager.CheckPasswordSignInAsync(user, password, true);
         if (!check.Succeeded)
         {
+            if (check.IsLockedOut)
+            {
+                return AuthOperationResult.Failure(new ApiResultDto(false, "Account is temporarily locked out. Please try again later", null!),
+                    StatusCodes.Status400BadRequest);
+            }
+
+            if (check.IsNotAllowed)
+            {
+                return AuthOperationResult.Failure(new ApiResultDto(false, "Account is not allowed to sign in. Please verify your email", null!),
+                    StatusCodes.Status400BadRequest);
+            }
+
             return AuthOperationResult.Failure(new ApiResultDto(false, "Password is incorrect", null!),
                 StatusCodes.Status400BadRequest);
         }

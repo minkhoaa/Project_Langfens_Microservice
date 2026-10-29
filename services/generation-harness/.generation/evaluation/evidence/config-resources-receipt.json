@@ -1,0 +1,192 @@
+{
+  "version": "vs4.1",
+  "evidenceClass": "OFFLINE_TESTS",
+  "commands": [
+    {
+      "id": "typecheck",
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "log": "typecheck.log",
+      "logSha256": "ab7d38fba366c72b2ef93f02d4b57de36f62f15bb3c132857f6c32e9bf49d8b0"
+    },
+    {
+      "id": "domain-typecheck",
+      "command": "/home/khoa/.local/opt/node-v24.21.0/bin/node node_modules/typescript/bin/tsc --noEmit --project .generation/tsconfig.json",
+      "exitCode": 0,
+      "log": "domain-typecheck.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": "build.log",
+      "logSha256": "0d929bf15574a4b7f76f40e2d27c72cf8281741f514da7e45f7d7dec15522d25"
+    },
+    {
+      "id": "tests",
+      "command": "npm test",
+      "exitCode": 0,
+      "log": "tests.log",
+      "logSha256": "6ab6236a90f1065f30db3267a4af3c7aad755636aa3698fd16cc4c1953e259bb"
+    },
+    {
+      "id": "frozen-diff",
+      "command": "git diff --exit-code -- services/generation-harness/packages :(glob)services/*-service*/** services/_shared AppHost gateway",
+      "exitCode": 0,
+      "log": "frozen-diff.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "frozen-status",
+      "command": "git status --porcelain --untracked-files=all -- services/generation-harness/packages :(glob)services/*-service*/** services/_shared AppHost gateway",
+      "exitCode": 0,
+      "log": "frozen-status.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "log": "whitespace.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "deterministicStructureScoringDelivery",
+      "verdict": "PASS",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Native VS1–VS3 and all 19 type regressions exercise structure, scoring and delivery; no fixture validation failures permitted."
+    },
+    {
+      "id": "leakageAndUnauthorizedAccess",
+      "verdict": "PASS",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Offline native blind-child/tool/context restrictions and known raw/encoded leakage attacks tested; arbitrary natural-language hints remain a human pilot-audit obligation."
+    },
+    {
+      "id": "pilotCompatibility",
+      "verdict": "PASS",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Pilot excludes FLOW_CHART and regex keys; supported TFNG, matching information, summary completion and single choice retain deterministic compatibility coverage."
+    },
+    {
+      "id": "reproducibleSchemasFixturesEvidence",
+      "verdict": "UNCERTAIN",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Concurrent source changes prevent a stable mapping from full-suite evidence to the current workspace; see sourceStability."
+    },
+    {
+      "id": "threeWayJudgments",
+      "verdict": "PASS",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "PASS/FAIL/UNCERTAIN and GO/NO-GO/INSUFFICIENT_EVIDENCE branches tested; verify_evidence remains PASS/FAIL only."
+    },
+    {
+      "id": "independentReviewAndHumanAdjudication",
+      "verdict": "PASS",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Two reviews per criterion/item; disagreement, critical defect, uncertainty and solver mismatch adjudication enforced; human identities still require external accountability."
+    },
+    {
+      "id": "frozenBackendBoundary",
+      "verdict": "PASS",
+      "commandIds": [
+        "frozen-diff",
+        "frozen-status"
+      ],
+      "reason": "Tracked diff and untracked status empty for frozen packages and backend service sources."
+    }
+  ],
+  "sourceHashes": {
+    "package.json": "a8bfd042d7599b17d0e96bdc882ca47ff659950591e776b9df12d785ae784563",
+    "README.md": "80de18365571c008cac88531d0185e059632b602fb9e0697df74b035a1ab0596",
+    "scripts/config.mjs": "57bc61d22510970e23a9c35f8e2d44472fb9d6192da12453ad5382ec278bb0ab",
+    "scripts/configuration.mjs": "c974688f5946ef762fdc8ea502b13cb16208d1442d0b530942e2c4478c9dcf6f",
+    "scripts/configuration-ui.mjs": "76e403a4e511c2e0e48f89c0b9273fc46f2c95b4deff7cae2939ae39a72d2720",
+    "scripts/configuration-resources.mjs": "7941e30fda3242eeb3091b2c3c1d7385619639b9f1607ba7e2587d2a9c19ac93",
+    "scripts/configuration-resources-ui.mjs": "2b3368ba96bd4d74b928ab1716bc8fcdce309f1127a543f41b171361f53d905c",
+    "scripts/configuration-resolver.mjs": "e7a9c12da6f55a35cb95dc9797ddacb509093c21a2df9240055558a0d34a59c4",
+    "scripts/runtime.mjs": "fd61010abd55410b7bcb9e16aaee63f9b10b387a28a537368d236ba6ded28704",
+    "test/config.test.mjs": "a5266772102f292a3e54cccc027ac3af3671336515ebad01cbf297a212ec6bc4",
+    "test/config-resources.test.mjs": "afb23ed3f2a6cc99d156ef115a9381022e8a4e3707c0f9b850a8761473a39b29",
+    ".generation/settings.json": "f7c835e75d373f893dd0ff48eb926496183a155f3bbcaf1a108d5f131328063a",
+    ".generation/README.md": "191b71601b2aa438b9f90b0d70721d7dfea543f097bb47f898f4534468932813",
+    ".generation/config/README.md": "43406be1c05e7250039961f591129cd8b20bdf06bb63b367244fa6668025a82e",
+    ".generation/config/models.example.json": "8b6642b3402d7040018c2a49dd6bcd37aecbbd8d8b2000840a37aa365738f2ce",
+    ".generation/evaluation/rubric.json": "23a26f38a1fa8b65befc4f4c26738e9bb1f43a9d635974165d92655bf3a319b3",
+    ".generation/evaluation/schemas.mjs": "b0cca31d9ad436c06036bd36a2d3cecce8f3c0f631b241cabd392116969ebb86",
+    ".generation/evaluation/report.mjs": "55f0ecc62a4e87efe52c611bc75e4df6a9d8aae107e5e4ec8c4ff66f5388667a",
+    ".generation/evaluation/evidence.mjs": "df3f64637124a20e3c84747d818127ca3cf887aaa87c875d2e3c5a7e9095eb41",
+    ".generation/evaluation/statistics.mjs": "3efb1e4a2ba9696b3b2e8ebc90a2f25e19ee6d021f484ed9d88385097f101552",
+    ".generation/evaluation/readiness.mjs": "b43bcf0367d90f39f405ab181312cb8c681f97c05dc099a129a06fe18e6ba962",
+    ".generation/evaluation/run-offline.mjs": "8674a3d086354b2aa475b41578baa9f61d699f8abf5127f991c823fcd2a37dab",
+    ".generation/evaluation/README.md": "71b45f2450dbe4eba4893aee796fbe9e6f327a5de74a3ae82ab752129f2e87b4",
+    ".generation/evaluation/fixtures/records.mjs": "116dce495fa80afa98b1afedcb59e9a649602647e99aa0ffe9e8e72b2ed7e629",
+    ".generation/evaluation/fixtures/pilot.mjs": "54b47d7415301fea86775b46a553f638beccb433d1fcbf1d8c821723fdfe33cc",
+    ".generation/evaluation/fixtures/held-out-section.json": "9a55d1df535143a84044997f8b2ba5fac9adc38756db47cab96f2cbc6c551d60",
+    ".generation/extensions/reading.ts": "081649e269fb16ab80385547a11782f2303e8b127e366310d01a3d02ce3ab9bc",
+    ".generation/reading/contracts.ts": "7c54bc1387ac7321830b013a01907f0d683cbac0d7f6dd85ae26313ee3d5490c",
+    ".generation/reading/grading.ts": "e0d31a0994a940ee2d8454f4c2a1beed88eb5c3bdb19faa3c9591905a23e665a",
+    ".generation/reading/validation.ts": "5a89dd63a77b3bdd30e538ca69361a829dbf9cc3fe0341f19bcbd4fbce7ac402",
+    ".generation/reading/projection.ts": "6cc5f5490c248a2ebdc007e685019333ec3ac36968d6fd75b884813b265efb8e",
+    ".generation/reading/blind-guard.ts": "0a814267a16bdb825ce5e656bc8b7ead510e8372dcd0ff00bf3327fa02850a75",
+    ".generation/agents/semantic-reviewer.md": "da02aa9e1020913fa99d4b8f86d8818ec3242dc44edd097de82b928a4c65260e",
+    ".generation/agents/blind-solver.md": "6a2e30ac635c1dfa114905f752e9b0e3760813b17600798033b3349cd5f3dc04",
+    "test/offline.mjs": "c0e865709956b277f2732989374ddc8a0dea730c6e7e79818bb1160690a966e8",
+    "test/reading.test.mjs": "834dfa1ce550e047cc17c1e1af27aa98b04f3b29046544987e9ad98952f2c8ad",
+    "test/reading-vs3.mjs": "156fa81a774efdf3b24fb7e4026425ef1ba9c806e390ce29800828c16b10b4da",
+    "test/reading-vs4.test.mjs": "3c35eafe50ff3941d31a72c9ebf94fb2318e87eb114129ee3dc0e7e96322b6da",
+    "test/reading-vs4-gate.test.mjs": "158deac2db619ae9117144ff9076198c9511eb259fdd9ca772c1faee3953bfb2",
+    "test/reading-vs4-acceptance.test.mjs": "b9d6c437931b2e92c226cd4146302ca7e2c84ded8f5937378f44f5915448a743",
+    "test/reading-vs4-readiness.test.mjs": "fad6e53e54e5ffcd285e1995f19d232c69cf286804d8ceb43544bcbbbd0f6ece"
+  },
+  "scope": "Offline instrument readiness, supported non-regex pilot types only; no semantic-quality claim or live authorization.",
+  "logRoot": "/tmp/langfens-config-resources-final-1",
+  "rawRunnerReceipt": "/tmp/langfens-config-resources-final-1/receipt.json",
+  "sourceStability": {
+    "verdict": "UNCERTAIN",
+    "changedSources": [
+      "package.json",
+      "test/reading.test.mjs"
+    ],
+    "baseline": "config-resources-source-baseline.json"
+  },
+  "testCounts": {
+    "harnessPassed": 130,
+    "harnessFailed": 0,
+    "harnessSkipped": 0,
+    "subagentsPassed": 3491,
+    "subagentsFailed": 0,
+    "subagentsSkipped": 13
+  },
+  "focusedConfiguration": {
+    "command": "GENERATION_HARNESS_OFFLINE=1 node --test test/config.test.mjs test/config-resources.test.mjs",
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0,
+    "log": "/tmp/langfens-config-resources-focused.log",
+    "logSha256": "6692cdd1e8d13aaed00edbaf95dab76995ddf087dee0c5147f584056b5bbfdac",
+    "note": "Rerun after detecting concurrent changes; config sources match baseline. Not a full-workspace approval."
+  },
+  "archiveNote": "Annotated receipt: preserve test exits but do NOT approve current combined workspace. Source changes outside this config task occurred during/after full verification. No native verify_evidence approval or live authorization is implied. Full logs are temporary; regenerate if unavailable."
+}

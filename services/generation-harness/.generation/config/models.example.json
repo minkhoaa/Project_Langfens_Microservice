@@ -1,0 +1,21 @@
+{
+  "$schema": "../../packages/generation-harness-core/schemas/models.schema.json",
+  "providers": {
+    "your-compatible-provider": {
+      "baseUrl": "https://replace-with-your-endpoint.invalid/v1",
+      "api": "openai-completions",
+      "apiKey": "$LANGFENS_LLM_API_KEY",
+      "models": [
+        {
+          "id": "replace-with-exact-model-id",
+          "name": "Your configured model",
+          "input": ["text"],
+          "reasoning": false,
+          "contextWindow": 32768,
+          "maxTokens": 4096,
+          "samplingParams": {"temperature": 0}
+        }
+      ]
+    }
+  }
+}

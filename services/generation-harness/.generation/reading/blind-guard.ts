@@ -25,10 +25,14 @@ export default function blindGuard(api: ExtensionAPI) {
     // Blind solves are single-task fresh sessions. Reject pre-existing history,
     // rather than trying to recognize secrets inside arbitrary inherited prose.
     const hasHistory = ctx.sessionManager.getBranch().some(entry => entry.type === "message");
-    if (hasHistory || event.images?.length || !validateBlindTaskInput(event.text).ok) {
+    // Native Subagents envelopes fresh task text as exactly `Task: ${task}`.
+    // Remove only that fixed envelope, then apply the unchanged public schema;
+    // prose, extra instructions, private fields and repeated envelopes still fail.
+    const text = event.text.startsWith("Task: ") ? event.text.slice(6) : event.text;
+    if (hasHistory || event.images?.length || !validateBlindTaskInput(text).ok) {
       return { action: "handled" };
     }
-    return { action: "continue" };
+    return text === event.text ? { action: "continue" } : { action: "transform", text };
   });
 
   api.on("before_agent_start", (event, ctx) => {
