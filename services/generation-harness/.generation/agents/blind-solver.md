@@ -4,7 +4,7 @@ description: Solve from allowlisted student-visible content in a fresh isolated 
 tools: get_question_spec
 excludeTools: contact_supervisor, intercom
 extensions:
-subagentOnlyExtensions: ../extensions/reading.ts
+subagentOnlyExtensions: ../extensions/reading.ts, ../reading/blind-guard.ts
 systemPromptMode: replace
 inheritProjectContext: false
 inheritGlobalContext: false

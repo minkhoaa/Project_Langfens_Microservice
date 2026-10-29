@@ -1,0 +1,64 @@
+{
+  "id": "e-mh-demo",
+  "title": "IELTS Academic Reading — Matching Headings Demo",
+  "sections": [
+    {
+      "id": "s1",
+      "examId": "e-mh-demo",
+      "idx": 1,
+      "title": "The Barbegal Watermill Complex",
+      "passageMd": "**A** The Barbegal aqueduct and mill complex is a Roman watermill installation in southern France, comprising sixteen overshot water wheels set out in two parallel rows down a steep hillside. Hydraulic engineers estimate the facility could grind up to twenty-five tonnes of grain daily, enough to supply the flour needs of the nearby city of Arelate, population around twelve thousand.\n\n**B** Recent isotopic analysis of the millstones has shown that the basalt used in their manufacture came from quarries in the Massif Central, nearly two hundred kilometres north. Transporting such dense stone over that distance required substantial organisation, and researchers now think the Roman imperial state funded and managed the complex directly.\n\n**C** Archaeologists have found no trace of slave quarters near the mills, and social historians therefore conclude that the workforce consisted of free paid labourers living in the farming settlements around the site.",
+      "questionGroups": [
+        {
+          "id": "g1",
+          "sectionId": "s1",
+          "idx": 1,
+          "startIdx": 1,
+          "endIdx": 3,
+          "instructionMd": "The passage has three paragraphs, A, B and C. Choose the correct headings i, ii and iii from the list of headings below. Write the appropriate number in boxes 1–3 on your answer sheet.\n\nList of Headings\ni  Sourcing the millstones\nii  The scale of the complex\niii  The composition of the workforce\niv  The influence of Roman taxation",
+          "questions": [
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "groupId": "g1",
+              "idx": 1,
+              "type": "MATCHING_HEADING",
+              "promptMd": "Paragraph A",
+              "options": [],
+              "matchPairs": {
+                "A": ["ii", "The scale of the complex"]
+              },
+              "explanationMd": "Paragraph A describes the sixteen water wheels and the twenty-five tonnes of grain ground daily.",
+              "modelAnswers": ["ii"]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000002",
+              "groupId": "g1",
+              "idx": 2,
+              "type": "MATCHING_HEADING",
+              "promptMd": "Paragraph B",
+              "options": [],
+              "matchPairs": {
+                "B": ["i", "Sourcing the millstones"]
+              },
+              "explanationMd": "Paragraph B concerns the basalt quarries in the Massif Central and the transport of the stone.",
+              "modelAnswers": ["i"]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000003",
+              "groupId": "g1",
+              "idx": 3,
+              "type": "MATCHING_HEADING",
+              "promptMd": "Paragraph C",
+              "options": [],
+              "matchPairs": {
+                "C": ["iii", "The composition of the workforce"]
+              },
+              "explanationMd": "Paragraph C reports the absence of slave quarters and the conclusion that workers were free paid labourers.",
+              "modelAnswers": ["iii"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

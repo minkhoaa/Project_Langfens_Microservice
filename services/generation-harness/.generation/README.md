@@ -1,4 +1,4 @@
-# IELTS Academic Reading — offline vertical slice 1
+# IELTS Academic Reading — offline vertical slices 1–3
 
 See [VERIFICATION.md](VERIFICATION.md) for the baseline audit, reproduced defects,
 final test evidence and explicit PASS/FAIL/BLOCKED/UNVERIFIED scope.
@@ -44,8 +44,8 @@ normal scalar coercion. No frozen SDK changes are needed.
 | `get_question_spec` | `type` | Family, required keys, wire answer format and IELTS limitations for each of the 19 shared types |
 | `validate_question` | `question` | Prompt, options, private keys, completion markers and admin-ingestion constraints |
 | `validate_group` | `group` | Exact index coverage, question membership and key completeness |
-| `validate_exam` | `exam, complete` | Full hierarchy, ownership, paper-wide indices; only complete papers require 40 independent units and three Academic sections |
-| `verify_evidence` | `passageMd, group, evidence, blindSolverId, semanticReviews` | Exact UTF-16 quotation offsets, coverage and independently identified review inputs; not entailment verification |
+| `validate_exam` | `exam, complete, requirements?` | Full hierarchy, ownership, paper-wide indices; complete papers require 40 independent units and three Academic sections; optional `sectionScoringUnits` and `answerSlotCount` are caller-specific, not production policy |
+| `verify_evidence` | `passageMd?, group?, groups?, exam?, sectionId?, evidence, blindSolverId, semanticReviews` | Exact UTF-16 quotation offsets, coverage and independently identified review inputs; exactly one target: single group, groups, or one canonical exam section; not entailment verification |
 | `check_grading_parity` | `question, cases[{id,answer,expectedCorrect}]` | Source-derived backend results versus caller-supplied IELTS expectations; selection-ingestion errors are separate diagnostics |
 | `inspect_delivery_projection` | `exam, projectionJson?` | Allowlisted, normalized student projection; optionally reject supplied JSON that leaks private fields or differs from it |
 
@@ -66,6 +66,13 @@ Counts are separate: `questionCount`, `answerSlotCount`, `scoringUnitCount`,
 scoring unit. Two correct MC selections, several matching pairs, several blanks
 or several ordered nodes do not become several independent marks. A 40-slot
 single Question is not a complete Reading paper.
+
+### Evidence verification target modes (`verify_evidence`)
+
+`verify_evidence` accepts exactly one target mode; supplying multiple targets emits `TARGET_AMBIGUOUS` and omitting targets emits `TARGET_MISSING`:
+1. **Single Group mode (`group`):** Requires `passageMd`. Validates the single QuestionGroup and checks span quotations against `passageMd`.
+2. **Multiple Groups mode (`groups`):** Requires `passageMd`. Validates each QuestionGroup and checks cross-group structural consistency (shared `sectionId`, unique group/question/option IDs, 1..N group index ordering, and consecutive non-overlapping range bounds).
+3. **Bound Exam mode (`exam`, optional `sectionId`):** Runs `validateExam(exam, false)` on the complete canonical artifact, then verifies only the selected Section's question IDs and passage. A single-section exam may omit `sectionId`; a multi-section exam must select one, otherwise `EVIDENCE_MULTI_SECTION_UNSUPPORTED`. Unknown selectors fail with `EVIDENCE_SECTION_UNKNOWN`; a selector without `exam` fails with `EVIDENCE_SECTION_TARGET_INVALID`. External `passageMd` must equal the selected canonical passage (`PASSAGE_MISMATCH`); corrupted passages and foreign-section spans fail with `EVIDENCE_SPAN_MISMATCH`. Review coverage must equal exactly that Section's questions. Call independently for each Section; no paper-wide evidence coordinator exists.
 
 ## Backend reference and deliberate limits
 
@@ -129,6 +136,18 @@ extensions, and exclude automatically injected supervisor/intercom tools. Use
 existing `executeSubagent`/native subagent delegation and lifecycle APIs. Never
 explicitly override a blind launch to fork or widen its tools/context.
 
+**Enforced Security Boundary:** the blind solver's input boundary is enforced
+fail-closed via a dedicated child-only native extension (`.generation/reading/blind-guard.ts`)
+loaded in child sessions via `subagentOnlyExtensions: ../extensions/reading.ts, ../reading/blind-guard.ts`.
+Direct `executeSubagent` calls with private artifact fields, plain-text tasks,
+malformed projections, unknown question types, or tested smuggled/encoded markers
+are rejected before model invocation. The guard requires strict public projection
+JSON and a fresh transcript, and only allows exact static `get_question_spec` results.
+Native tests exercise runtime fork cancellation, pre-existing-history rejection,
+and poisoned-tool-output redaction. Schema validity does not attest provenance or
+absence of arbitrary natural-language answer hints: callers must pass the exact
+PASS projection. See `VERIFICATION.md` for evidence and the trust boundary.
+
 Before blind delegation, call `inspect_delivery_projection`, require PASS, and
 send **only** its `projection` as the child task. Never fork a key-bearing
 session or pass generator/validator output directly. The blind solver can request
@@ -152,13 +171,64 @@ semantic judgments are mocked: `ieltsQualityEstablished` remains false. Matching
 quotations, supplied review approval and grading agreement do not establish real
 IELTS question quality or authorize live runs or publication.
 
+## Complete offline Section fixture
+
+`fixtures/section-vs2.json` and `fixtures/evidence-vs2.json` provide one Section
+with three QuestionGroups (5 truth items, 4 completion items and 4 single-choice
+items). Counts are **13 Questions / 13 answer slots / 13 scoring units / 3 groups**.
+The native mock scenario hands off all 13 blind answers, grades **13/13**, and
+checks every evidence span against the canonical passage. Fixture drift and a
+13-question/14-slot all-or-nothing scoring variant are regression-tested.
+Semantic quality remains **UNVERIFIED**; this is not a 40-question paper.
+
+## Complete deterministic paper (VS3)
+
+`fixtures/blueprint-vs3.json` configures the fixture, not a production rotation.
+`fixtures/paper-vs3.mjs` constructs its canonical paper, exact per-Section evidence
+and predetermined mock answers. Section 1 is unchanged VS2, including IDs and keys.
+
+| Section | Questions | Groups |
+| --- | --- | --- |
+| 1, Barbegal | Q1–13 | Existing VS2 truth / summary / single choice |
+| 2, Alder Valley seed archive | Q14–26 | 4 matching headings / 3 truth / 3 summary / 3 short answer |
+| 3, urban sound | Q27–40 | 4 writer-view truth / 4 matching information / 3 sentence completion / 3 single choice |
+
+There are **40 Questions / 40 answer slots / 40 independent scoring units / 11
+groups**. Matching and completion records each contain only one answer. The fixture
+passes `requirements: {sectionScoringUnits:[13,13,14], answerSlotCount:40}` to
+`validate_exam`; other distributions remain possible without these requirements.
+A regression changes a blueprint type to demonstrate configuration, rather than
+installing a fixed rotation.
+
+`test/reading-vs3.mjs`, registered by `test/reading.test.mjs`, uses the existing
+native Subagents API to execute 3 generators, 1 complete-paper validator, 1 blind
+solver and 6 independent reviewers in **11 fresh native child sessions**. Actual
+outputs feed subsequent inputs, and persisted transcripts assert the handoffs.
+Each Section's evidence is checked against its selected canonical passage with
+reviewer IDs bound to native session IDs. All 40 blind answers are processed by
+native parity calls: **40 correct, 0 incorrect, 0 ungradable, 40/40 points**.
+Mixed cases exercise the separate incorrect/ungradable counters and reject invalid
+keys; malformed answer coverage cannot silently disappear from totals.
+
+Negative regressions cover cross-Section ID collisions, foreign answers and spans,
+private annotations/encodings, contaminated passages/reviews, incomplete papers,
+and 40 slots representing only 39 marks. Private markers in public canonical
+content now also fail projection inspection before blind delegation. Existing
+blind-guard tests continue verifying hostile tool-output redaction, fork denial,
+and inherited-history rejection. Arbitrary unmarked natural-language hints cannot
+be proved absent. All model outputs, including blind solves, are deterministic
+mocks: real IELTS semantic quality remains **UNVERIFIED**.
+
 ## Offline verification
 
 ```sh
 export GENERATION_HARNESS_OFFLINE=1
 export NODE_OPTIONS="--import=$PWD/test/offline.mjs"
 npm run typecheck
+# Includes domain-only/child-only sources not discovered as ambient extensions:
+./node_modules/.bin/tsc --noEmit --project .generation/tsconfig.json
 npm run build
+# Run after build completes: build replaces dist files used by native child tests.
 npm test
 # Read-only/mock .NET regressions, no restore, no databases:
 dotnet test ../attempt-service.Tests/attempt-service.Tests.csproj --no-restore

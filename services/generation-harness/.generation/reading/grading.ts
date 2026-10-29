@@ -10,6 +10,8 @@ const words: Record<string, number> = Object.fromEntries([
 // .NET whitespace includes NEXT LINE (U+0085), but not JavaScript's BOM.
 const trim = (s: string) => s.replace(/^[\u0009-\u000d\u0085\p{Z}]+|[\u0009-\u000d\u0085\p{Z}]+$/gu, "");
 const collapseSpaces = (s: string) => trim(s.replace(/[\u0009-\u000d\u0085\p{Z}]+/gu, " "));
+// Shared with canonical option-conflict checks: JavaScript trim() differs from .NET.
+export const choiceTextIdentity = (text: string) => trim(text).toLowerCase();
 export function normalize(input = ""): string {
   const tokens = collapseSpaces(trim(input).toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").normalize("NFC")).split(" ");
   const out: string[] = [];

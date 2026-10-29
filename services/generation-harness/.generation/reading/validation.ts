@@ -1,4 +1,5 @@
 import { answerSlots, counts, diagnostic as d, families, type Diagnostic, type Exam, type Group, type Question } from "./contracts.js";
+import { choiceTextIdentity } from "./grading.js";
 const hasText = (xs?: string[]) => xs?.some(x => x.trim().length > 0) ?? false;
 const populated = (m?: Record<string, string[]>) => Object.values(m ?? {}).some(hasText);
 function duplicates(xs: (string | number)[]) { return new Set(xs).size !== xs.length; }
@@ -9,9 +10,20 @@ export function validateQuestion(q: Question, path = "question"): Diagnostic[] {
   const family = families[q.type];
   if (!family) { add("QUESTION_TYPE_UNKNOWN", "Unknown shared contract question type."); return issues; }
   if (!q.promptMd.trim()) add("PROMPT_EMPTY", "A student-visible prompt is required.");
-  if (duplicates(q.options.map(o => o.idx)) || duplicates(q.options.map(o => o.id))) add("OPTION_DUPLICATE", "Option IDs and indices must be unique.");
+  if (duplicates(q.options.map(o => o.idx)) || duplicates(q.options.map(o => o.id.toLowerCase()))) add("OPTION_DUPLICATE", "Option IDs and indices must be unique.");
   if (!contiguous(q.options.map(o => o.idx), 1)) add("OPTION_INDEX_COVERAGE", "Option indices must cover 1..N.");
   if (q.options.some(o => !o.contentMd.trim())) add("OPTION_CONTENT_EMPTY", "Option content is required.");
+  // Single-choice text fallback compares trimmed, case-insensitive option text.
+  // A distractor with the same text as a key can therefore grade as correct.
+  const keyedTexts = new Set(q.options.filter(o => o.isCorrect).map(o => choiceTextIdentity(o.contentMd)));
+  if ((family === "single" || family === "multiple") && q.options.some(o => !o.isCorrect && keyedTexts.has(choiceTextIdentity(o.contentMd)))) {
+    add("DISTRACTOR_KEY_CONFLICT", "A distractor duplicates keyed option text under backend-compatible whitespace and case comparison.");
+  }
+  if ((family === "single" || family === "multiple") && duplicates(q.options.map(o => choiceTextIdentity(o.contentMd)))) {
+    if (!issues.some(i => i.code === "DISTRACTOR_KEY_CONFLICT")) {
+      add("OPTION_CONTENT_DUPLICATE", "Option choices must have distinct text content.");
+    }
+  }
   const correct = q.options.filter(o => o.isCorrect).length;
   if (family === "single" && correct !== 1) add("CHOICE_KEY_COUNT", "Exactly one correct option is required.");
   if (family === "multiple" && correct < 2) add("CHOICE_KEY_COUNT", "Multiple choice requires at least two correct options.");
@@ -67,10 +79,13 @@ export function validateGroup(g: Group, path = "group"): Diagnostic[] {
   if (!g.questions.length) issues.push(d("GROUP_EMPTY", path, "A group must contain questions."));
   if (g.endIdx < g.startIdx || g.endIdx - g.startIdx + 1 !== g.questions.length || !contiguous(g.questions.map(q => q.idx), g.startIdx)) issues.push(d("GROUP_INDEX_COVERAGE", path, "Group bounds must exactly cover its question indices."));
   if (duplicates(g.questions.map(q => q.id))) issues.push(d("QUESTION_DUPLICATE", path, "Question IDs must be unique."));
+  const allOptions = g.questions.flatMap(q => q.options);
+  if (duplicates(allOptions.map(o => o.id.toLowerCase()))) issues.push(d("OPTION_DUPLICATE", path, "Option IDs must be unique within the group."));
   if (g.questions.some(q => q.groupId !== g.id)) issues.push(d("QUESTION_GROUP_MEMBERSHIP", path, "Every question must belong to its containing group."));
   return issues;
 }
-export function validateExam(exam: Exam, complete: boolean): Diagnostic[] {
+export type PaperRequirements = { sectionScoringUnits?: number[]; answerSlotCount?: number };
+export function validateExam(exam: Exam, complete: boolean, requirements: PaperRequirements = {}): Diagnostic[] {
   const issues: Diagnostic[] = [];
   const groups = exam.sections.flatMap(s => s.questionGroups);
   const qs = groups.flatMap(g => g.questions);
@@ -82,6 +97,8 @@ export function validateExam(exam: Exam, complete: boolean): Diagnostic[] {
     if (!s.passageMd.trim()) issues.push(d("PASSAGE_EMPTY", path, "Academic Reading requires passage content."));
     if (!s.questionGroups.length) issues.push(d("SECTION_EMPTY", path, "Section must contain question groups."));
     if (!contiguous(s.questionGroups.map(g => g.idx), 1)) issues.push(d("GROUP_INDEX_ORDER", path, "Group indices must cover 1..N within their section."));
+    const orderedGroups = [...s.questionGroups].sort((a, b) => a.idx - b.idx);
+    if (orderedGroups.some((g, i) => i > 0 && g.startIdx !== orderedGroups[i - 1].endIdx + 1)) issues.push(d("SECTION_GROUP_RANGE_CONTINUITY", path, "Group ranges must be consecutive and non-overlapping in delivery order."));
     for (const [j, g] of s.questionGroups.entries()) {
       if (g.sectionId !== s.id) issues.push(d("GROUP_SECTION_MEMBERSHIP", `${path}.questionGroups[${j}]`, "Group belongs to another section."));
       issues.push(...validateGroup(g, `${path}.questionGroups[${j}]`));
@@ -89,8 +106,30 @@ export function validateExam(exam: Exam, complete: boolean): Diagnostic[] {
   }
   if (duplicates(groups.map(g => g.id))) issues.push(d("GROUP_DUPLICATE", "exam", "Group IDs must be paper-wide unique."));
   if (duplicates(qs.map(q => q.id))) issues.push(d("QUESTION_DUPLICATE", "exam", "Question IDs must be paper-wide unique."));
+  const allOptions = qs.flatMap(q => q.options);
+  if (duplicates(allOptions.map(o => o.id.toLowerCase()))) issues.push(d("OPTION_DUPLICATE", "exam", "Option IDs must be paper-wide unique."));
+  const orderedSections = [...exam.sections].sort((a, b) => a.idx - b.idx);
+  for (let sIdx = 1; sIdx < orderedSections.length; sIdx++) {
+    const prevGroups = [...orderedSections[sIdx - 1].questionGroups].sort((a, b) => a.idx - b.idx);
+    const currGroups = [...orderedSections[sIdx].questionGroups].sort((a, b) => a.idx - b.idx);
+    if (prevGroups.length && currGroups.length && currGroups[0].startIdx !== prevGroups.at(-1)!.endIdx + 1) {
+      const origIdx = exam.sections.indexOf(orderedSections[sIdx]);
+      issues.push(d("SECTION_GROUP_RANGE_CONTINUITY", `exam.sections[${origIdx}]`, "Group ranges must be consecutive and non-overlapping in delivery order."));
+    }
+  }
+  const firstSectionGroups = orderedSections[0]?.questionGroups ? [...orderedSections[0].questionGroups].sort((a, b) => a.idx - b.idx) : [];
+  if (firstSectionGroups.length && firstSectionGroups[0].startIdx !== 1) {
+    const firstOrigIdx = exam.sections.indexOf(orderedSections[0]);
+    issues.push(d("SECTION_GROUP_RANGE_CONTINUITY", `exam.sections[${firstOrigIdx}]`, "First group range must start at question index 1."));
+  }
   const ordered = [...exam.sections].sort((a, b) => a.idx - b.idx).flatMap(s => [...s.questionGroups].sort((a, b) => a.idx - b.idx)).flatMap(g => [...g.questions].sort((a, b) => a.idx - b.idx));
   if (ordered.some((q, i) => q.idx !== i + 1)) issues.push(d("PAPER_INDEX_COVERAGE", "exam", "Delivery order requires paper-wide question indices 1..N, not section-local indices."));
+  if (requirements.sectionScoringUnits && (requirements.sectionScoringUnits.length !== orderedSections.length || orderedSections.some((s, i) => counts(s.questionGroups).scoringUnitCount !== requirements.sectionScoringUnits![i]))) {
+    issues.push(d("SECTION_SCORING_UNIT_COUNT", "exam.sections", "Section scoring units must match the caller-supplied distribution in section index order."));
+  }
+  if (requirements.answerSlotCount !== undefined && counts(groups).answerSlotCount !== requirements.answerSlotCount) {
+    issues.push(d("PAPER_ANSWER_SLOT_COUNT", "exam", "Answer slots must match the caller-supplied count; slots are not independent scoring units."));
+  }
   if (complete && counts(groups).scoringUnitCount !== 40) issues.push(d("PAPER_SCORING_UNIT_COUNT", "exam", "A complete paper requires exactly 40 independent scoring units, not 40 answer slots."));
   if (complete && exam.sections.length !== 3) issues.push(d("ACADEMIC_SECTION_COUNT", "exam", "A complete Academic Reading paper requires three sections."));
   return issues;

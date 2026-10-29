@@ -1,0 +1,417 @@
+{
+  "id": "e-vs2",
+  "title": "IELTS Academic Reading Vertical Slice 2 — Offline Validated Section",
+  "sections": [
+    {
+      "id": "s1",
+      "examId": "e-vs2",
+      "idx": 1,
+      "title": "The Roman Watermill Complex at Barbegal",
+      "passageMd": "The Barbegal aqueduct and mill complex is a Roman watermill installation located in southern France. Described as the greatest known concentration of mechanical power in the ancient world, the complex comprised sixteen overshot water wheels arranged in two parallel sets of eight down a steep hillside. Hydraulic engineers estimate that the facility could grind up to twenty-five tonnes of grain daily, enough to produce flour for the entire population of the nearby city of Arelate (modern Arles), which numbered approximately twelve thousand inhabitants in the second century AD.\n\nExcavations led by archaeologist Fernand Benoit in the late 1930s revealed that each mill race was driven by a single stone aqueduct that divided into two channels at the crest of the hill. Carbonate encrustations preserved on the surviving stonework indicate that the waterwheels operated almost continuously throughout the year, rather than intermittently or seasonally. A notable feature of the Barbegal mills was the use of wood for both the gears and axle shafts, while the flumes and retaining structures were constructed from dressed limestone blocks and hydraulic mortar.\n\nRecent isotopic analysis of the millstones has demonstrated that the basalt utilised in their manufacture originated from quarries in the Massif Central, nearly two hundred kilometres north of the site. This finding disproved earlier theories asserting that local limestone was used for the grindstones. Transporting such dense volcanic stone over that distance required substantial logistical organisation, suggesting that the Roman imperial state played a direct role in funding and managing the complex. Furthermore, researchers found no evidence of slave quarters near the mills, leading social historians to conclude that the workforce was composed of free paid labourers who resided in adjacent farming settlements.",
+      "questionGroups": [
+        {
+          "id": "g1",
+          "sectionId": "s1",
+          "idx": 1,
+          "startIdx": 1,
+          "endIdx": 5,
+          "instructionMd": "Do the following statements agree with the information given in Reading Passage 1? In boxes 1–5 on your answer sheet, write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.",
+          "questions": [
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "groupId": "g1",
+              "idx": 1,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "promptMd": "The Barbegal complex contained sixteen water wheels arranged in four equal rows.",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000101",
+                  "idx": 1,
+                  "contentMd": "TRUE",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000102",
+                  "idx": 2,
+                  "contentMd": "FALSE",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000103",
+                  "idx": 3,
+                  "contentMd": "NOT GIVEN",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "The complex comprised sixteen overshot water wheels arranged in two parallel sets of eight, not four rows.",
+              "modelAnswers": [
+                "FALSE"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000002",
+              "groupId": "g1",
+              "idx": 2,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "promptMd": "The flour produced at Barbegal was sufficient to feed the entire population of Arelate.",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000104",
+                  "idx": 1,
+                  "contentMd": "TRUE",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000105",
+                  "idx": 2,
+                  "contentMd": "FALSE",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000106",
+                  "idx": 3,
+                  "contentMd": "NOT GIVEN",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "Hydraulic engineers estimate the facility could grind enough to produce flour for the entire population of the nearby city of Arelate.",
+              "modelAnswers": [
+                "TRUE"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000003",
+              "groupId": "g1",
+              "idx": 3,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "promptMd": "The waterwheels at Barbegal operated only during the autumn harvest season.",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000107",
+                  "idx": 1,
+                  "contentMd": "TRUE",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000108",
+                  "idx": 2,
+                  "contentMd": "FALSE",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000109",
+                  "idx": 3,
+                  "contentMd": "NOT GIVEN",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "Carbonate encrustations indicate that the waterwheels operated almost continuously throughout the year, rather than intermittently or seasonally.",
+              "modelAnswers": [
+                "FALSE"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000004",
+              "groupId": "g1",
+              "idx": 4,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "promptMd": "The millstones at Barbegal were manufactured from local limestone.",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000110",
+                  "idx": 1,
+                  "contentMd": "TRUE",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000111",
+                  "idx": 2,
+                  "contentMd": "FALSE",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000112",
+                  "idx": 3,
+                  "contentMd": "NOT GIVEN",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "Isotopic analysis disproved earlier theories asserting that local limestone was used for the grindstones, showing basalt was used instead.",
+              "modelAnswers": [
+                "FALSE"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000005",
+              "groupId": "g1",
+              "idx": 5,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "promptMd": "The Roman imperial state levied a special tax on grain ground at Barbegal.",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000113",
+                  "idx": 1,
+                  "contentMd": "TRUE",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000114",
+                  "idx": 2,
+                  "contentMd": "FALSE",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000115",
+                  "idx": 3,
+                  "contentMd": "NOT GIVEN",
+                  "isCorrect": true
+                }
+              ],
+              "explanationMd": "The passage mentions state management and funding, but there is no mention of a tax levied on grain.",
+              "modelAnswers": [
+                "NOT GIVEN"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "g2",
+          "sectionId": "s1",
+          "idx": 2,
+          "startIdx": 6,
+          "endIdx": 9,
+          "instructionMd": "Complete the summary below. Choose ONE WORD ONLY from the passage for each answer. Write your answers in boxes 6–9 on your answer sheet.",
+          "questions": [
+            {
+              "id": "00000000-0000-0000-0000-000000000006",
+              "groupId": "g2",
+              "idx": 6,
+              "type": "SUMMARY_COMPLETION",
+              "promptMd": "Excavations in the late 1930s showed that water was supplied to the mill races by an [6] that split into two channels.",
+              "options": [],
+              "blankAcceptTexts": {
+                "6": [
+                  "aqueduct"
+                ]
+              },
+              "explanationMd": "Each mill race was driven by a single stone aqueduct that divided into two channels at the crest of the hill.",
+              "modelAnswers": [
+                "aqueduct"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000007",
+              "groupId": "g2",
+              "idx": 7,
+              "type": "SUMMARY_COMPLETION",
+              "promptMd": "Timber was chosen as the material for constructing both the axle shafts and the [7].",
+              "options": [],
+              "blankAcceptTexts": {
+                "7": [
+                  "gears"
+                ]
+              },
+              "explanationMd": "A notable feature was the use of wood for both the gears and axle shafts.",
+              "modelAnswers": [
+                "gears"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000008",
+              "groupId": "g2",
+              "idx": 8,
+              "type": "SUMMARY_COMPLETION",
+              "promptMd": "Scientific tests revealed that the millstones were cut from [8] sourced from the Massif Central.",
+              "options": [],
+              "blankAcceptTexts": {
+                "8": [
+                  "basalt"
+                ]
+              },
+              "explanationMd": "Recent isotopic analysis demonstrated that the basalt utilised in their manufacture originated from quarries in the Massif Central.",
+              "modelAnswers": [
+                "basalt"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000009",
+              "groupId": "g2",
+              "idx": 9,
+              "type": "SUMMARY_COMPLETION",
+              "promptMd": "Because no living quarters for enslaved people were found, experts believe the mill workers were [9] employees.",
+              "options": [],
+              "blankAcceptTexts": {
+                "9": [
+                  "free",
+                  "paid"
+                ]
+              },
+              "explanationMd": "Social historians concluded that the workforce was composed of free paid labourers.",
+              "modelAnswers": [
+                "free"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "g3",
+          "sectionId": "s1",
+          "idx": 3,
+          "startIdx": 10,
+          "endIdx": 13,
+          "instructionMd": "Choose the correct letter, A, B, C or D. Write the correct letter in boxes 10–13 on your answer sheet.",
+          "questions": [
+            {
+              "id": "00000000-0000-0000-0000-000000000010",
+              "groupId": "g3",
+              "idx": 10,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "promptMd": "According to hydraulic engineers, how much grain could the Barbegal mill complex process per day?",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000116",
+                  "idx": 1,
+                  "contentMd": "twelve tonnes",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000117",
+                  "idx": 2,
+                  "contentMd": "sixteen tonnes",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000118",
+                  "idx": 3,
+                  "contentMd": "twenty-five tonnes",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000119",
+                  "idx": 4,
+                  "contentMd": "two hundred tonnes",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "The facility could grind up to twenty-five tonnes of grain daily.",
+              "modelAnswers": [
+                "twenty-five tonnes"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000011",
+              "groupId": "g3",
+              "idx": 11,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "promptMd": "What physical evidence suggested that the Barbegal waterwheels operated year-round?",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000120",
+                  "idx": 1,
+                  "contentMd": "Carbonate encrustations",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000121",
+                  "idx": 2,
+                  "contentMd": "Preserved hydraulic mortar",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000122",
+                  "idx": 3,
+                  "contentMd": "Roman tax records",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000123",
+                  "idx": 4,
+                  "contentMd": "Written diaries of Fernand Benoit",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "Carbonate encrustations preserved on the surviving stonework indicate year-round operation.",
+              "modelAnswers": [
+                "Carbonate encrustations"
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000012",
+              "groupId": "g3",
+              "idx": 12,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "promptMd": "The distance from the basalt quarries to Barbegal indicated that",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000124",
+                  "idx": 1,
+                  "contentMd": "grain transport along the river was hazardous.",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000125",
+                  "idx": 2,
+                  "contentMd": "the imperial administration participated in managing the facility.",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000126",
+                  "idx": 3,
+                  "contentMd": "local stonemasons lacked quarrying skills.",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000127",
+                  "idx": 4,
+                  "contentMd": "water levels in the aqueduct fluctuated severely.",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "Logistics over two hundred kilometres suggested the Roman imperial state played a direct role in funding and managing the complex.",
+              "modelAnswers": [
+                "the imperial administration participated in managing the facility."
+              ]
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000013",
+              "groupId": "g3",
+              "idx": 13,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "promptMd": "Social historians believe the workforce at Barbegal lived",
+              "options": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000128",
+                  "idx": 1,
+                  "contentMd": "in barracks inside the mill complex.",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000129",
+                  "idx": 2,
+                  "contentMd": "in the port city of Massif Central.",
+                  "isCorrect": false
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000130",
+                  "idx": 3,
+                  "contentMd": "in neighboring agricultural communities.",
+                  "isCorrect": true
+                },
+                {
+                  "id": "00000000-0000-0000-0000-000000000131",
+                  "idx": 4,
+                  "contentMd": "on transport barges on the river.",
+                  "isCorrect": false
+                }
+              ],
+              "explanationMd": "Social historians concluded that the workforce resided in adjacent farming settlements.",
+              "modelAnswers": [
+                "in neighboring agricultural communities."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
