@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using attempt_service.Domain.Entities;
 
@@ -415,16 +416,24 @@ public sealed class FlowChartGrader : IQuestionGrader
 
     private sealed class FlowChartPayload
     {
+        [JsonPropertyName("steps")]
         public List<string>? Steps { get; set; }
+
+        [JsonPropertyName("labels")]
         public Dictionary<string, string>? Labels { get; set; }
     }
+
+    private static readonly JsonSerializerOptions FlowJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     private static FlowChartPayload ParseUserPayload(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return new FlowChartPayload();
         try
         {
-            return JsonSerializer.Deserialize<FlowChartPayload>(raw) ?? new FlowChartPayload();
+            return JsonSerializer.Deserialize<FlowChartPayload>(raw, FlowJsonOptions) ?? new FlowChartPayload();
         }
         catch
         {

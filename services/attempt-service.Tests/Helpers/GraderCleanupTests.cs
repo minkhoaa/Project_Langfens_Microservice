@@ -187,4 +187,27 @@ public class GraderCleanupTests
         Assert.False(result.IsCorrect);
         Assert.Equal("Sequence order or labels do not match answer key", result.Feedback);
     }
+
+    [Fact]
+    public void FlowChart_lowercase_json_payload_with_steps_and_labels_grades_correctly()
+    {
+        var key = new QuestionKey(
+            QuestionId: Guid.NewGuid(),
+            QuestionType: "FLOW_CHART",
+            QuestionPoints: 1m,
+            OrderCorrects: new List<string> { "step-1", "step-2" },
+            BlankAcceptTexts: new Dictionary<string, string[]?>
+            {
+                ["1"] = new[] { "soak" }
+            }
+        );
+
+        // Lowercase JSON as emitted by frontend
+        var raw = "{\"steps\":[\"step-1\",\"step-2\"],\"labels\":{\"1\":\"soak\"}}";
+        var result = new FlowChartGrader().Grade(MakeAnswer(raw), key);
+
+        Assert.Equal(1m, result.AwardedPoints);
+        Assert.True(result.IsCorrect);
+        Assert.Null(result.Feedback);
+    }
 }

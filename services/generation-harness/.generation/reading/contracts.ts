@@ -19,7 +19,10 @@ const idx = Type.Integer({ minimum: 1 });
 export const strings = Type.Array(text);
 export const mapSchema = Type.Record(Type.String(), strings);
 const objectOptions = { additionalProperties: false } as const;
-export const optionSchema = Type.Object({ id, idx, contentMd: text, isCorrect: Type.Boolean() }, objectOptions);
+export const optionSchema = Type.Object({
+  id, idx, contentMd: text, isCorrect: Type.Boolean(),
+  imageUrl: Type.Optional(text), altText: Type.Optional(text),
+}, objectOptions);
 export const questionSchema = Type.Object({
   id, groupId: id, idx, type: kindSchema, promptMd: text, options: Type.Array(optionSchema),
   explanationMd: Type.Optional(text), imageUrl: Type.Optional(text), wordList: Type.Optional(strings),
@@ -43,9 +46,35 @@ export type Question = Static<typeof questionSchema>;
 export type Group = Static<typeof groupSchema>;
 export type Exam = Static<typeof examSchema>;
 export type Answer = Static<typeof answerSchema>;
-export type Diagnostic = { code: string; severity: "error" | "warning"; path: string; message: string };
-export const diagnostic = (code: string, path: string, message: string, severity: Diagnostic["severity"] = "error"): Diagnostic => ({ code, severity, path, message });
-export function report(diagnostics: Diagnostic[], extra: object = {}) {
+export type DiagnosticCategory = "invalid-input" | "unsupported-capability" | "semantic-uncertainty";
+export type Diagnostic = {
+  code: string;
+  severity: "error" | "warning";
+  path: string;
+  message: string;
+  category?: DiagnosticCategory;
+  repairGuidance?: string;
+};
+export function diagnostic(
+  code: string,
+  path: string,
+  message: string,
+  severity: Diagnostic["severity"] = "error",
+  category?: DiagnosticCategory,
+  repairGuidance?: string
+): Diagnostic {
+  if (!category) {
+    if (code.includes("UNSUPPORTED") || code.includes("PARITY_REGEX_UNSUPPORTED") || code.includes("BLOCKED") || code.includes("ACADEMIC_TYPE_UNSUPPORTED") || code.includes("ACADEMIC_MULTI_SLOT_UNSUPPORTED")) {
+      category = "unsupported-capability";
+    } else if (code.includes("SEMANTIC") || code.includes("UNCERTAIN") || code.includes("REVIEW") || code.includes("TRUTH_EVIDENCE") || code.includes("QUALITY")) {
+      category = "semantic-uncertainty";
+    } else {
+      category = "invalid-input";
+    }
+  }
+  return { code, severity, path, message, category, ...(repairGuidance ? { repairGuidance } : {}) };
+}
+export function report<T extends object = Record<never, never>>(diagnostics: Diagnostic[], extra: T = {} as T) {
   return { status: diagnostics.some(d => d.severity === "error") ? "FAIL" : "PASS", diagnostics, ...extra };
 }
 function int64(value: string): bigint | undefined {
@@ -71,6 +100,16 @@ export function counts(groups: Group[]) {
   const qs = groups.flatMap(g => g.questions);
   return { questionCount: qs.length, answerSlotCount: qs.reduce((n, q) => n + answerSlots(q), 0), scoringUnitCount: qs.length, questionGroupCount: groups.length };
 }
+export type Profile = "platform-reference" | "strict-academic";
+export const ACADEMIC_READING_SUPPORTED_TYPES = new Set<Kind>([
+  "MULTIPLE_CHOICE_SINGLE", "MULTIPLE_CHOICE_MULTIPLE", "TRUE_FALSE_NOT_GIVEN", "YES_NO_NOT_GIVEN",
+  "SUMMARY_COMPLETION", "TABLE_COMPLETION", "NOTE_COMPLETION", "SENTENCE_COMPLETION", "SHORT_ANSWER",
+  "DIAGRAM_LABEL", "MATCHING_HEADING", "MATCHING_INFORMATION", "MATCHING_FEATURES", "MATCHING_ENDINGS",
+  "CLASSIFICATION",
+]);
+export const PLATFORM_ONLY_TYPES = new Set<Kind>([
+  "MULTIPLE_CHOICE_SINGLE_IMAGE", "MAP_LABEL", "FORM_COMPLETION", "FLOW_CHART",
+]);
 export function spec(type: Kind) {
   const family = families[type];
   const formats = {
@@ -79,11 +118,15 @@ export function spec(type: Kind) {
     completion: "textAnswer: JSON object keyed by numeric blank IDs; plaintext/newline positional fallback",
     matching: "textAnswer: JSON object of leftKey -> rightValue; plaintext only for a single pair",
     short: "textAnswer: plain text",
-    flow: 'textAnswer: JSON array of node keys; object fallback uses case-sensitive Steps/Labels (not steps/labels)',
+    flow: 'textAnswer: JSON array of node keys; legacy JS oracle models case-sensitive Steps/Labels; current dirty .NET source accepts lowercase (separate fixture evidence)',
   };
+  const isPlatformOnly = PLATFORM_ONLY_TYPES.has(type);
   return {
     type, family, answerFormat: formats[family], scoring: "all-or-nothing per Question (one independent scoring unit)",
     requiredKey: { single: "options.isCorrect (exactly one)", multiple: "options.isCorrect (at least two)", completion: "blankAcceptTexts plus optional blankAcceptRegex", matching: "matchPairs: leftKey -> [gradingKey, displayText]", short: "shortAnswerAcceptTexts plus optional shortAnswerAcceptRegex", flow: "orderCorrects: lowercase slug array; ingestion forbids labels" }[family],
     ieltsCorrectness: family === "flow" ? "INCOMPATIBLE_STANDARD_FLOW_COMPLETION" : "REQUIRES_INDEPENDENT_SEMANTIC_REVIEW",
+    platformOnly: isPlatformOnly,
+    academicReadingStatus: isPlatformOnly ? "BLOCKED_BY_SELECTED_ACADEMIC_PROFILE" : "ACADEMIC_CANDIDATE_REQUIRES_SLOT_AND_CONSUMER_GATES",
+    ...(family === "flow" ? { unsupportedCapability: "BLOCKED: Standard IELTS flow-chart blank completion is unsupported on the current platform ordering contract." } : {}),
   };
 }

@@ -1,5 +1,9 @@
 # IELTS Academic Reading — offline vertical slices 1–3
 
+**Current canonical contract:** [Executable v1.0.0 profile](contracts/IMPLEMENTATION-v1.md).
+See the [corrected audit and offline decision](evaluation/CONTRACT-HARDENING-AUDIT.md).
+The legacy VS shapes described below remain regression interfaces, not canonical-v1 or consumer certificates.
+
 See [VERIFICATION.md](VERIFICATION.md) for the baseline audit, reproduced defects,
 final test evidence and explicit PASS/FAIL/BLOCKED/UNVERIFIED scope.
 
@@ -58,12 +62,12 @@ normal scalar coercion. No frozen SDK changes are needed.
 | Tool | Input | Purpose |
 | --- | --- | --- |
 | `get_question_spec` | `type` | Family, required keys, wire answer format and IELTS limitations for each of the 19 shared types |
-| `validate_question` | `question` | Prompt, options, private keys, completion markers and admin-ingestion constraints |
-| `validate_group` | `group` | Exact index coverage, question membership and key completeness |
-| `validate_exam` | `exam, complete, requirements?` | Full hierarchy, ownership, paper-wide indices; complete papers require 40 independent units and three Academic sections; optional `sectionScoringUnits` and `answerSlotCount` are caller-specific, not production policy |
+| `validate_question` | `question` or `canonicalQuestion`; permissive `draft`; optional profile | Prompt, options, private keys, completion markers and admin-ingestion constraints |
+| `validate_group` | `group` or `canonicalGroup`; optional profile | Exact index coverage, question membership and key completeness |
+| `validate_exam` | `exam` or `canonicalExam`, plus `complete, requirements?` | Full hierarchy, ownership, paper-wide indices; complete papers require 40 independent units and three Academic sections; optional `sectionScoringUnits` and `answerSlotCount` are caller-specific, not production policy |
 | `verify_evidence` | `passageMd?, group?, groups?, exam?, sectionId?, evidence, blindSolverId, semanticReviews` | Exact UTF-16 quotation offsets, coverage and independently identified review inputs; exactly one target: single group, groups, or one canonical exam section; not entailment verification |
 | `check_grading_parity` | `question, cases[{id,answer,expectedCorrect}]` | Source-derived backend results versus caller-supplied IELTS expectations; selection-ingestion errors are separate diagnostics |
-| `inspect_delivery_projection` | `exam, projectionJson?` | Allowlisted, normalized student projection; optionally reject supplied JSON that leaks private fields or differs from it |
+| `inspect_delivery_projection` | `exam` or `canonicalExam`, plus `projectionJson?` | Allowlisted, normalized student projection; optionally reject supplied JSON that leaks private fields or differs from it |
 
 Schemas and executable specifications are in `reading/contracts.ts`. This is a
 canonical **generation artifact**, not an HTTP upsert DTO: identifiers establish
@@ -118,9 +122,10 @@ Important distinctions:
 - Matching ingestion uses `[gradingKey, displayText]`. Grading actually accepts
   **every** array value, including display text; JSON values are not trimmed.
 - FLOW_CHART ingestion requires lowercase slug order keys and forbids labels,
-  although the grader supports labels. Default case-sensitive JSON parsing uses
-  `Steps`/`Labels`; lowercase `steps`/`labels` from the backend comment fails.
-  Use the array format for compatible ordering. This is not standard IELTS
+  although the grader supports labels. The committed legacy JS oracle expects
+  `Steps`/`Labels`; the existing uncommitted .NET patch accepts lowercase too.
+  Actual .NET fixture evidence records this divergence. No consumer patch was made
+  by this task. Use the array format for compatible ordering. This is not standard IELTS
   flow-chart completion; warnings and specification metadata say so.
 - Text normalization follows existing backend behavior, including its compound
   number lookahead quirks and .NET whitespace (U+0085 is whitespace; BOM is not),

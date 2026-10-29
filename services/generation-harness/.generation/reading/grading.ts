@@ -1,4 +1,4 @@
-import { families, sortedKeys, type Answer, type Question } from "./contracts.js";
+import { families, sortedKeys, type Answer, type Question } from "./contracts.ts";
 
 // Mirrors TextNorm.Normalize, including its existing compound-number lookahead
 // quirks. Do not improve this independently of attempt-service.
@@ -90,7 +90,8 @@ export function grade(q: Question, answer: Answer): Grade {
   const expected = (q.orderCorrects ?? []).map(node).filter(Boolean);
   if (!expected.length) return { awardedPoints: 0, isCorrect: null, needsManualReview: true };
   const parsed = parse(raw);
-  // Default JsonSerializer is case-sensitive: Steps/Labels, despite the backend comment.
+  // Committed legacy oracle is case-sensitive. The pre-existing dirty .NET patch
+  // accepts lowercase; reading-dotnet-contract.test.mjs records that divergence.
   const payload = parsed as { Steps?: unknown; Labels?: unknown } | undefined;
   const steps = Array.isArray(parsed) ? parsed : payload?.Steps;
   if (!Array.isArray(parsed) && payload?.Labels !== undefined && payload.Labels !== null && !stringMap(payload.Labels)) return result(false);

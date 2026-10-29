@@ -1,0 +1,34 @@
+{
+  "retrievedAtUtc": "2026-10-29T17:18:24Z",
+  "purpose": "Read-only official-document audit, not inference, database access or a production probe. Tests never fetch these sources.",
+  "sources": [
+    {
+      "url": "https://ielts.org/take-a-test/preparation-resources/sample-test-questions/academic-test",
+      "sha256": "8f5996417c29f3b55b3f906c91328e16791251b5e997606be17ee4bc6ed873d5",
+      "observation": "Links to the Academic Reading multiple-choice-more-than-one-answer answer key."
+    },
+    {
+      "url": "https://ielts.org/cdn/computer-delivered-sample-tests-academic-reading/ielts-academic-reading-computer-delivered-multiple-choice-more-than-one-answer-answer-key.pdf",
+      "sha256": "c020b41b7a11d84b9fe81eede01d8dffb7acc1d8b6cff42241cc9da22ef4c0bb",
+      "excerpts": ["1&2 IN EITHER ORDER", "3&4 IN EITHER ORDER"],
+      "observation": "Two required responses occupy two numbered questions in each pair. This is not a specification of every electronic multi-select scoring algorithm."
+    },
+    {
+      "url": "https://ielts.org/for-test-takers/how-ielts-is-scored",
+      "sha256": "e263e86d512ef43fd06ff6c5d628eeea17c98bd265255d42df007a327b45e238",
+      "excerpt": "The IELTS Reading test contains 40 questions. Each correct answer is awarded 1 mark.",
+      "observation": "Supports one mark per numbered correct answer, not a universal partial-credit rule for a Langfens Question row containing a set."
+    },
+    {
+      "url": "https://ielts.org/take-a-test/test-types/ielts-academic-test/ielts-academic-format-reading",
+      "sha256": "e9e3f59856864ac77c48566363291bf93b7727cfcc27b8eac7a10e86fc5b37ea",
+      "excerpts": [
+        "Not every paragraph (or section) may be used and some paragraphs (or sections) may be used more than once.",
+        "When the paragraphs (or sections) may be used more than once, the instructions will say: ‘You may choose any paragraph (or section) more than once’.",
+        "Number of sections: 3; the total text length is 2150–2750 words"
+      ],
+      "observation": "Reuse permission is not a requirement that a generated key must repeat a letter."
+    }
+  ],
+  "limits": "Hashes identify bytes retrieved for this audit; URLs may later change. Only short excerpts are retained in-repository; raw downloads were held under /tmp. The example and general scoring text do not prove a universal K-of-N subset-credit algorithm or penalization rule."
+}

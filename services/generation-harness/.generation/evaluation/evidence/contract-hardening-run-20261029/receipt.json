@@ -1,0 +1,171 @@
+{
+  "version": "vs4.1",
+  "evidenceClass": "OFFLINE_TESTS",
+  "commands": [
+    {
+      "id": "typecheck",
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "log": "typecheck.log",
+      "logSha256": "ab7d38fba366c72b2ef93f02d4b57de36f62f15bb3c132857f6c32e9bf49d8b0"
+    },
+    {
+      "id": "domain-typecheck",
+      "command": "/home/khoa/.local/opt/node-v24.21.0/bin/node node_modules/typescript/bin/tsc --noEmit --project .generation/tsconfig.json",
+      "exitCode": 0,
+      "log": "domain-typecheck.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": "build.log",
+      "logSha256": "0d929bf15574a4b7f76f40e2d27c72cf8281741f514da7e45f7d7dec15522d25"
+    },
+    {
+      "id": "tests",
+      "command": "npm test",
+      "exitCode": 0,
+      "log": "tests.log",
+      "logSha256": "7922623eeda2bf954b01c3c55d129d852e3d731312d2130197aaec33078e0221"
+    },
+    {
+      "id": "contract-tests",
+      "command": "/home/khoa/.local/opt/node-v24.21.0/bin/node --test test/reading-canonical-contracts.test.mjs test/reading-hardened-contracts.test.mjs test/reading-dotnet-contract.test.mjs test/reading-contract-replay.test.mjs test/reading-trace-metrics.test.mjs",
+      "exitCode": 0,
+      "log": "contract-tests.log",
+      "logSha256": "70427e820ba43b95a1711002b12f6ce1d040d56f9f9274cc3f69caf245ed7ed1"
+    },
+    {
+      "id": "frozen-diff",
+      "command": "git diff --exit-code -- services/generation-harness/packages :(glob)services/*-service*/** services/_shared AppHost gateway",
+      "exitCode": 1,
+      "log": "frozen-diff.log",
+      "logSha256": "42539ace6003900d980b7630e961965146dd88e73c229bd3ba41e666ed4db484"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "deterministicStructureScoringDelivery",
+      "verdict": "FAIL",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Native VS1–VS3 and all 19 type regressions exercise structure, scoring and delivery; no fixture validation failures permitted."
+    },
+    {
+      "id": "leakageAndUnauthorizedAccess",
+      "verdict": "FAIL",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Offline native blind-child/tool/context restrictions and known raw/encoded leakage attacks tested; arbitrary natural-language hints remain a human pilot-audit obligation."
+    },
+    {
+      "id": "pilotCompatibility",
+      "verdict": "FAIL",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Pilot excludes FLOW_CHART and regex keys; supported TFNG, matching information, summary completion and single choice retain deterministic compatibility coverage."
+    },
+    {
+      "id": "reproducibleSchemasFixturesEvidence",
+      "verdict": "FAIL",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Versioned rubric, native canonical generator schema, solver/reviewer/adjudication schemas, synthetic records, manifest hashing and tamper fixtures exercised."
+    },
+    {
+      "id": "threeWayJudgments",
+      "verdict": "FAIL",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "PASS/FAIL/UNCERTAIN and GO/NO-GO/INSUFFICIENT_EVIDENCE branches tested; verify_evidence remains PASS/FAIL only."
+    },
+    {
+      "id": "independentReviewAndHumanAdjudication",
+      "verdict": "FAIL",
+      "commandIds": [
+        "tests",
+        "domain-typecheck"
+      ],
+      "reason": "Two reviews per criterion/item; disagreement, critical defect, uncertainty and solver mismatch adjudication enforced; human identities still require external accountability."
+    },
+    {
+      "id": "frozenBackendBoundary",
+      "verdict": "FAIL",
+      "commandIds": [
+        "frozen-diff",
+        "frozen-status"
+      ],
+      "reason": "Tracked diff and untracked status empty for frozen packages and backend service sources."
+    }
+  ],
+  "sourceHashes": {
+    "package.json": "a8bfd042d7599b17d0e96bdc882ca47ff659950591e776b9df12d785ae784563",
+    "README.md": "4825693a82cc95410a1898dd313968c5497905660b07f77dca4a71cea34be5b0",
+    "scripts/config.mjs": "24cd142c7904e4edb4b675802b07e7d5dc21c166e147ce1c83f82e061aea3685",
+    "scripts/configuration.mjs": "54b66453bbc0250f86dca32d4988a8f76e766447624eb79c0dfe30d88140a711",
+    "scripts/configuration-ui.mjs": "547daeb8a0413655e7402ef113b420f4d9e162404b8b70dfd569d48450debe02",
+    "scripts/configuration-resources.mjs": "7941e30fda3242eeb3091b2c3c1d7385619639b9f1607ba7e2587d2a9c19ac93",
+    "scripts/configuration-resources-ui.mjs": "356c85d9d39b979369d02f42baf9d8d5517a2244d69a102372de014096ab0861",
+    "scripts/configuration-resolver.mjs": "e7a9c12da6f55a35cb95dc9797ddacb509093c21a2df9240055558a0d34a59c4",
+    "scripts/runtime.mjs": "dfb9e93d604224cf4f339e5d8dda9476c2c71f0cfb0d5ccf649b85bfd6535892",
+    "test/config.test.mjs": "f633b34a7f494bde20dbdce0723288c676b82870d7f7738b8aadb1a421bdaa6a",
+    "test/config-resources.test.mjs": "8638c2304a38a50a9b8d0620400f33ad41f7c0a842004483e7f9a7d3d33d24f1",
+    ".generation/settings.json": "ddbdd606ebe2a4d97cd693e9d9514c99d15867f33b69845f6ee3a1eb1249333b",
+    ".generation/README.md": "486ba7d69bd79c63114eb0266425055b6af269a37acdd9f733172f2a873d5b31",
+    ".generation/config/README.md": "43406be1c05e7250039961f591129cd8b20bdf06bb63b367244fa6668025a82e",
+    ".generation/config/models.example.json": "8b6642b3402d7040018c2a49dd6bcd37aecbbd8d8b2000840a37aa365738f2ce",
+    ".generation/evaluation/rubric.json": "23a26f38a1fa8b65befc4f4c26738e9bb1f43a9d635974165d92655bf3a319b3",
+    ".generation/evaluation/schemas.mjs": "b0cca31d9ad436c06036bd36a2d3cecce8f3c0f631b241cabd392116969ebb86",
+    ".generation/evaluation/report.mjs": "55f0ecc62a4e87efe52c611bc75e4df6a9d8aae107e5e4ec8c4ff66f5388667a",
+    ".generation/evaluation/evidence.mjs": "df3f64637124a20e3c84747d818127ca3cf887aaa87c875d2e3c5a7e9095eb41",
+    ".generation/evaluation/statistics.mjs": "3efb1e4a2ba9696b3b2e8ebc90a2f25e19ee6d021f484ed9d88385097f101552",
+    ".generation/evaluation/readiness.mjs": "b43bcf0367d90f39f405ab181312cb8c681f97c05dc099a129a06fe18e6ba962",
+    ".generation/evaluation/run-offline.mjs": "5713926c710bcb1e339473ce2dc9d92b8ceb3a9cc047c8db3d37304c883d601f",
+    ".generation/evaluation/README.md": "71b45f2450dbe4eba4893aee796fbe9e6f327a5de74a3ae82ab752129f2e87b4",
+    ".generation/evaluation/fixtures/records.mjs": "116dce495fa80afa98b1afedcb59e9a649602647e99aa0ffe9e8e72b2ed7e629",
+    ".generation/evaluation/fixtures/pilot.mjs": "54b47d7415301fea86775b46a553f638beccb433d1fcbf1d8c821723fdfe33cc",
+    ".generation/evaluation/fixtures/held-out-section.json": "9a55d1df535143a84044997f8b2ba5fac9adc38756db47cab96f2cbc6c551d60",
+    ".generation/extensions/reading.ts": "90acd6f1f36751c8c4a6af5af1cec2d4ffd26c81c9e7a4981db98e4c2b418807",
+    ".generation/reading/contracts.ts": "b58eaa23e10ff66aa54ce4cef8f2e786f58db7a5d829f9e1209627aff9c949ae",
+    ".generation/reading/grading.ts": "3b4d7a3c99d88a6644785ccf09f21d8cbd73bb4d630cc64d8e974aa14989b621",
+    ".generation/reading/validation.ts": "e175ee7cdb0a4a5d4fe98461d625e5e084c4f6e24fa347806ae447ebc2b2ff35",
+    ".generation/reading/projection.ts": "ae76c93f172bfd5a07e99550243e149e37f4b16361c4ebf1fd98db963ea0f3c9",
+    ".generation/reading/blind-guard.ts": "70ac9a541644dc97b4b7c41c7cf7181582816c83295abe4d3974f187e4cfc8d5",
+    ".generation/agents/semantic-reviewer.md": "da02aa9e1020913fa99d4b8f86d8818ec3242dc44edd097de82b928a4c65260e",
+    ".generation/agents/blind-solver.md": "6a2e30ac635c1dfa114905f752e9b0e3760813b17600798033b3349cd5f3dc04",
+    "test/offline.mjs": "c0e865709956b277f2732989374ddc8a0dea730c6e7e79818bb1160690a966e8",
+    "test/reading.test.mjs": "1784846b077cfdeeb17e839a5fe80f9b688c9db8d95806569cbc2a21fe3b2d82",
+    "test/reading-vs3.mjs": "156fa81a774efdf3b24fb7e4026425ef1ba9c806e390ce29800828c16b10b4da",
+    "test/reading-vs4.test.mjs": "3c35eafe50ff3941d31a72c9ebf94fb2318e87eb114129ee3dc0e7e96322b6da",
+    "test/reading-vs4-gate.test.mjs": "158deac2db619ae9117144ff9076198c9511eb259fdd9ca772c1faee3953bfb2",
+    "test/reading-vs4-acceptance.test.mjs": "b9d6c437931b2e92c226cd4146302ca7e2c84ded8f5937378f44f5915448a743",
+    "test/reading-vs4-readiness.test.mjs": "fad6e53e54e5ffcd285e1995f19d232c69cf286804d8ceb43544bcbbbd0f6ece",
+    ".generation/contracts/question-types.v1.schema.json": "6345070a86b3271bc2ae348a0afcb33c928b42a1b55346809cb566a21c6478c5",
+    ".generation/reading/canonical.ts": "c1dc4aaeaa44e9f988b4c0f8ebc27a87fb839aed4119719d085e27f798405ec8",
+    ".generation/reading/diagnostics.ts": "e60ad368ccf18245fa8e93ada59a3677355e9164c29cc1561385c16f8f43057b",
+    ".generation/reading/repair-policy.ts": "e0fa1a25622a5783dc7d5716848dbe33965bb29158c6fc3e7ea1764beda1f2e2",
+    ".generation/fixtures/canonical-v1.mjs": "853fe97759f2448e9a20a5190337df4482653cf0ee0383ee5ba8648b43062f02",
+    ".generation/evaluation/contract-trace-metrics.mjs": "cccadc465876650eb834c5d8e2d71ddd3e56b59f50b17a96559e6a797ce3d93c",
+    "test/reading-canonical-contracts.test.mjs": "4ce0373ae8e5c063d5941c80a4fac6d0bff3aeecef31c5c2c8886a2eca49f780",
+    "test/reading-hardened-contracts.test.mjs": "33a92fa886576c0d27e0de170210ebfc2520ca0c83bd144b6aa384e99e44120c",
+    "test/reading-dotnet-contract.test.mjs": "1415ba80cabf98bd72611ee61f00505c270fb15d26ebe8a0070df81c61e053b8",
+    "test/reading-contract-replay.test.mjs": "6fc9c3fc83be1d24d8b173649a6402017c113c18ef071722d1e8846cd38d504e",
+    "test/reading-trace-metrics.test.mjs": "543690cd82c18ab11c40625a2a176996503807e6d95a8af8e4543706807382ba",
+    "test/dotnet-contract/GraderFixture.csproj": "07fb1b6e4d2c229a7ff7d97d17536a63871db3d0ad892bc8317e6e3d363eb81d",
+    "test/dotnet-contract/Program.cs": "db7e269a3d11e725301ffdd3158f820a574c21f3a2eca785d4b2928192431268",
+    "test/dotnet-contract/NuGet.Config": "7405c6bdd96d20dd7e91af8a0945781b7e7fc92ac6f62367757f2b8872a43ba7"
+  },
+  "scope": "Offline instrument readiness, supported non-regex pilot types only; no semantic-quality claim or live authorization."
+}

@@ -1,0 +1,33 @@
+{
+  "evidenceClass": "OFFLINE_TESTS",
+  "launcherReceiptSha256": "061a79fde0f18a2c2c76614646ee8a8f87ed7a0db4d8e92bd43a451405df7bde",
+  "separateChecks": [
+    {
+      "command": "GENERATION_HARNESS_OFFLINE=1 node --import ./test/offline.mjs --test test/reading*.mjs",
+      "cwd": "services/generation-harness",
+      "exitCode": 0,
+      "tests": 127,
+      "passed": 127,
+      "failed": 0,
+      "skipped": 0,
+      "log": "reading-all.log",
+      "logSha256": "915d6e00b8b94b13b9a755e0de5af5b90206e338a6d0642a48994295ca8b2434"
+    },
+    { "command": "git diff --check", "exitCode": 0 },
+    {
+      "command": "git diff --exit-code -- services/generation-harness/packages services/_shared AppHost gateway",
+      "exitCode": 0,
+      "scope": "Frozen sources excluding the two pre-existing dirty attempt files. This is not a waiver of the full gate."
+    }
+  ],
+  "preExistingConsumerPatch": {
+    "paths": ["services/attempt-service/Features/Helpers/Grader.cs", "services/attempt-service.Tests/Helpers/GraderCleanupTests.cs"],
+    "beforeAndAfterDiffSha256": "42539ace6003900d980b7630e961965146dd88e73c229bd3ba41e666ed4db484",
+    "byteComparedUnchanged": true,
+    "classification": "PRE_EXISTING_FROZEN_BOUNDARY_FAILURE"
+  },
+  "readinessDecision": "NO-GO",
+  "semanticPilotDecision": "INSUFFICIENT_EVIDENCE",
+  "authorizesInferenceOrPublication": false,
+  "productionReadinessDeclared": false
+}

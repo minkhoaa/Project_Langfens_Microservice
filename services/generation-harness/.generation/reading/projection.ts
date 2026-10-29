@@ -13,9 +13,15 @@ export function studentProjection(exam: Exam) {
         const startIdx = idx;
         const questions = [...g.questions].sort((a, b) => a.idx - b.idx).map(q => ({
           id: q.id, groupId: q.groupId, idx: idx++, type: q.type, promptMd: q.promptMd,
+          ...("sectionId" in q ? { sectionId: q.sectionId as string } : {}),
+          ...("skill" in q ? { skill: q.skill as "READING" | "LISTENING" } : {}),
+          ...("difficulty" in q ? { difficulty: q.difficulty as number } : {}),
           ...(q.imageUrl ? { imageUrl: q.imageUrl } : {}),
           ...(q.wordList ? { wordList: [...q.wordList] } : {}),
-          options: [...q.options].sort((a, b) => a.idx - b.idx).map(o => ({ id: o.id, idx: o.idx, contentMd: o.contentMd })),
+          options: [...q.options].sort((a, b) => a.idx - b.idx).map(o => ({
+            id: o.id, idx: o.idx, contentMd: o.contentMd,
+            ...(o.imageUrl ? { imageUrl: o.imageUrl, ...(o.altText ? { altText: o.altText } : {}) } : {}),
+          })),
           ...(q.type === "FLOW_CHART" ? { flowChartNodes: [...new Set(q.orderCorrects ?? [])].sort().map(key => ({ key, label: key.replace(/-/g, " ").trim() })) } : {}),
         }));
         return { id: g.id, idx: g.idx, startIdx, endIdx: idx - 1, instructionMd: g.instructionMd, questions };
@@ -40,10 +46,15 @@ const strict = { additionalProperties: false } as const;
 const id = Type.String({ minLength: 1 });
 const idx = Type.Integer({ minimum: 1 });
 const text = Type.String();
-const publicOption = Type.Object({ id, idx, contentMd: text }, strict);
+const publicOption = Type.Object({
+  id, idx, contentMd: text,
+  imageUrl: Type.Optional(text), altText: Type.Optional(text),
+}, strict);
 const publicNode = Type.Object({ key: id, label: text }, strict);
 const publicQuestion = Type.Object({
   id, groupId: id, idx, type: kindSchema, promptMd: text,
+  sectionId: Type.Optional(id), skill: Type.Optional(Type.Union([Type.Literal("READING"), Type.Literal("LISTENING")])),
+  difficulty: Type.Optional(Type.Integer({ minimum: 1, maximum: 5 })),
   imageUrl: Type.Optional(text), wordList: Type.Optional(Type.Array(text)),
   options: Type.Array(publicOption),
   flowChartNodes: Type.Optional(Type.Array(publicNode)),

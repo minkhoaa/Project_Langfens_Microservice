@@ -2,6 +2,10 @@
 
 **Provisional research thresholds, not official IELTS standards or previously approved Langfens policy.** This package is an offline evaluation instrument, not a generator, coordinator, runtime, publication tool or production-quality certificate. A readiness GO never authorizes running a live pilot. No inference is performed by these scripts.
 
+## Canonical v1 hardening follow-up
+
+See [CONTRACT-HARDENING-AUDIT.md](CONTRACT-HARDENING-AUDIT.md) and [the v1 implementation](../contracts/IMPLEMENTATION-v1.md). The historical VS4 protocol below retains its legacy schema; it is not canonical-v1 compatibility evidence. The first strict canonical pilot is TFNG/single-MCQ/one-slot-summary only. V1 MATCHING_* multi-target exercises cannot satisfy one-slot/one-mark generation without a deliberate versioned representation change. `run-offline.mjs` now also executes the related canonical/native-replay/actual-.NET tests using cached packages and records failures by scoped command dependency; a frozen-backend failure is not relabeled as a schema/test failure. The launcher remains fail-fast and refuses an existing receipt directory.
+
 ## Scope and artifacts
 
 - `rubric.json`: versioned, machine-readable provisional cutoffs.

@@ -1,0 +1,57 @@
+{
+  "artifacts": [
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/2026-10-29T08-09-00-735Z_01a186b4-883e-74ab-9b2e-153e5355955b.jsonl",
+      "sha256": "0ee9f939f5895d03cefb36885e150bc77cd72d227571dc63809677f166d938ab",
+      "bytes": 1615608
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/01965d04-dc81-41b2-a494-9fd6d3c5fa82/run-0/session.jsonl",
+      "sha256": "70de5ad59640616cbbd766fad683c2cb85866cbda13cfba78aecd0983dd1f75b",
+      "bytes": 242626
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/06ac3b62-c440-4dff-8210-8431c1529876/run-0/session.jsonl",
+      "sha256": "fc53acc2d0f4cc6cbc370ecf780c0b45913bbb1f641f456070d5100ef5b2131e",
+      "bytes": 395128
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/19066096-c723-4ac5-9811-32487881dca5/run-0/session.jsonl",
+      "sha256": "d52e61e713a9c9faee6840f0f7ed9c19b59f3358652a2a363c9154dc1bb511d4",
+      "bytes": 903612
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/61a586c0-6e00-48bf-b301-eab20d0c0c89/run-0/session.jsonl",
+      "sha256": "dbbb2c56e958477227871d634f71e3f9b5b4a989051c1d6dce55e5327a1d5759",
+      "bytes": 219495
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/66645851-965b-42c6-9074-9c9c6179c63a/run-0/session.jsonl",
+      "sha256": "6d65298edb4582ff819ac7c0db849f190840bb4dc83e5c62adbdb455f11c365b",
+      "bytes": 29704
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/b6f20e65-76f1-4995-935a-32d39ed4eb9c/run-0/session.jsonl",
+      "sha256": "19095c86669f0988fbc1e3c2efc3ede6d05519804d93efd17bd0dabba92e7236",
+      "bytes": 25687
+    },
+    {
+      "path": ".runtime/reading-runs/dc4559d1-0618-453c-a8dd-7eca12790e25/.sessions/e526fd1f-7a90-4866-b81e-2d823d2255b3/run-0/session.jsonl",
+      "sha256": "d7fc3935d29b73ccdf1cbe0432108f9244b9bc1e37e73a8ea0eb497cdaad346a",
+      "bytes": 198736
+    }
+  ],
+  "sessions": 8,
+  "uniqueCalls": 250,
+  "uniqueResults": 250,
+  "schemaFailures": 145,
+  "nativeSchemaErrors": 145,
+  "schemaDiagnosticResults": 0,
+  "toolErrors": 145,
+  "withinSessionRepeatedCalls": 29,
+  "pooledStructuralRepeats": 40,
+  "malformedLines": 0,
+  "unidentifiedMessages": 0,
+  "inferenceTokenSavings": "NOT_MEASURED",
+  "method": "Deduplicate session-id/tool-call-id; exact tool-name + stable-key-order arguments. Within-session repeated calls and pooled structural repeats have different denominators. Retries/artifact revisions are not inferred from repeated calls."
+}
