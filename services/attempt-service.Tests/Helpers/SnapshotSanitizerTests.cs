@@ -10,7 +10,7 @@ public class SnapshotSanitizerTests
     [Fact]
     public void Grpc_keeps_slot_ids_without_exposing_accepted_values_or_mutating_snapshot()
     {
-        var question = new InternalDeliveryQuestion { Id = Guid.NewGuid().ToString() };
+        var question = new InternalDeliveryQuestion { Id = Guid.NewGuid().ToString(), ExplanationMd = "secret-explanation" };
         var blank = new InternalCompletionAccept { BlankId = "5" };
         blank.AcceptedTexts.Add("secret");
         blank.AcceptedRegex.Add("secret.*");
@@ -30,6 +30,8 @@ public class SnapshotSanitizerTests
 
         var safe = GrpcSnapshotSanitizer.Sanitize(exam).Sections[0].QuestionGroups[0].Questions[0];
 
+        Assert.Empty(safe.ExplanationMd);
+        Assert.Equal("secret-explanation", question.ExplanationMd);
         Assert.Equal("5", Assert.Single(safe.CompletionAccepts).BlankId);
         Assert.Empty(safe.CompletionAccepts[0].AcceptedTexts);
         Assert.Empty(safe.CompletionAccepts[0].AcceptedRegex);
@@ -48,6 +50,8 @@ public class SnapshotSanitizerTests
     {
         var question = new Dto.InternalDeliveryQuestion
         {
+            ExplanationMd = "secret-explanation",
+            ModelAnswers = ["secret-model"],
             BlankAcceptTexts = new Dictionary<string, string[]?> { ["5"] = ["secret"] },
             BlankAcceptRegex = new Dictionary<string, string[]?> { ["10"] = ["secret.*"] },
             MatchPairs = new Dictionary<string, string[]?> { ["7"] = ["B"] },
@@ -62,10 +66,47 @@ public class SnapshotSanitizerTests
         };
 
         var safe = Dto.SnapshotSanitizer.Sanitize(exam).Sections[0].QuestionGroups[0].Questions[0];
+        Assert.Null(safe.ExplanationMd);
+        Assert.Null(safe.ModelAnswers);
+        Assert.Equal("secret-explanation", question.ExplanationMd);
+        Assert.Equal("secret-model", Assert.Single(question.ModelAnswers!));
         Assert.Empty(safe.BlankAcceptTexts["5"]!);
         Assert.Empty(safe.BlankAcceptRegex["10"]!);
         Assert.Empty(safe.MatchPairs["7"]!);
         Assert.Null(safe.Options[0].IsCorrect);
         Assert.Equal("secret", question.BlankAcceptTexts["5"]![0]);
     }
+    [Fact]
+    public void Exam_rest_sanitizer_covers_flat_and_grouped_questions_without_mutation()
+    {
+        var question = new exam_service.Contracts.Exams.InternalExamDto.InternalDeliveryQuestion(
+            1, "TYPE", "READING", 1, "Public prompt", "private-explanation",
+            Options: [new(Guid.NewGuid(), 1, "Public option", true)],
+            BlankAcceptTexts: new Dictionary<string, string[]?> { ["1"] = ["private-blank"] },
+            BlankAcceptRegex: new Dictionary<string, string[]?> { ["1"] = ["private-regex"] },
+            MatchPairs: new Dictionary<string, string[]?> { ["1"] = ["private-match"] },
+            OrderCorrects: ["private-order"], ShortAnswerAcceptTexts: ["private-short"],
+            ShortAnswerAcceptRegex: ["private-short-regex"], ModelAnswers: ["private-model"]);
+        var exam = new exam_service.Contracts.Exams.InternalExamDto.InternalDeliveryExam(
+            Guid.NewGuid(), "slug", "title", null, "IELTS", "B1", 60, null,
+            [new(1, "Section", null, null, null, null, [question],
+                [new(Guid.NewGuid(), 1, 1, 1, "Instructions", [question])])]);
+        var safe = exam_service.Contracts.Exams.InternalExamDto.SnapshotSanitizer.Sanitize(exam);
+        foreach (var item in new[] { safe.Sections[0].Questions[0], safe.Sections[0].QuestionGroups![0].Questions[0] })
+        {
+            Assert.Null(item.ExplanationMd);
+            Assert.Null(item.ModelAnswers);
+            Assert.Null(item.BlankAcceptTexts);
+            Assert.Null(item.BlankAcceptRegex);
+            Assert.Null(item.MatchPairs);
+            Assert.Null(item.OrderCorrects);
+            Assert.Null(item.ShortAnswerAcceptTexts);
+            Assert.Null(item.ShortAnswerAcceptRegex);
+            Assert.Null(item.Options![0].IsCorrect);
+        }
+        Assert.Contains("private-model", question.ModelAnswers!);
+        Assert.Equal("private-explanation", question.ExplanationMd);
+        Assert.True(question.Options![0].IsCorrect);
+    }
+
 }

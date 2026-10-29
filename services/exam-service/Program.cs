@@ -103,7 +103,7 @@ app.UseAuthorization();
 // gRPC and HTTP/1.1 are multiplexed on the same Kestrel pipeline.
 // Under Aspire, ASPNETCORE_URLS is dynamic; clients distinguish gRPC from HTTP via content-type.
 // Under compose, ConfigureLangfensKestrel binds separate HTTP and HTTP/2 ports.
-app.MapGrpcService<ExamInternalGrpcService>().AllowAnonymous();
+app.MapGrpcService<ExamInternalGrpcService>().RequireAuthorization(InternalExamAccess.Policy);
 
 app.MapPublicExamEndpoints();
 app.MapAdminExamEndpoint();

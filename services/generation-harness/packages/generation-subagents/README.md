@@ -2,14 +2,14 @@
 
 Native Generation Harness adaptation of **Pi Subagents 0.83.1**, pinned to
 [`312082429bda07714fe0fe7729fe8d4935de4c5a`](https://github.com/nicobailon/pi-subagents/tree/312082429bda07714fe0fe7729fe8d4935de4c5a).
-MIT, copyright Nico Bailon. See `LICENSE`, `UPSTREAM-PROVENANCE.json` and
-`PARITY-AUDIT.md` for source provenance and the verified compatibility boundary.
-**The source migration is not a claim of 100% verified parity.**
+MIT, copyright Nico Bailon. See `LICENSE` and `UPSTREAM-PROVENANCE.json`
+for source attribution and per-file provenance. A source pin alone does not
+establish behavioral parity.
 
 ## Native entry point
 
-The package's default extension registers the pinned upstream delegation runtime,
-not the former foreground-only implementation. Load `generation-subagents` through
+The package's default extension registers the native delegation runtime.
+Load `generation-subagents` through
 Generation Harness's existing native extension/resource APIs. Its manifest supplies
 `dist/index.js`, packaged skills, and prompt templates. There is no global Pi,
 global npm package, external source checkout, separate coordinator, or replacement
@@ -56,8 +56,8 @@ installation. Do not run live providers or external CLIs as an offline test.
   are isolated, with unclaimed parent providers inherited rather than shared.
 - Native resource reload isolates transformed extension factories. Node's native
   ESM module map still retains `.mjs` module state; the pinned implementation has
-  the same boundary on this host. See the differential tests and audit before
-  relying on stronger independence guarantees.
+  the same boundary on this host. Use differential tests before relying on
+  stronger independence guarantees.
 
 The existing named programmatic APIs (`executeSubagent`, `discoverAgents`, and
 `createSubagentExtension({ agents })`) retain their Generation result/input

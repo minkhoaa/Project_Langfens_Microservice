@@ -1,7 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, realpathSync, statSync, symlinkSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { readingConfiguration } from "../.generation/reading/workspace.mjs";
 
 export const harnessRoot = realpathSync(fileURLToPath(new URL("..", import.meta.url)));
 export const packageRoot = join(harnessRoot, "packages/generation-harness-core");
@@ -22,7 +21,7 @@ export function ownedCoreEntry(source = false) {
 }
 
 /** Root application wiring loads the vendored extension without a core package dependency cycle. */
-export function ownedSubagentEntry(source = false) {
+function ownedSubagentEntry(source) {
 	const expected = join(harnessRoot, "packages/generation-subagents");
 	const canonical = realpathSync(expected);
 	if (canonical !== expected) throw new Error("Foreign local subagent package root");
@@ -51,7 +50,7 @@ export function runtimeEnvironment(inherited = process.env) {
 	}
 	const env = { ...inherited };
 	for (const key of Object.keys(env)) {
-		if (key.startsWith("PI_") || (key.startsWith("XDG_") && key !== "XDG_RUNTIME_DIR") || ["NODE_PATH", "NODE_OPTIONS", "INIT_CWD", "GENERATION_SUBAGENTS_BINARY"].includes(key)) {
+		if (key.startsWith("PI_") || key.startsWith("XDG_") || ["NODE_PATH", "NODE_OPTIONS", "INIT_CWD", "GENERATION_SUBAGENTS_BINARY"].includes(key)) {
 			delete env[key];
 		}
 	}
@@ -82,16 +81,7 @@ export function runtimeLaunch(args = [], inherited = process.env) {
 	const entry = ownedCoreEntry(source);
 	const forwarded = [];
 	let explicitCwd;
-	let input = source ? args.slice(1) : args;
-	const readingMode = input.includes("--reading");
-	let readingRuntime;
-	if (readingMode) {
-		readingRuntime = runtimeEnvironment(inherited);
-		const reading = readingConfiguration(input.filter(arg => arg !== "--reading"), readingRuntime);
-		input = reading.args;
-		explicitCwd = reading.workspace;
-		readingRuntime.env.GENERATION_HARNESS_READING_WORKSPACE = reading.workspace;
-	}
+	const input = source ? args.slice(1) : args;
 	for (let i = 0; i < input.length; i++) {
 		if (input[i] === "--cwd") {
 			if (!input[i + 1] || input[i + 1].startsWith("--")) throw new Error("--cwd requires a directory");
@@ -101,12 +91,8 @@ export function runtimeLaunch(args = [], inherited = process.env) {
 	if (!forwarded.includes("--no-extensions")) {
 		const extension = ownedSubagentEntry(source);
 		if (!forwarded.includes(extension)) forwarded.unshift("--extension", extension);
-		if (!readingMode) {
-			const configExt = join(harnessRoot, "scripts/config-extension.mjs");
-			if (!forwarded.includes(configExt)) forwarded.push("--extension", configExt);
-		}
 	}
-	const runtime = readingRuntime || runtimeEnvironment(inherited);
+	const runtime = runtimeEnvironment(inherited);
 	const cwd = explicitCwd || (inherited.GENERATION_HARNESS_ISOLATED === "1" && inherited.GENERATION_HARNESS_WORKING_DIR) || runtime.workspace;
 	if (!statSync(cwd).isDirectory()) throw new Error(`Harness cwd is not a directory: ${cwd}`);
 	runtime.env.GENERATION_HARNESS_WORKING_DIR = cwd;

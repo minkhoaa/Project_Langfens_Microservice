@@ -8,12 +8,10 @@ namespace exam_service.Features.Exams.InternalEndpoint;
 
 public class ExamInternalGrpcService : ExamInternal.ExamInternalBase
 {
-    private readonly IConfiguration _configuration;
     private readonly ExamDbContext _context;
 
-    public ExamInternalGrpcService(ExamDbContext context, IConfiguration configuration)
+    public ExamInternalGrpcService(ExamDbContext context)
     {
-        _configuration = configuration;
         _context = context;
     }
 

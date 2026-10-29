@@ -114,11 +114,13 @@ var attemptDb = attemptDbServer.AddDatabase("attempt-db");
 // Let Aspire allocate Kestrel ports. Agent 4 is making Kestrel ports env-
 // configurable (Kestrel__HttpPort / Kestrel__GrpcPort), but we deliberately
 // don't pin them — service discovery handles addressing.
+var examInternalApiKey = builder.AddParameter("exam-internal-api-key", secret: true);
 var exam = builder.AddProject("exam-service", "../services/exam-service/exam-service.csproj")
     .WithReference(examDb)
     .WithHttpEndpoint(name: "http", env: "Kestrel__HttpPort")
     .WithHttpEndpoint(name: "grpc", env: "Kestrel__GrpcPort")
     .WithComposeEnvFile("exam")
+    .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", examInternalApiKey)
     .WaitFor(examDb);
 
 // ── gamification-service ─────────────────────────────────────────────────
@@ -200,7 +202,7 @@ var auth = builder.AddProject("auth-service", "../services/auth-service/auth-ser
 
 // ── attempt-service ──────────────────────────────────────────────────────
 // EXAMSERVICE__INTERNAL__API__KEY is required (attempt-service throws on
-// startup without it). Dev placeholder only.
+// startup without it). Share the configured secret with exam-service.
 var attempt = builder.AddProject("attempt-service", "../services/attempt-service/attempt-service.csproj")
     .WithReference(attemptDb)
     .WithReference(rabbitmq)
@@ -208,7 +210,7 @@ var attempt = builder.AddProject("attempt-service", "../services/attempt-service
     .WithRabbitMqEnv(rabbitmq, rabbitUser, rabbitPass)
     .WithEnvironment("EXAMSERVICE__EXAM__ADDRESS", exam.GetEndpoint("http"))
     .WithEnvironment("ExamService__GrpcAddress", exam.GetEndpoint("grpc"))
-    .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", "dev-internal-key-not-for-prod")
+    .WithEnvironment("EXAMSERVICE__INTERNAL__API__KEY", examInternalApiKey)
     .WithEnvironment("AI_SERVICE_URL", aiService.GetEndpoint("http"))
     .WaitFor(aiService)
     .WaitFor(attemptDb)

@@ -97,6 +97,8 @@ public class InternalExamDto
                 {
                     Questions = grp.Questions.Select(q => q with
                     {
+                        ExplanationMd = null,
+                        ModelAnswers = null,
                         Options = q.Options.Select(o => o with { IsCorrect = null }).ToList(),
                         BlankAcceptTexts = q.BlankAcceptTexts.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
                         BlankAcceptRegex = q.BlankAcceptRegex.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),

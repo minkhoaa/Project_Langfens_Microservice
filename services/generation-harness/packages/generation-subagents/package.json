@@ -86,7 +86,6 @@
     "README.md",
     "UPSTREAM-README.md",
     "CHANGELOG.md",
-    "PARITY-AUDIT.md",
     "UPSTREAM-PROVENANCE.json"
   ],
   "scripts": {

@@ -98,7 +98,8 @@ public class AttemptService(
                             { PropertyNameCaseInsensitive = true });
                         if (dto == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
                         using var sanitized =
-                            JsonSerializer.SerializeToDocument(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                            JsonSerializer.SerializeToDocument(InternalExamDto.SnapshotSanitizer.Sanitize(dto),
+                                new JsonSerializerOptions(JsonSerializerDefaults.Web));
                         var safeEl = PaperWideNormalizer.NormalizeJsonElement(sanitized.RootElement);
 
                         //time left
@@ -116,8 +117,7 @@ public class AttemptService(
                     }
                     catch
                     {
-                        return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                            PaperWideNormalizer.NormalizeJsonElement(existedStartedAttempt.PaperJson.RootElement)));
+                        return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
                     }
                 }
             }

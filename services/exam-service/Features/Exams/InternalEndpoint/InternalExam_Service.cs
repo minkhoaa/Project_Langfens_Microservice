@@ -61,7 +61,7 @@ public class InternalExamService : IInternalExamService
                                 question.Skill,
                                 question.Difficulty,
                                 question.PromptMd,
-                                question.ExplanationMd,
+                                showAnswer ? question.ExplanationMd : null,
                                 question.ImageUrl,
                                 question.Options.Where(d => d.QuestionId == question.Id)
                                     .OrderBy(d => d.Idx)
@@ -106,7 +106,7 @@ public class InternalExamService : IInternalExamService
                                         var flowChartNodes = BuildFlowChartNodes(q.OrderCorrects);
                                         var nodesOrNull = flowChartNodes.Count > 0 ? flowChartNodes : null;
                                         return new InternalExamDto.InternalDeliveryQuestion(
-                                            q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd, q.ExplanationMd,
+                                            q.Idx, q.Type, q.Skill, q.Difficulty, q.PromptMd, showAnswer ? q.ExplanationMd : null,
                                             q.ImageUrl,
                                             q.Options.OrderBy(o => o.Idx)
                                                 .Select(o => new InternalExamDto.InternalDeliveryOption(

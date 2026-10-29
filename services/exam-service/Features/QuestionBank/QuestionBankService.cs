@@ -1,7 +1,7 @@
 using exam_service.Contracts.Exams;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
+using Shared.ExamDto.Contracts.Exam.Enums;
 using Shared.ExamDto.Contracts;
 
 namespace exam_service.Features.QuestionBank;
@@ -29,7 +29,7 @@ public record QuestionBankItemDto(
     List<string>? ShortAnswerAcceptRegex
 );
 
-public record OptionDto(Guid Id, string Text, bool IsCorrect, int Idx);
+public record OptionDto(Guid Id, string Text, bool? IsCorrect, int Idx);
 
 public record QuestionBankResponse(
     List<QuestionBankItemDto> Items,
@@ -49,7 +49,8 @@ public class QuestionBankService(ExamDbContext context) : IQuestionBankService
 {
     public async Task<IResult> GetQuestionTypes(string? skill, CancellationToken token)
     {
-        var query = context.ExamQuestions.AsNoTracking();
+        var query = context.ExamQuestions.AsNoTracking()
+            .Where(q => q.Section.Exam.Status == ExamStatus.Published);
 
         if (!string.IsNullOrEmpty(skill))
             query = query.Where(q => q.Skill.ToUpper() == skill.ToUpper());
@@ -66,6 +67,7 @@ public class QuestionBankService(ExamDbContext context) : IQuestionBankService
     public async Task<IResult> GetExamByQuestionTypes(string? type, int page, int pageSize, CancellationToken token)
     {
         var exams = await context.Exams.AsNoTracking()
+            .Where(e => e.Status == ExamStatus.Published)
             .Where(e => context.ExamQuestions.Any(q => q.Section.ExamId == e.Id && q.Type == type))
             .Skip((page -1) * pageSize)
             .Take(pageSize)
@@ -87,6 +89,7 @@ public class QuestionBankService(ExamDbContext context) : IQuestionBankService
             .Include(q => q.Options)
             .Include(q => q.Section)
             .ThenInclude(s => s.Exam)
+            .Where(q => q.Section.Exam.Status == ExamStatus.Published)
             .Where(q => q.Type.ToUpper() == type.ToUpper());
         
         if (!string.IsNullOrEmpty(skill))
@@ -106,18 +109,18 @@ public class QuestionBankService(ExamDbContext context) : IQuestionBankService
                 q.Skill,
                 q.Difficulty,
                 q.PromptMd,
-                q.ExplanationMd,
+                null,
                 q.SectionId,
                 q.Section.Title ?? "",
                 q.Section.ExamId,
                 q.Section.Exam.Title,
-                q.Options.OrderBy(o => o.Idx).Select(o => new OptionDto(o.Id, o.ContentMd, o.IsCorrect, o.Idx)).ToList(),
-                q.MatchPairs,
-                q.BlankAcceptTexts,
-                q.BlankAcceptRegex,
-                q.OrderCorrects,
-                q.ShortAnswerAcceptTexts,
-                q.ShortAnswerAcceptRegex
+                q.Options.OrderBy(o => o.Idx).Select(o => new OptionDto(o.Id, o.ContentMd, null, o.Idx)).ToList(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
             ))
             .ToListAsync(token);
         

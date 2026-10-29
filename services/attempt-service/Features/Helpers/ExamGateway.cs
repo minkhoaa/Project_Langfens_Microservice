@@ -59,6 +59,7 @@ public static class GrpcSnapshotSanitizer
         foreach (var grp in sec.QuestionGroups)
         foreach (var q in grp.Questions)
         {
+            q.ExplanationMd = string.Empty;
             // Slot identities are public rendering metadata; accepted values
             // and regex patterns must never reach the exam-taking client.
             foreach (var blank in q.CompletionAccepts)

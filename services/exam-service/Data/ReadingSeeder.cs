@@ -40,14 +40,9 @@ public static class ReadingSeeder
 
     public static async Task SeedReadingExamAsync(ExamDbContext db)
     {
-        // Always recreate: delete existing exam (cascade deletes sections/questions/options)
-        var existing = await db.Exams.FirstOrDefaultAsync(e => e.Slug == ExamSlug);
-        if (existing != null)
-        {
-            db.Exams.Remove(existing);
-            await db.SaveChangesAsync();
-            Console.WriteLine($"Deleted existing exam '{ExamSlug}', recreating...");
-        }
+        // Existing papers may be referenced by attempts or edited by an author.
+        if (await db.Exams.AnyAsync(e => e.Slug == ExamSlug))
+            return;
 
         var examId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
@@ -92,10 +87,10 @@ The shift from rags to wood pulp created new challenges. Wood-based paper degrad
         var q1Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q1");
         var q1Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 1, ContentMd = "A. Papyrus and parchment", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 2, ContentMd = "B. Clay tablets and bamboo", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 3, ContentMd = "C. Papyrus, parchment, clay tablets and bamboo", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q1Id, Idx = 4, ContentMd = "D. Animal skins and wood", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q1Id.ToString(), "option-1"), QuestionId = q1Id, Idx = 1, ContentMd = "A. Papyrus and parchment", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q1Id.ToString(), "option-2"), QuestionId = q1Id, Idx = 2, ContentMd = "B. Clay tablets and bamboo", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q1Id.ToString(), "option-3"), QuestionId = q1Id, Idx = 3, ContentMd = "C. Papyrus, parchment, clay tablets and bamboo", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q1Id.ToString(), "option-4"), QuestionId = q1Id, Idx = 4, ContentMd = "D. Animal skins and wood", IsCorrect = false }
         };
         var q1 = new ExamQuestion
         {
@@ -109,9 +104,9 @@ The shift from rags to wood pulp created new challenges. Wood-based paper degrad
         var q2Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s1q2");
         var q2Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 1, ContentMd = "True", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 2, ContentMd = "False", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q2Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q2Id.ToString(), "option-1"), QuestionId = q2Id, Idx = 1, ContentMd = "True", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q2Id.ToString(), "option-2"), QuestionId = q2Id, Idx = 2, ContentMd = "False", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q2Id.ToString(), "option-3"), QuestionId = q2Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
         };
         var q2 = new ExamQuestion
         {
@@ -225,13 +220,13 @@ vi.  The difference between local visitors and tourists
 vii. Funding challenges for smaller cultural institutions",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 1, ContentMd = "i. How museum purposes have changed over time" },
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 2, ContentMd = "ii. The economic model of major international exhibitions" },
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 3, ContentMd = "iii. Digital technology and its effect on visitor experience" },
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 4, ContentMd = "iv. Disputes over the ownership of cultural artefacts" },
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 5, ContentMd = "v. Museums as neighbourhood service centres" },
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 6, ContentMd = "vi. The difference between local visitors and tourists" },
-                new() { Id = Guid.NewGuid(), QuestionId = q6Id, Idx = 7, ContentMd = "vii. Funding challenges for smaller cultural institutions" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-1"), QuestionId = q6Id, Idx = 1, ContentMd = "i. How museum purposes have changed over time" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-2"), QuestionId = q6Id, Idx = 2, ContentMd = "ii. The economic model of major international exhibitions" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-3"), QuestionId = q6Id, Idx = 3, ContentMd = "iii. Digital technology and its effect on visitor experience" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-4"), QuestionId = q6Id, Idx = 4, ContentMd = "iv. Disputes over the ownership of cultural artefacts" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-5"), QuestionId = q6Id, Idx = 5, ContentMd = "v. Museums as neighbourhood service centres" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-6"), QuestionId = q6Id, Idx = 6, ContentMd = "vi. The difference between local visitors and tourists" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q6Id.ToString(), "option-7"), QuestionId = q6Id, Idx = 7, ContentMd = "vii. Funding challenges for smaller cultural institutions" }
             },
             // Paragraph 1 → i, Paragraph 2 → ii, Paragraph 3 → iii, Paragraph 4 → iv, Paragraph 5 → v
             MatchPairs = new Dictionary<string, string[]?>
@@ -257,11 +252,11 @@ Which paragraph contains the following information?
 Note: Each paragraph letter may be used more than once. Four of the results will be used.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 1, ContentMd = "A. Paragraph A" },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 2, ContentMd = "B. Paragraph B" },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 3, ContentMd = "C. Paragraph C" },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 4, ContentMd = "D. Paragraph D" },
-                new() { Id = Guid.NewGuid(), QuestionId = q7Id, Idx = 5, ContentMd = "E. Paragraph E" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q7Id.ToString(), "option-1"), QuestionId = q7Id, Idx = 1, ContentMd = "A. Paragraph A" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q7Id.ToString(), "option-2"), QuestionId = q7Id, Idx = 2, ContentMd = "B. Paragraph B" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q7Id.ToString(), "option-3"), QuestionId = q7Id, Idx = 3, ContentMd = "C. Paragraph C" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q7Id.ToString(), "option-4"), QuestionId = q7Id, Idx = 4, ContentMd = "D. Paragraph D" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q7Id.ToString(), "option-5"), QuestionId = q7Id, Idx = 5, ContentMd = "E. Paragraph E" }
             },
             // 1→blockbuster commercial model (B), 2→technology digital lending (C), 3→repatriation ethics (D), 4→community outreach (E)
             MatchPairs = new Dictionary<string, string[]?>
@@ -277,9 +272,9 @@ Note: Each paragraph letter may be used more than once. Four of the results will
         var q8Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s2q3");
         var q8Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 1, ContentMd = "Yes", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 2, ContentMd = "No", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q8Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q8Id.ToString(), "option-1"), QuestionId = q8Id, Idx = 1, ContentMd = "Yes", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q8Id.ToString(), "option-2"), QuestionId = q8Id, Idx = 2, ContentMd = "No", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q8Id.ToString(), "option-3"), QuestionId = q8Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
         };
         var q8 = new ExamQuestion
         {
@@ -302,11 +297,11 @@ Match each initiative (1–4) with the correct feature (A–E).
 Note: Two statements will NOT be matched.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 1, ContentMd = "A. Generates significant income" },
-                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 2, ContentMd = "B. Raises ethical questions about ownership" },
-                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 3, ContentMd = "C. Includes non-cultural activities such as language classes" },
-                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 4, ContentMd = "D. Involves borrowing objects from other countries" },
-                new() { Id = Guid.NewGuid(), QuestionId = q9Id, Idx = 5, ContentMd = "E. Makes use of digital devices and software" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q9Id.ToString(), "option-1"), QuestionId = q9Id, Idx = 1, ContentMd = "A. Generates significant income" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q9Id.ToString(), "option-2"), QuestionId = q9Id, Idx = 2, ContentMd = "B. Raises ethical questions about ownership" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q9Id.ToString(), "option-3"), QuestionId = q9Id, Idx = 3, ContentMd = "C. Includes non-cultural activities such as language classes" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q9Id.ToString(), "option-4"), QuestionId = q9Id, Idx = 4, ContentMd = "D. Involves borrowing objects from other countries" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q9Id.ToString(), "option-5"), QuestionId = q9Id, Idx = 5, ContentMd = "E. Makes use of digital devices and software" }
             },
             MatchPairs = new Dictionary<string, string[]?>
             {
@@ -328,12 +323,12 @@ Note: Two statements will NOT be matched.",
 Write the correct letter on your answer sheet.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 1, ContentMd = "A. …the crowds they draw can overshadow the museum's educational mission" },
-                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 2, ContentMd = "B. …raise questions about what it means to 'possess' a work of art" },
-                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 3, ContentMd = "C. …which can then be used to support the institution's core activities" },
-                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 4, ContentMd = "D. …a responsibility to serve the local community beyond tourism" },
-                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 5, ContentMd = "E. …the digital version has been shared freely with other institutions" },
-                new() { Id = Guid.NewGuid(), QuestionId = q10Id, Idx = 6, ContentMd = "F. …which can only be resolved through international agreements" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q10Id.ToString(), "option-1"), QuestionId = q10Id, Idx = 1, ContentMd = "A. …the crowds they draw can overshadow the museum's educational mission" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q10Id.ToString(), "option-2"), QuestionId = q10Id, Idx = 2, ContentMd = "B. …raise questions about what it means to 'possess' a work of art" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q10Id.ToString(), "option-3"), QuestionId = q10Id, Idx = 3, ContentMd = "C. …which can then be used to support the institution's core activities" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q10Id.ToString(), "option-4"), QuestionId = q10Id, Idx = 4, ContentMd = "D. …a responsibility to serve the local community beyond tourism" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q10Id.ToString(), "option-5"), QuestionId = q10Id, Idx = 5, ContentMd = "E. …the digital version has been shared freely with other institutions" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q10Id.ToString(), "option-6"), QuestionId = q10Id, Idx = 6, ContentMd = "F. …which can only be resolved through international agreements" }
             },
             MatchPairs = new Dictionary<string, string[]?>
             {
@@ -444,10 +439,10 @@ Arrange steps in the correct chronological order:",
         var q16Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s3q6");
         var q16Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 1, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 2, ContentMd = "B. LED lights are too expensive for commercial use", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 3, ContentMd = "C. Hydroponic systems require constant human supervision", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q16Id, Idx = 4, ContentMd = "D. Vertical farms can only produce leafy greens", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q16Id.ToString(), "option-1"), QuestionId = q16Id, Idx = 1, ContentMd = "A. Staple crops like wheat and rice cannot be grown economically", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q16Id.ToString(), "option-2"), QuestionId = q16Id, Idx = 2, ContentMd = "B. LED lights are too expensive for commercial use", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q16Id.ToString(), "option-3"), QuestionId = q16Id, Idx = 3, ContentMd = "C. Hydroponic systems require constant human supervision", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q16Id.ToString(), "option-4"), QuestionId = q16Id, Idx = 4, ContentMd = "D. Vertical farms can only produce leafy greens", IsCorrect = false }
         };
         var q16 = new ExamQuestion
         {
@@ -485,12 +480,12 @@ The future of remote work may lie in hybrid models that combine the best of both
         var q17Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s4q1");
         var q17Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 1, ContentMd = "A. Increased job satisfaction", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 2, ContentMd = "B. Reduced commuting time", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 3, ContentMd = "C. Higher salaries", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 4, ContentMd = "D. Improved work-life balance", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 5, ContentMd = "E. Better access to mentorship", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q17Id, Idx = 6, ContentMd = "F. Reduced presenteeism", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q17Id.ToString(), "option-1"), QuestionId = q17Id, Idx = 1, ContentMd = "A. Increased job satisfaction", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q17Id.ToString(), "option-2"), QuestionId = q17Id, Idx = 2, ContentMd = "B. Reduced commuting time", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q17Id.ToString(), "option-3"), QuestionId = q17Id, Idx = 3, ContentMd = "C. Higher salaries", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q17Id.ToString(), "option-4"), QuestionId = q17Id, Idx = 4, ContentMd = "D. Improved work-life balance", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q17Id.ToString(), "option-5"), QuestionId = q17Id, Idx = 5, ContentMd = "E. Better access to mentorship", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q17Id.ToString(), "option-6"), QuestionId = q17Id, Idx = 6, ContentMd = "F. Reduced presenteeism", IsCorrect = false }
         };
         var q17 = new ExamQuestion
         {
@@ -530,9 +525,9 @@ Remote Work: Key Findings
         var q19Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s4q3");
         var q19Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q19Id, Idx = 1, ContentMd = "Yes", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q19Id, Idx = 2, ContentMd = "No", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q19Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q19Id.ToString(), "option-1"), QuestionId = q19Id, Idx = 1, ContentMd = "Yes", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q19Id.ToString(), "option-2"), QuestionId = q19Id, Idx = 2, ContentMd = "No", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q19Id.ToString(), "option-3"), QuestionId = q19Id, Idx = 3, ContentMd = "Not Given", IsCorrect = false }
         };
         var q19 = new ExamQuestion
         {
@@ -554,11 +549,11 @@ Remote Work: Key Findings
 Note: Two features will NOT be used.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 1, ContentMd = "A. Developed digital tools for distributed teams" },
-                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 2, ContentMd = "B. Reported up to 40% productivity gains" },
-                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 3, ContentMd = "C. Mandated no-meeting periods for staff" },
-                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 4, ContentMd = "D. Higher job satisfaction than office workers" },
-                new() { Id = Guid.NewGuid(), QuestionId = q20Id, Idx = 5, ContentMd = "E. Struggled to stop working at the end of the day" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q20Id.ToString(), "option-1"), QuestionId = q20Id, Idx = 1, ContentMd = "A. Developed digital tools for distributed teams" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q20Id.ToString(), "option-2"), QuestionId = q20Id, Idx = 2, ContentMd = "B. Reported up to 40% productivity gains" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q20Id.ToString(), "option-3"), QuestionId = q20Id, Idx = 3, ContentMd = "C. Mandated no-meeting periods for staff" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q20Id.ToString(), "option-4"), QuestionId = q20Id, Idx = 4, ContentMd = "D. Higher job satisfaction than office workers" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q20Id.ToString(), "option-5"), QuestionId = q20Id, Idx = 5, ContentMd = "E. Struggled to stop working at the end of the day" }
             },
             MatchPairs = new Dictionary<string, string[]?>
             {
@@ -618,12 +613,12 @@ Modern reconstruction efforts have attracted significant international interest.
 Write the correct letter on your answer sheet.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 1, ContentMd = "A. …400,000 scrolls containing works by the greatest authors of antiquity" },
-                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 2, ContentMd = "B. …laboratories, botanical gardens and observatories" },
-                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 3, ContentMd = "C. …funding cuts, political instability and loss of patronage" },
-                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 4, ContentMd = "D. …8 million titles, making it one of the world's largest" },
-                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 5, ContentMd = "E. …the Bibliotheca Alexandrina was built nearby" },
-                new() { Id = Guid.NewGuid(), QuestionId = q22Id, Idx = 6, ContentMd = "F. …reconstructed using its original architectural plans" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q22Id.ToString(), "option-1"), QuestionId = q22Id, Idx = 1, ContentMd = "A. …400,000 scrolls containing works by the greatest authors of antiquity" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q22Id.ToString(), "option-2"), QuestionId = q22Id, Idx = 2, ContentMd = "B. …laboratories, botanical gardens and observatories" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q22Id.ToString(), "option-3"), QuestionId = q22Id, Idx = 3, ContentMd = "C. …funding cuts, political instability and loss of patronage" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q22Id.ToString(), "option-4"), QuestionId = q22Id, Idx = 4, ContentMd = "D. …8 million titles, making it one of the world's largest" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q22Id.ToString(), "option-5"), QuestionId = q22Id, Idx = 5, ContentMd = "E. …the Bibliotheca Alexandrina was built nearby" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q22Id.ToString(), "option-6"), QuestionId = q22Id, Idx = 6, ContentMd = "F. …reconstructed using its original architectural plans" }
             },
             MatchPairs = new Dictionary<string, string[]?>
             {
@@ -653,10 +648,10 @@ D — the activities of scholars who worked there
 25. Scholars travelled from across the Mediterranean to study and copy texts.",
             Options = new List<ExamOption>
             {
-                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 1, ContentMd = "A. The debate over what caused the library's destruction" },
-                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 2, ContentMd = "B. The features of the ancient library itself" },
-                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 3, ContentMd = "C. The modern reconstruction efforts" },
-                new() { Id = Guid.NewGuid(), QuestionId = q23Id, Idx = 4, ContentMd = "D. The activities of scholars who worked there" }
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q23Id.ToString(), "option-1"), QuestionId = q23Id, Idx = 1, ContentMd = "A. The debate over what caused the library's destruction" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q23Id.ToString(), "option-2"), QuestionId = q23Id, Idx = 2, ContentMd = "B. The features of the ancient library itself" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q23Id.ToString(), "option-3"), QuestionId = q23Id, Idx = 3, ContentMd = "C. The modern reconstruction efforts" },
+                new() { Id = SeederHelpers.CreateDeterministicGuid(q23Id.ToString(), "option-4"), QuestionId = q23Id, Idx = 4, ContentMd = "D. The activities of scholars who worked there" }
             },
             MatchPairs = new Dictionary<string, string[]?>
             {
@@ -698,10 +693,10 @@ Modern collection size: [30] titles",
         var q25Id = SeederHelpers.CreateDeterministicGuid(ExamSlug, "s5q5");
         var q25Options = new List<ExamOption>
         {
-            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 1, ContentMd = "A. It was built using the original ancient architectural plans", ImageUrl = "https://placehold.co/200x150/png?text=A", AltText = "Option A", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 2, ContentMd = "B. It combines modern architecture with references to the ancient library", ImageUrl = "https://placehold.co/200x150/png?text=B", AltText = "Option B", IsCorrect = true },
-            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 3, ContentMd = "C. It is the largest library ever built in human history", ImageUrl = "https://placehold.co/200x150/png?text=C", AltText = "Option C", IsCorrect = false },
-            new() { Id = Guid.NewGuid(), QuestionId = q25Id, Idx = 4, ContentMd = "D. It houses the original scrolls recovered from the ancient site", ImageUrl = "https://placehold.co/200x150/png?text=D", AltText = "Option D", IsCorrect = false }
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q25Id.ToString(), "option-1"), QuestionId = q25Id, Idx = 1, ContentMd = "A. It was built using the original ancient architectural plans", ImageUrl = "https://placehold.co/200x150/png?text=A", AltText = "Option A", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q25Id.ToString(), "option-2"), QuestionId = q25Id, Idx = 2, ContentMd = "B. It combines modern architecture with references to the ancient library", ImageUrl = "https://placehold.co/200x150/png?text=B", AltText = "Option B", IsCorrect = true },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q25Id.ToString(), "option-3"), QuestionId = q25Id, Idx = 3, ContentMd = "C. It is the largest library ever built in human history", ImageUrl = "https://placehold.co/200x150/png?text=C", AltText = "Option C", IsCorrect = false },
+            new() { Id = SeederHelpers.CreateDeterministicGuid(q25Id.ToString(), "option-4"), QuestionId = q25Id, Idx = 4, ContentMd = "D. It houses the original scrolls recovered from the ancient site", ImageUrl = "https://placehold.co/200x150/png?text=D", AltText = "Option D", IsCorrect = false }
         };
         var q25 = new ExamQuestion
         {
@@ -712,7 +707,6 @@ Modern collection size: [30] titles",
         };
 // ── Persist ───────────────────────────────────────────────────────────
         db.Exams.Add(exam);
-        await db.SaveChangesAsync(); // persist exam first so FK constraint is satisfied
         db.ExamSections.AddRange(section1, section2, section3, section4, section5);
         db.ExamQuestions.AddRange(
             // Section 1

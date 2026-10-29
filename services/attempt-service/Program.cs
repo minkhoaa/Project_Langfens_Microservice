@@ -38,6 +38,11 @@ builder.Services.AddLangfensCors();
 builder.Services.AddLangfensSwagger("Attempt Service");
 builder.Services.AddLangfensJson();
 
+var internalApiKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
+    ?? throw new InvalidOperationException("EXAMSERVICE__INTERNAL__API__KEY is required");
+if (string.IsNullOrWhiteSpace(internalApiKey))
+    throw new InvalidOperationException("EXAMSERVICE__INTERNAL__API__KEY is required");
+
 // ── gRPC client ───────────────────────────────────────────────────────────────
 var examGrpcAddress = Environment.GetEnvironmentVariable("ExamService__GrpcAddress")
     ?? "http://exam-service:8081";
@@ -46,6 +51,13 @@ builder.Services
     {
         o.Address = new Uri(examGrpcAddress);
     })
+    .AddCallCredentials((context, metadata) =>
+    {
+        metadata.Add("X-Internal-Key", internalApiKey);
+        return Task.CompletedTask;
+    })
+    // Exam uses h2c on the internal network, just like the keyed HTTP client below.
+    .ConfigureChannel(o => o.UnsafeUseInsecureChannelCallCredentials = true)
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {
         EnableMultipleHttp2Connections = true,
@@ -56,8 +68,6 @@ builder.Services
 
 
 // ── Internal HTTP client ─────────────────────────────────────────────────────
-var internalApiKey = Environment.GetEnvironmentVariable("EXAMSERVICE__INTERNAL__API__KEY")
-    ?? throw new InvalidOperationException("EXAMSERVICE__INTERNAL__API__KEY is required");
 builder.Services.AddHttpClient("ExamServiceInternal", (sp, http) =>
 {
     http.BaseAddress = new Uri(EnvOrDefault("EXAMSERVICE__EXAM__ADDRESS", "http://exam-service:8080"));

@@ -64,18 +64,25 @@ public class InternalExamDto
         {
             Sections = exam.Sections.Select(x => x with
             {
-                Questions = x.Questions.Select(a => a with
-                {
-                    Options = a.Options.Select(q => q with { IsCorrect = false }).ToList()
-                }).ToList(),
+                Questions = x.Questions.Select(SanitizeQuestion).ToList(),
                 QuestionGroups = x.QuestionGroups?.Select(g => g with
                 {
-                    Questions = g.Questions.Select(a => a with
-                    {
-                        Options = a.Options.Select(q => q with { IsCorrect = false }).ToList()
-                    }).ToList()
+                    Questions = g.Questions.Select(SanitizeQuestion).ToList()
                 }).ToList()
             }).ToList()
+        };
+
+        private static InternalDeliveryQuestion SanitizeQuestion(InternalDeliveryQuestion question) => question with
+        {
+            ExplanationMd = null,
+            ModelAnswers = null,
+            Options = question.Options?.Select(o => o with { IsCorrect = null }).ToList(),
+            BlankAcceptTexts = null,
+            BlankAcceptRegex = null,
+            MatchPairs = null,
+            OrderCorrects = null,
+            ShortAnswerAcceptTexts = null,
+            ShortAnswerAcceptRegex = null
         };
     }
 }

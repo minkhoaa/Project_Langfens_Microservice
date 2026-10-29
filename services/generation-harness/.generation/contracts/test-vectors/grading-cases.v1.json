@@ -1,0 +1,2796 @@
+[
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE/1/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 1,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001010",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001011",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001012",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [
+        "00000000-0000-0000-0000-000000001010"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE/1/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 1,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001010",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001011",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001012",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE/1/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 1,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001010",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001011",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001012",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE/1/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 1,
+      "type": "MULTIPLE_CHOICE_SINGLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001010",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001011",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001012",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_MULTIPLE/2/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 2,
+      "type": "MULTIPLE_CHOICE_MULTIPLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Choose TWO answers.",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001020",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001021",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001022",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [
+        "00000000-0000-0000-0000-000000001020",
+        "00000000-0000-0000-0000-000000001021"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_MULTIPLE/2/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 2,
+      "type": "MULTIPLE_CHOICE_MULTIPLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Choose TWO answers.",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001020",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001021",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001022",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_MULTIPLE/2/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 2,
+      "type": "MULTIPLE_CHOICE_MULTIPLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Choose TWO answers.",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001020",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001021",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001022",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_MULTIPLE/2/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 2,
+      "type": "MULTIPLE_CHOICE_MULTIPLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Choose TWO answers.",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001020",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001021",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001022",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_MULTIPLE/2/partial",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 2,
+      "type": "MULTIPLE_CHOICE_MULTIPLE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Choose TWO answers.",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001020",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001021",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001022",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [
+        "00000000-0000-0000-0000-000000001020"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/TRUE_FALSE_NOT_GIVEN/3/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 3,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001030",
+          "idx": 1,
+          "contentMd": "True",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001031",
+          "idx": 2,
+          "contentMd": "False",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001032",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [
+        "00000000-0000-0000-0000-000000001030"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/TRUE_FALSE_NOT_GIVEN/3/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 3,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001030",
+          "idx": 1,
+          "contentMd": "True",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001031",
+          "idx": 2,
+          "contentMd": "False",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001032",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/TRUE_FALSE_NOT_GIVEN/3/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 3,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001030",
+          "idx": 1,
+          "contentMd": "True",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001031",
+          "idx": 2,
+          "contentMd": "False",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001032",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/TRUE_FALSE_NOT_GIVEN/3/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 3,
+      "type": "TRUE_FALSE_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001030",
+          "idx": 1,
+          "contentMd": "True",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001031",
+          "idx": 2,
+          "contentMd": "False",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001032",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/YES_NO_NOT_GIVEN/4/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 4,
+      "type": "YES_NO_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001040",
+          "idx": 1,
+          "contentMd": "Yes",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001041",
+          "idx": 2,
+          "contentMd": "No",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001042",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [
+        "00000000-0000-0000-0000-000000001040"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/YES_NO_NOT_GIVEN/4/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 4,
+      "type": "YES_NO_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001040",
+          "idx": 1,
+          "contentMd": "Yes",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001041",
+          "idx": 2,
+          "contentMd": "No",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001042",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/YES_NO_NOT_GIVEN/4/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 4,
+      "type": "YES_NO_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001040",
+          "idx": 1,
+          "contentMd": "Yes",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001041",
+          "idx": 2,
+          "contentMd": "No",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001042",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/YES_NO_NOT_GIVEN/4/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 4,
+      "type": "YES_NO_NOT_GIVEN",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001040",
+          "idx": 1,
+          "contentMd": "Yes",
+          "isCorrect": true
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001041",
+          "idx": 2,
+          "contentMd": "No",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001042",
+          "idx": 3,
+          "contentMd": "Not Given",
+          "isCorrect": false
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE_IMAGE/5/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000005",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 5,
+      "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001050",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true,
+          "imageUrl": "fixtures/authorized-0.svg",
+          "altText": "Synthetic option 0"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001051",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-1.svg",
+          "altText": "Synthetic option 1"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001052",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-2.svg",
+          "altText": "Synthetic option 2"
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [
+        "00000000-0000-0000-0000-000000001050"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE_IMAGE/5/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000005",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 5,
+      "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001050",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true,
+          "imageUrl": "fixtures/authorized-0.svg",
+          "altText": "Synthetic option 0"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001051",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-1.svg",
+          "altText": "Synthetic option 1"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001052",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-2.svg",
+          "altText": "Synthetic option 2"
+        }
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE_IMAGE/5/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000005",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 5,
+      "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001050",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true,
+          "imageUrl": "fixtures/authorized-0.svg",
+          "altText": "Synthetic option 0"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001051",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-1.svg",
+          "altText": "Synthetic option 1"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001052",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-2.svg",
+          "altText": "Synthetic option 2"
+        }
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MULTIPLE_CHOICE_SINGLE_IMAGE/5/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000005",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 5,
+      "type": "MULTIPLE_CHOICE_SINGLE_IMAGE",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "What does the passage describe?",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001050",
+          "idx": 1,
+          "contentMd": "River",
+          "isCorrect": true,
+          "imageUrl": "fixtures/authorized-0.svg",
+          "altText": "Synthetic option 0"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001051",
+          "idx": 2,
+          "contentMd": "Forest",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-1.svg",
+          "altText": "Synthetic option 1"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001052",
+          "idx": 3,
+          "contentMd": "Desert",
+          "isCorrect": false,
+          "imageUrl": "fixtures/authorized-2.svg",
+          "altText": "Synthetic option 2"
+        }
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/SUMMARY_COMPLETION/6/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 6,
+      "type": "SUMMARY_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/SUMMARY_COMPLETION/6/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 6,
+      "type": "SUMMARY_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/SUMMARY_COMPLETION/6/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 6,
+      "type": "SUMMARY_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/SUMMARY_COMPLETION/6/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 6,
+      "type": "SUMMARY_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/TABLE_COMPLETION/7/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000007",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 7,
+      "type": "TABLE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n| Source | Answer |\n| --- | --- |\n| Water | [1] |",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/TABLE_COMPLETION/7/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000007",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 7,
+      "type": "TABLE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n| Source | Answer |\n| --- | --- |\n| Water | [1] |",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/TABLE_COMPLETION/7/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000007",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 7,
+      "type": "TABLE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n| Source | Answer |\n| --- | --- |\n| Water | [1] |",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/TABLE_COMPLETION/7/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000007",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 7,
+      "type": "TABLE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n| Source | Answer |\n| --- | --- |\n| Water | [1] |",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/NOTE_COMPLETION/8/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000008",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 8,
+      "type": "NOTE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n- Source: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/NOTE_COMPLETION/8/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000008",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 8,
+      "type": "NOTE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n- Source: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/NOTE_COMPLETION/8/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000008",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 8,
+      "type": "NOTE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n- Source: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/NOTE_COMPLETION/8/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000008",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 8,
+      "type": "NOTE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\n- Source: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/FORM_COMPLETION/9/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000009",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 9,
+      "type": "FORM_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\nSource: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/FORM_COMPLETION/9/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000009",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 9,
+      "type": "FORM_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\nSource: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/FORM_COMPLETION/9/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000009",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 9,
+      "type": "FORM_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\nSource: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/FORM_COMPLETION/9/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000009",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 9,
+      "type": "FORM_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY.\nSource: [1]",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/SENTENCE_COMPLETION/10/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000010",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 10,
+      "type": "SENTENCE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/SENTENCE_COMPLETION/10/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000010",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 10,
+      "type": "SENTENCE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/SENTENCE_COMPLETION/10/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000010",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 10,
+      "type": "SENTENCE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/SENTENCE_COMPLETION/10/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000010",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 10,
+      "type": "SENTENCE_COMPLETION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/SHORT_ANSWER/11/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000011",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 11,
+      "type": "SHORT_ANSWER",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. What supplies the water?",
+      "options": [],
+      "shortAnswerAcceptTexts": [
+        "river"
+      ]
+    },
+    "answer": {
+      "textAnswer": "river"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/SHORT_ANSWER/11/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000011",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 11,
+      "type": "SHORT_ANSWER",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. What supplies the water?",
+      "options": [],
+      "shortAnswerAcceptTexts": [
+        "river"
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/SHORT_ANSWER/11/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000011",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 11,
+      "type": "SHORT_ANSWER",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. What supplies the water?",
+      "options": [],
+      "shortAnswerAcceptTexts": [
+        "river"
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/SHORT_ANSWER/11/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000011",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 11,
+      "type": "SHORT_ANSWER",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. What supplies the water?",
+      "options": [],
+      "shortAnswerAcceptTexts": [
+        "river"
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/DIAGRAM_LABEL/12/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000012",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 12,
+      "type": "DIAGRAM_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/DIAGRAM_LABEL/12/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000012",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 12,
+      "type": "DIAGRAM_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/DIAGRAM_LABEL/12/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000012",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 12,
+      "type": "DIAGRAM_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/DIAGRAM_LABEL/12/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000012",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 12,
+      "type": "DIAGRAM_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MAP_LABEL/13/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000013",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 13,
+      "type": "MAP_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"river\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MAP_LABEL/13/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000013",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 13,
+      "type": "MAP_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MAP_LABEL/13/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000013",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 13,
+      "type": "MAP_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MAP_LABEL/13/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000013",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 13,
+      "type": "MAP_LABEL",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Write ONE WORD ONLY. Water comes from the [1].",
+      "options": [],
+      "imageUrl": "fixtures/authorized-labels.svg",
+      "blankAcceptTexts": {
+        "1": [
+          "river"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_HEADING/14/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 14,
+      "type": "MATCHING_HEADING",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "List of Headings:\ni. Water\nii. Food\niii. Travel\nYou may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001140",
+          "idx": 1,
+          "contentMd": "i. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001141",
+          "idx": 2,
+          "contentMd": "ii. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001142",
+          "idx": 3,
+          "contentMd": "iii. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "i",
+          "Water"
+        ],
+        "2": [
+          "ii",
+          "Food"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"i\",\"2\":\"ii\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MATCHING_HEADING/14/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 14,
+      "type": "MATCHING_HEADING",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "List of Headings:\ni. Water\nii. Food\niii. Travel\nYou may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001140",
+          "idx": 1,
+          "contentMd": "i. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001141",
+          "idx": 2,
+          "contentMd": "ii. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001142",
+          "idx": 3,
+          "contentMd": "iii. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "i",
+          "Water"
+        ],
+        "2": [
+          "ii",
+          "Food"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_HEADING/14/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 14,
+      "type": "MATCHING_HEADING",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "List of Headings:\ni. Water\nii. Food\niii. Travel\nYou may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001140",
+          "idx": 1,
+          "contentMd": "i. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001141",
+          "idx": 2,
+          "contentMd": "ii. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001142",
+          "idx": 3,
+          "contentMd": "iii. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "i",
+          "Water"
+        ],
+        "2": [
+          "ii",
+          "Food"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_HEADING/14/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 14,
+      "type": "MATCHING_HEADING",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "List of Headings:\ni. Water\nii. Food\niii. Travel\nYou may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001140",
+          "idx": 1,
+          "contentMd": "i. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001141",
+          "idx": 2,
+          "contentMd": "ii. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001142",
+          "idx": 3,
+          "contentMd": "iii. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "i",
+          "Water"
+        ],
+        "2": [
+          "ii",
+          "Food"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_HEADING/14/partial",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 14,
+      "type": "MATCHING_HEADING",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "List of Headings:\ni. Water\nii. Food\niii. Travel\nYou may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001140",
+          "idx": 1,
+          "contentMd": "i. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001141",
+          "idx": 2,
+          "contentMd": "ii. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001142",
+          "idx": 3,
+          "contentMd": "iii. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "i",
+          "Water"
+        ],
+        "2": [
+          "ii",
+          "Food"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"i\"}"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_INFORMATION/15/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000015",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 15,
+      "type": "MATCHING_INFORMATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001150",
+          "idx": 1,
+          "contentMd": "A. Paragraph A",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001151",
+          "idx": 2,
+          "contentMd": "B. Paragraph B",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001152",
+          "idx": 3,
+          "contentMd": "C. Paragraph C",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\",\"2\":\"B\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MATCHING_INFORMATION/15/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000015",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 15,
+      "type": "MATCHING_INFORMATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001150",
+          "idx": 1,
+          "contentMd": "A. Paragraph A",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001151",
+          "idx": 2,
+          "contentMd": "B. Paragraph B",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001152",
+          "idx": 3,
+          "contentMd": "C. Paragraph C",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_INFORMATION/15/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000015",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 15,
+      "type": "MATCHING_INFORMATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001150",
+          "idx": 1,
+          "contentMd": "A. Paragraph A",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001151",
+          "idx": 2,
+          "contentMd": "B. Paragraph B",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001152",
+          "idx": 3,
+          "contentMd": "C. Paragraph C",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_INFORMATION/15/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000015",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 15,
+      "type": "MATCHING_INFORMATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001150",
+          "idx": 1,
+          "contentMd": "A. Paragraph A",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001151",
+          "idx": 2,
+          "contentMd": "B. Paragraph B",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001152",
+          "idx": 3,
+          "contentMd": "C. Paragraph C",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_INFORMATION/15/partial",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000015",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 15,
+      "type": "MATCHING_INFORMATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001150",
+          "idx": 1,
+          "contentMd": "A. Paragraph A",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001151",
+          "idx": 2,
+          "contentMd": "B. Paragraph B",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001152",
+          "idx": 3,
+          "contentMd": "C. Paragraph C",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\"}"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_FEATURES/16/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000016",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 16,
+      "type": "MATCHING_FEATURES",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001160",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001161",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001162",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\",\"2\":\"B\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MATCHING_FEATURES/16/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000016",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 16,
+      "type": "MATCHING_FEATURES",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001160",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001161",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001162",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_FEATURES/16/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000016",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 16,
+      "type": "MATCHING_FEATURES",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001160",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001161",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001162",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_FEATURES/16/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000016",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 16,
+      "type": "MATCHING_FEATURES",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001160",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001161",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001162",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_FEATURES/16/partial",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000016",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 16,
+      "type": "MATCHING_FEATURES",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001160",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001161",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001162",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\"}"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_ENDINGS/17/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000017",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 17,
+      "type": "MATCHING_ENDINGS",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001170",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001171",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001172",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\",\"2\":\"B\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/MATCHING_ENDINGS/17/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000017",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 17,
+      "type": "MATCHING_ENDINGS",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001170",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001171",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001172",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_ENDINGS/17/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000017",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 17,
+      "type": "MATCHING_ENDINGS",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001170",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001171",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001172",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_ENDINGS/17/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000017",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 17,
+      "type": "MATCHING_ENDINGS",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001170",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001171",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001172",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/MATCHING_ENDINGS/17/partial",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000017",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 17,
+      "type": "MATCHING_ENDINGS",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001170",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001171",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001172",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\"}"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/CLASSIFICATION/18/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000018",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 18,
+      "type": "CLASSIFICATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001180",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001181",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001182",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\",\"2\":\"B\"}"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/CLASSIFICATION/18/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000018",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 18,
+      "type": "CLASSIFICATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001180",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001181",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001182",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/CLASSIFICATION/18/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000018",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 18,
+      "type": "CLASSIFICATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001180",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001181",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001182",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/CLASSIFICATION/18/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000018",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 18,
+      "type": "CLASSIFICATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001180",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001181",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001182",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/CLASSIFICATION/18/partial",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000018",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 18,
+      "type": "CLASSIFICATION",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "You may use any letter more than once.\n1. Target one\n2. Target two",
+      "options": [
+        {
+          "id": "00000000-0000-0000-0000-000000001180",
+          "idx": 1,
+          "contentMd": "A. Water",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001181",
+          "idx": 2,
+          "contentMd": "B. Food",
+          "isCorrect": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000001182",
+          "idx": 3,
+          "contentMd": "C. Travel",
+          "isCorrect": false
+        }
+      ],
+      "matchPairs": {
+        "1": [
+          "A",
+          "Target one"
+        ],
+        "2": [
+          "B",
+          "Target two"
+        ]
+      }
+    },
+    "answer": {
+      "textAnswer": "{\"1\":\"A\"}"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/FLOW_CHART/19/correct",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000019",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 19,
+      "type": "FLOW_CHART",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Arrange the public process nodes.",
+      "options": [],
+      "orderCorrects": [
+        "collect-water",
+        "heat-water"
+      ]
+    },
+    "answer": {
+      "textAnswer": "[\"collect-water\",\"heat-water\"]"
+    },
+    "expected": true
+  },
+  {
+    "id": "all19/FLOW_CHART/19/incorrect",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000019",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 19,
+      "type": "FLOW_CHART",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Arrange the public process nodes.",
+      "options": [],
+      "orderCorrects": [
+        "collect-water",
+        "heat-water"
+      ]
+    },
+    "answer": {
+      "textAnswer": "definitely incorrect"
+    },
+    "expected": false
+  },
+  {
+    "id": "all19/FLOW_CHART/19/empty",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000019",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 19,
+      "type": "FLOW_CHART",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Arrange the public process nodes.",
+      "options": [],
+      "orderCorrects": [
+        "collect-water",
+        "heat-water"
+      ]
+    },
+    "answer": {},
+    "expected": false
+  },
+  {
+    "id": "all19/FLOW_CHART/19/cleared",
+    "question": {
+      "id": "00000000-0000-0000-0000-000000000019",
+      "sectionId": "s1",
+      "groupId": "g1",
+      "idx": 19,
+      "type": "FLOW_CHART",
+      "skill": "READING",
+      "difficulty": 2,
+      "promptMd": "Arrange the public process nodes.",
+      "options": [],
+      "orderCorrects": [
+        "collect-water",
+        "heat-water"
+      ]
+    },
+    "answer": {
+      "selectedOptionIds": [],
+      "textAnswer": ""
+    },
+    "expected": false
+  }
+]

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using exam_service.Features.Exams.InternalEndpoint;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Shared.Security.Helper;
 using Shared.Security.Roles;
@@ -14,11 +15,14 @@ public static class ExamBootstrapExtensions
 
     public static IServiceCollection AddExamAuthorization(this IServiceCollection services)
     {
+        services.AddSingleton<IAuthorizationHandler, InternalExamAccess>();
         services.AddAuthorization(opts =>
         {
             // No FallbackPolicy: endpoints opt in to auth via .RequireAuthorization(...) or
             // [Authorize] on the endpoint, which lets ServiceDefaults' /health and /alive
             // (mapped with .AllowAnonymous()) bypass the JwtBearer challenge cleanly.
+
+            opts.AddPolicy(InternalExamAccess.Policy, p => p.AddRequirements(new InternalExamAccess.Requirement()));
 
             opts.AddPolicy(Roles.User,  p => p.RequireRole(Roles.User));
             opts.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));

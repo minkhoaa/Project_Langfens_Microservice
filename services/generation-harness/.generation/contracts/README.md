@@ -4,9 +4,11 @@
 
 This is the versioned specification for the **19 current objective IELTS platform types**. It consolidates the existing backend contracts/graders, FE admin contracts and source audit. It does not start generation, change a backend DTO, migrate existing exams, or automatically replace a consumer's validator.
 
-## Domain implementation update
+## Usage boundary
 
-The v1 schema bytes remain unchanged. The harness now executes all 19 literal definitions and registry semantic handlers through additive modes of its seven native tools. See [IMPLEMENTATION-v1.md](IMPLEMENTATION-v1.md) for profile boundaries, exact interfaces, evidence limits and repair-admission limitations. Historical source-audit observations below are not assertions about a later frontend revision.
+This directory contains passive contracts and synthetic [test vectors](test-vectors/README.md), not a loaded extension. `question-types.v1.schema.json` is the only authoritative schema; its embedded `x-langfens.registry` and `x-langfens.semanticRules` are normative.
+
+No Reading tools, policy, guards or custom orchestration are installed by these assets. Structural validation does not execute semantic rules or establish actual-.NET grading parity. Historical reference observations and schema consumer-gap metadata are not assertions about a later consumer revision.
 
 ## Entry points
 
