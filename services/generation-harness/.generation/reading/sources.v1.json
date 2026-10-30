@@ -1,0 +1,23 @@
+{
+  "verification": "source-only",
+  "revision": "93d585a5ab4e8bce75215d0b2099a36242b578d8",
+  "contractHash": "6345070a86b3271bc2ae348a0afcb33c928b42a1b55346809cb566a21c6478c5",
+  "sources": [
+    {"id":"hierarchy","path":"services/_shared/Shared.PublicContracts/Contracts/Exam/InternalExamDto/SharedInternalExamDto.cs","symbols":["SharedInternalExamDto"],"sha256":"e6c6b82e044ef3e2db5747270eb65c72f856d91fcc633db3f883589fa217fbe4"},
+    {"id":"shared-normalizer","path":"services/_shared/Shared.PublicContracts/Contracts/Exam/InternalExamDto/PaperWideNormalizer.cs","symbols":["Normalize","NormalizeJsonElement"],"sha256":"b3ad90d5a217fd0eca80f3a8917c7673ba89b683c6cdd7ee043a02a4bbc3d074"},
+    {"id":"exam-normalizer","path":"services/exam-service/Application/Common/PaperWideNormalizer.ExamService.cs","symbols":["Normalize"],"sha256":"9f032a9fb8ad77502e31cffbfa9c130f0852b3acb0ec157f81e5331dbf3df8fa"},
+    {"id":"admin-dto","path":"services/exam-service/Contracts/Exams/Dto.Admin.cs","symbols":["CreateQuestionReq"],"sha256":"301cc8281728a40d3d550ac27b6cf2e7f06f96196385fccb949668950a7efe76"},
+    {"id":"internal-dto","path":"services/exam-service/Contracts/Exams/Dto.Internal.cs","symbols":["InternalExamDto"],"sha256":"4684db0ff83e46720267fc7d9908f46fe817254d704b6f60acb66cc2c1e60948"},
+    {"id":"public-dto","path":"services/exam-service/Contracts/Exams/Dto.Public.cs","symbols":["PublicExamDto"],"sha256":"f1070f40cb311a4a30fae6bca1cbda29af45f3d52ff96d5bd96b27c9de738020"},
+    {"id":"grader","path":"services/attempt-service/Features/Helpers/Grader.cs","symbols":["CompletionGrader","MatchingHeadingGrader","FlowChartGrader"],"sha256":"e425824a519886755121546dda8aac09f47f2ae4a3992bedddaea0c3fa6d1be5"},
+    {"id":"normalization","path":"services/attempt-service/Features/Helpers/GraderHelper.cs","symbols":["TextNorm","AnswerValidator"],"sha256":"e9faefa724d514afa3a681a41d9ca02822763f80eeb12f894ab473be353ec6b9"},
+    {"id":"key-builder","path":"services/attempt-service/Features/Helpers/BuildQuestionIdSet.cs","symbols":["BuildQuestionIdSet"],"sha256":"83d49686b7af0969f6292d229a6f3ce4b2265bf1e5b28dffdd663c1fbedf9694"},
+    {"id":"grader-registration","path":"services/attempt-service/Features/Helpers/QuestionGraderRegistration.cs","symbols":["QuestionGraderRegistration"],"sha256":"8f7f0d87b352cb8a6f7c00c0811de178b435c3be325c9e10457ba05532cea68e"},
+    {"id":"submission-dto","path":"services/attempt-service/Contracts/Attempt/AttemptDtos.cs","symbols":["AttemptDtos"],"sha256":"3288b2ab05acde856ed85ef153ba535288929b4a7218cd03d8cabaa73798b1fe"},
+    {"id":"autosave","path":"services/attempt-service/Features/Attempt/AttemptEndpoint/AttemptService.cs","symbols":["Autosave"],"sha256":"077eb3a8f401be7efda3c27e330ba62bfd48ed97a21e059c73d666ee214e601a"}
+  ],
+  "divergences": [
+    {"code":"SOURCE_CONTRACT_DIVERGENCE","source":"grader","detail":"Canonical metadata describes historical case-sensitive Steps/Labels; inspected FlowChartGrader accepts case-insensitive legacy properties. Canonical flow answers remain arrays."},
+    {"code":"TRANSPORT_ORDER_DIFFERENCE","source":"shared-normalizer","detail":"Typed normalization sorts by idx; JSON snapshot normalization traverses supplied array order. No transport round-trip has been executed here."}
+  ]
+}

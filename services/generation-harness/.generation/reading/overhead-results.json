@@ -1,0 +1,111 @@
+{
+  "node": "v24.21.0",
+  "os": "linux 7.3.0-4-cachyos x64",
+  "warmups": 5,
+  "iterations": 20,
+  "fixtureQuestionCount": 100,
+  "declarationBytes": 3972,
+  "registration": {
+    "contractReads": 0,
+    "vectorReads": 0,
+    "sourceReads": 0,
+    "schemaCompiles": 0
+  },
+  "firstUse": {
+    "contractReads": 1,
+    "vectorReads": 0,
+    "sourceReads": 0,
+    "schemaCompiles": 4,
+    "contractParses": 1
+  },
+  "concurrentFirstUse": {
+    "contractReads": 1,
+    "vectorReads": 0,
+    "sourceReads": 0,
+    "schemaCompiles": 4,
+    "contractParses": 1
+  },
+  "coldRegistrationMs": 66.204508,
+  "firstCallMs": 202.475483,
+  "timings": {
+    "registrationDelta": {
+      "samples": [
+        0.02985599999999522,
+        0.031142999999985932,
+        0.03492999999997437,
+        0.022773000000029242,
+        0.023380000000031487,
+        0.032680000000027576,
+        0.018301000000008116,
+        0.017670000000009622,
+        0.05938299999996843,
+        0.026737000000025546,
+        0.029532999999958065,
+        0.029405999999994492,
+        0.027753999999958978,
+        0.0398789999999849,
+        0.04875100000015209,
+        0.0336690000000317,
+        0.02638200000001234,
+        0.029556999999954314,
+        0.023570999999947162,
+        0.028385999999954947
+      ],
+      "median": 0.029532999999958065,
+      "p95": 0.04875100000015209
+    },
+    "warmQuestion": {
+      "samples": [
+        0.3391199999999799,
+        0.188871000000006,
+        0.22904899999997497,
+        0.23391299999997273,
+        0.19963200000000825,
+        0.20177799999999024,
+        0.11610100000001466,
+        0.11139300000002095,
+        0.2242750000000342,
+        0.19109400000002097,
+        0.20084400000001779,
+        0.22438199999999142,
+        0.4815810000000056,
+        0.27646799999996574,
+        0.22452199999997902,
+        0.31994299999996656,
+        0.24818099999993137,
+        0.30780700000002525,
+        0.20319800000004307,
+        0.20851200000004155
+      ],
+      "median": 0.22438199999999142,
+      "p95": 0.3391199999999799
+    },
+    "warmExam100": {
+      "samples": [
+        10.779012000000023,
+        9.141796999999997,
+        9.214020000000005,
+        9.008835999999974,
+        6.89828,
+        5.796149000000014,
+        5.829506999999978,
+        6.400676000000033,
+        8.898619999999994,
+        8.118674999999996,
+        8.90609500000005,
+        9.750193999999965,
+        15.058299999999974,
+        18.154075999999975,
+        10.971315000000004,
+        15.517751999999973,
+        10.843713999999977,
+        10.265567000000033,
+        8.71017100000006,
+        8.192575000000033
+      ],
+      "median": 9.141796999999997,
+      "p95": 15.517751999999973
+    }
+  },
+  "methodology": "Fresh offline subprocess observes bounded opens, exact canonical JSON parsing and actual Compile calls via temporary module instrumentation. Cold registration includes extension imports. Twenty warm factory deltas against a no-op plus warmed Question/100-Question calls follow five warmups. Not native host startup or live-model quality; instrumentation exists only in this finite benchmark process."
+}
