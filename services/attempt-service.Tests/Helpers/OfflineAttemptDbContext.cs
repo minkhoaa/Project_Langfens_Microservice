@@ -1,12 +1,15 @@
 using System.Text.Json;
 using attempt_service.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace attempt_service.Tests.Helpers;
 
 internal sealed class OfflineAttemptDbContext() : AttemptDbContext(
-    new DbContextOptionsBuilder<AttemptDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options)
+    new DbContextOptionsBuilder<AttemptDbContext>()
+        .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning)).Options)
 {
     protected override void OnModelCreating(ModelBuilder model)
     {

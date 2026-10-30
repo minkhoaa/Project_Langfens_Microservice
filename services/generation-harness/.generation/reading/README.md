@@ -1,12 +1,12 @@
 # Reading domain extension
 
-Seven independent native tools, backed by the unchanged canonical contract at `../contracts/question-types.v1.schema.json` (`urn:langfens:question-types:1.0.0`). Product code is strict ESM TypeScript; tests/finite benchmarks are `.mjs`. No new packages, orchestration, inference, agent definitions, policy hooks or consumer mutations.
+Seven independent native tools, backed by the unchanged canonical contract at `../contracts/question-types.v1.schema.json` (`urn:langfens:question-types:1.0.0`). Product code is strict ESM TypeScript; tests/finite benchmarks are `.mjs`. No new packages, orchestration, inference, agent definitions or policy hooks. Separately scoped backend bug repairs and their offline evidence are recorded in `PROGRESS.md`; the canonical contract remains unchanged. The operator-authorized P1-06 SDK exception adds only an opt-in preparation-error formatter; it does not change runtime orchestration or default tool errors.
 
 ## Loading
 
 From `services/generation-harness/`, run `npm run start:reading` for native TUI, or `npm run start:reading -- --mode rpc` for RPC. The operator-requested alias selects this project CWD and explicitly loads `.generation/extensions/reading.ts`, retaining native Subagents and `/config` without `--approve` or any Reading workflow.
 
-Native project discovery or an absolute `--extension` path still works. Ordinary `npm start` retains `.runtime/workspace` as its default CWD and does not implicitly load Reading. No native/Core package or automatic project-settings override is changed.
+Native project discovery or an absolute `--extension` path still works. Ordinary `npm start` retains `.runtime/workspace` as its default CWD and does not implicitly load Reading. No automatic project-settings override or extension-discovery policy is changed.
 
 ## Tools
 
@@ -41,21 +41,23 @@ Known descriptive source fields are optional. Group `sectionId`, `startIdx`, `en
 
 Evidence offsets are zero-based UTF-16 code units, end-exclusive; exact slicing only, no normalization/search. A passage string is accepted but cannot prove an asserted source identity. Mechanical spans cannot establish entailment, factual truth or NOT GIVEN absence.
 
-Submission accepts the canonical wire answer directly (lifecycle unspecified), or `{state:'autosave'|'final'|'restored', answer:wireAnswer}`. Only explicit `final` requests a complete answered response; this is not a claim that the backend rejects unanswered final Questions. Autosave/restored subsets preserve exact blank/statement/node identities. Explicit clearing is `selectedOptionIds:[]` plus `textAnswer:''`; omission/null is not clearing. Duplicate encoded JSON members, including escaped-equivalent names, are rejected. Wrong-but-valid answers are not rejected merely for earning zero.
+Submission accepts the canonical wire answer directly (lifecycle unspecified), or `{state:'autosave'|'final'|'restored', answer:wireAnswer}`. Only explicit `final` requests a complete answered response; this is not a claim that the backend rejects unanswered final Questions. Autosave/restored subsets preserve exact blank/statement/node identities. Canonical tool clearing is `selectedOptionIds:[]` plus `textAnswer:''`; omission/null is not a canonical clear. The backend REST lifecycle separately supports explicit `textAnswer:null` to clear text while omission preserves it; this wire-policy divergence is recorded in `sources.v1.json`, not silently normalized by the tool. Duplicate encoded JSON members, including escaped-equivalent names, are rejected. Wrong-but-valid answers are not rejected merely for earning zero.
 
 One backend Question is one all-or-nothing scoring unit. Multi-blank/target Questions and multiple selections do not silently become separate IELTS marks. Actual .NET execution/regex/normalization, persisted identity mapping and frontend autosave/restore round trips remain UNVERIFIED. `sources.v1.json` pins inspected source fingerprints, not deployed or executed consumer evidence; flow legacy Steps/Labels divergence is recorded without changing canonical array answers.
 
 ### Public-only projection and blind solving
 
-Projection builds fresh objects from canonical StudentQuestion/PublicOption allowlists. It preserves public media, membership, banks and input identities; private keys, correctness, explanations and reviews never become student fields. Known leakage/invalid content withholds the projection. Explicit answer-key/correct-answer/solution/teacher-note headers are screened at line and sentence boundaries, including common blockquote, list, indentation and emphasis wrappers. Only finite generic Answer(s) response-direction forms are treated as benign; stronger private headers are never exempted by direction-shaped values. Natural occurrence of an answer word is not automatically leakage; encoded/semantic hints remain unverified.
+Projection builds fresh objects from canonical StudentQuestion/PublicOption allowlists. It preserves public media, membership, banks and input identities; private keys, correctness, explanations and reviews never become student fields. Known leakage/invalid content withholds the projection. Explicit answer-key/correct-answer/solution/teacher-note headers are screened at line and sentence boundaries, including composed/repeated blockquote, list, heading, indentation and emphasis wrappers. Only finite generic Answer(s) response-direction forms are treated as benign; stronger private headers are never exempted by direction-shaped values. Natural occurrence of an answer word is not automatically leakage; encoded/semantic hints remain unverified.
 
-FLOW_CHART remains process ordering. Public labels must already exist in prompt lines `- key: label`; unsupported presentations remain unverified, not platform-invalid. Nodes display in deterministic key order independent of private solution order. Missing public labels never come from private keys or examples.
+FLOW_CHART remains process ordering. Public labels must already exist in prompt lines `- key: label`; unsupported presentations remain unverified, not platform-invalid. Nodes display in deterministic key order independent of private solution order. Missing public labels never come from private keys or examples. Separately, backend public REST now exposes its legacy key-derived node bank sorted by key, not solution sequence; this does not establish canonical-label or frontend compatibility.
 
 Only the returned `data.studentQuestion` is a candidate public input, not full reports/spec examples or authoring transcripts. Independent blind solving additionally needs a fresh native context, public-only inputs and verified OS-level denial of access to private files/tools/credentials/history, including symlink/absolute-path negative-access evidence. CWD/worktree separation is not filesystem isolation. This extension installs no solver, sandbox or delegation wrapper.
 
 ## Native error/result boundary
 
-Normal execution returns equal JSON text, `details` and `structuredContent` in the native execution event. The existing native tool-result **transcript** drops `structuredContent` while retaining text/details; no Core patch is made. Invalid outer calls fail through the public argument hook as sanitized JSON text; pre-execution details/structuredContent are not guaranteed. Provider/RPC JSON parsing and cancellation before this hook retain native behavior. Cancellation is checked again after lazy domain initialization, before domain execution; rejected lazy imports are cleared for a later explicit call, without automatic retry loops, while concurrent initialization remains shared. A consumer requiring uniform structured pre-execution/transcript results needs a separately scoped SDK capability, not fabricated evidence.
+Normal execution and Reading outer-argument rejection return equal JSON text, `details` and `structuredContent` in the native execution event. P1-06 adds the public optional `formatPreparationError(error,args)` callback: Reading returns its sanitized argument report without parsing exception messages. Calls remain rejected with `isError:true`; execute and after-tool hooks are not entered. Tools without the callback retain their original errors, as do callbacks returning undefined or throwing. Provider/RPC JSON parsing, unknown-tool handling and cancellation before preparation retain native behavior.
+
+The existing native tool-result **transcript** still drops `structuredContent` while retaining text/details; transcript schema changes are outside this patch. Cancellation is checked again after lazy domain initialization, before domain execution; rejected lazy imports are cleared for a later explicit call, without automatic retry loops, while concurrent initialization remains shared.
 
 ## Resource limits
 
@@ -71,9 +73,12 @@ node node_modules/typescript/bin/tsc -p .generation/reading/tsconfig.json
 GENERATION_HARNESS_OFFLINE=1 npm run typecheck
 GENERATION_HARNESS_OFFLINE=1 npm run build
 GENERATION_HARNESS_OFFLINE=1 npm test
+GENERATION_HARNESS_OFFLINE=1 npm test -w generation-agent-core
 GENERATION_HARNESS_OFFLINE=1 npm run smoke
 GENERATION_HARNESS_OFFLINE=1 node .generation/reading/bench/overhead.mjs
 ```
+
+Legacy heading headers accept `List of Headings` with or without a colon; full bank equality still applies. Multiple-choice counts recognize `Which TWO/THREE…` alongside Choose/Select/Pick forms; conflicting counts remain unverified.
 
 Every executable test/benchmark imports the existing network/credential guard. Native fixtures use disposable directories and in-memory credentials/faux provider. Root `npm test` runs the Reading domain suite after the existing harness tests and before the Subagents workspace suite. No live inference, production data, publishing, commits or pushes are authorized.
 

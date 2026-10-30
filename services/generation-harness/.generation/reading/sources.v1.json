@@ -1,22 +1,29 @@
 {
   "verification": "source-only",
-  "revision": "93d585a5ab4e8bce75215d0b2099a36242b578d8",
+  "revision": "1f14aee58e6b91cc79fae5bf479b0424f5a38772",
+  "snapshot": "working-tree; per-file hashes are authoritative",
   "contractHash": "6345070a86b3271bc2ae348a0afcb33c928b42a1b55346809cb566a21c6478c5",
   "sources": [
-    {"id":"hierarchy","path":"services/_shared/Shared.PublicContracts/Contracts/Exam/InternalExamDto/SharedInternalExamDto.cs","symbols":["SharedInternalExamDto"],"sha256":"e6c6b82e044ef3e2db5747270eb65c72f856d91fcc633db3f883589fa217fbe4"},
-    {"id":"shared-normalizer","path":"services/_shared/Shared.PublicContracts/Contracts/Exam/InternalExamDto/PaperWideNormalizer.cs","symbols":["Normalize","NormalizeJsonElement"],"sha256":"b3ad90d5a217fd0eca80f3a8917c7673ba89b683c6cdd7ee043a02a4bbc3d074"},
+    {"id":"hierarchy","path":"services/_shared/Shared.PublicContracts/Contracts/Exam/InternalExamDto/SharedInternalExamDto.cs","symbols":["InternalExamDto"],"sha256":"eba58a24177847eeb5af940a4919c2fd7c441a15eb90513af2a573726248538a"},
+    {"id":"shared-normalizer","path":"services/_shared/Shared.PublicContracts/Contracts/Exam/InternalExamDto/PaperWideNormalizer.cs","symbols":["Normalize","NormalizeJsonElement"],"sha256":"3a0d90cb4cd862184403eacb8f68746befedb148590beb2368b83b01ea6a9dbe"},
     {"id":"exam-normalizer","path":"services/exam-service/Application/Common/PaperWideNormalizer.ExamService.cs","symbols":["Normalize"],"sha256":"9f032a9fb8ad77502e31cffbfa9c130f0852b3acb0ec157f81e5331dbf3df8fa"},
-    {"id":"admin-dto","path":"services/exam-service/Contracts/Exams/Dto.Admin.cs","symbols":["CreateQuestionReq"],"sha256":"301cc8281728a40d3d550ac27b6cf2e7f06f96196385fccb949668950a7efe76"},
+    {"id":"admin-dto","path":"services/exam-service/Contracts/Exams/Dto.Admin.cs","symbols":["AdminQuestionUpsert","AdminQuestionUpdate"],"sha256":"75a3d4ea51ef57f4a97db7fb7aa18c11ab9cf04b44e0eca618e3a7943a7200a3"},
     {"id":"internal-dto","path":"services/exam-service/Contracts/Exams/Dto.Internal.cs","symbols":["InternalExamDto"],"sha256":"4684db0ff83e46720267fc7d9908f46fe817254d704b6f60acb66cc2c1e60948"},
-    {"id":"public-dto","path":"services/exam-service/Contracts/Exams/Dto.Public.cs","symbols":["PublicExamDto"],"sha256":"f1070f40cb311a4a30fae6bca1cbda29af45f3d52ff96d5bd96b27c9de738020"},
+    {"id":"public-dto","path":"services/exam-service/Contracts/Exams/Dto.Public.cs","symbols":["PublicQuestionRecord","PublicFlowChartNode"],"sha256":"954eabd643302fb1bb38d0b8ddf64a3c5f62079cd78c9a79de182d3b641b02ec"},
     {"id":"grader","path":"services/attempt-service/Features/Helpers/Grader.cs","symbols":["CompletionGrader","MatchingHeadingGrader","FlowChartGrader"],"sha256":"e425824a519886755121546dda8aac09f47f2ae4a3992bedddaea0c3fa6d1be5"},
     {"id":"normalization","path":"services/attempt-service/Features/Helpers/GraderHelper.cs","symbols":["TextNorm","AnswerValidator"],"sha256":"e9faefa724d514afa3a681a41d9ca02822763f80eeb12f894ab473be353ec6b9"},
     {"id":"key-builder","path":"services/attempt-service/Features/Helpers/BuildQuestionIdSet.cs","symbols":["BuildQuestionIdSet"],"sha256":"83d49686b7af0969f6292d229a6f3ce4b2265bf1e5b28dffdd663c1fbedf9694"},
     {"id":"grader-registration","path":"services/attempt-service/Features/Helpers/QuestionGraderRegistration.cs","symbols":["QuestionGraderRegistration"],"sha256":"8f7f0d87b352cb8a6f7c00c0811de178b435c3be325c9e10457ba05532cea68e"},
-    {"id":"submission-dto","path":"services/attempt-service/Contracts/Attempt/AttemptDtos.cs","symbols":["AttemptDtos"],"sha256":"3288b2ab05acde856ed85ef153ba535288929b4a7218cd03d8cabaa73798b1fe"},
-    {"id":"autosave","path":"services/attempt-service/Features/Attempt/AttemptEndpoint/AttemptService.cs","symbols":["Autosave"],"sha256":"077eb3a8f401be7efda3c27e330ba62bfd48ed97a21e059c73d666ee214e601a"}
+    {"id":"submission-dto","path":"services/attempt-service/Contracts/Attempt/AttemptDtos.cs","symbols":["AnswerItem","SubmitRequest"],"sha256":"4f364e72feb3197c019ad7200b4d38ce6a96160f2e3e494fafc429d6762bb464"},
+    {"id":"delivery-membership","path":"services/exam-service/Application/Common/ExamDeliveryLayout.cs","symbols":["Groups","FlowKeys"],"sha256":"6d9c2fdebeefe08eaf56c6b91bff06faabfbc064569771bd51b67495be97e7aa"},
+    {"id":"proto-mapper","path":"services/exam-service/Application/Common/ProtoHelper.cs","symbols":["MapToProto"],"sha256":"a44ccf7c8b2a35feb05f57195400b559e1b051961bffec5a660345d70fc8d308"},
+    {"id":"snapshot-reader","path":"services/attempt-service/Features/Helpers/AttemptSnapshotReader.cs","symbols":["AttemptSnapshotReader"],"sha256":"ea8620272990d3dc62e406af7580fd746eb7a3ee05555227dc4f490974a2c8eb"},
+    {"id":"admin-service","path":"services/exam-service/Features/Exams/AdminEndpoint/QuestionEndpoint/AdminQuestion_Service.cs","symbols":["AdminQuestionService"],"sha256":"308e32dd7ed297d034f9c379d7c7779bd44db8804973ff55511c93bb170781e3"},
+    {"id":"public-service","path":"services/exam-service/Features/Exams/PublicEndpoint/ExamService.cs","symbols":["GetBySlugAsync"],"sha256":"d8ed311651618fcaa8882048030f5ebfeccb5e2865460eb9ab6f4f1c1247e358"},
+    {"id":"autosave","path":"services/attempt-service/Features/Attempt/AttemptEndpoint/AttemptService.cs","symbols":["Autosave"],"sha256":"4f761da0ff0b9d672749c48f77f8488cca64acdaa9f1f6832147613ea7c11b18"}
   ],
   "divergences": [
+    {"code":"CANONICAL_BACKEND_CLEAR_DIFFERENCE","source":"submission-dto","detail":"Canonical clear requires empty selections and textAnswer as an empty string. Backend REST additionally treats explicit textAnswer:null as text clearing and omission as preserving text. Tools keep the unchanged canonical policy."} ,
     {"code":"SOURCE_CONTRACT_DIVERGENCE","source":"grader","detail":"Canonical metadata describes historical case-sensitive Steps/Labels; inspected FlowChartGrader accepts case-insensitive legacy properties. Canonical flow answers remain arrays."},
     {"code":"TRANSPORT_ORDER_DIFFERENCE","source":"shared-normalizer","detail":"Typed normalization sorts by idx; JSON snapshot normalization traverses supplied array order. No transport round-trip has been executed here."}
   ]

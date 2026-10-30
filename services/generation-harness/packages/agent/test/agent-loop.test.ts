@@ -2211,6 +2211,88 @@ describe("runToolCall", () => {
 		expect(hookCalls).toEqual(["before a", "after a", "before c", "before e", "after e"]);
 	});
 
+	it.each(["prepare", "validate"])("preserves formatted %s errors without executing or entering hooks", async (stage) => {
+		const seen: string[] = [];
+		const args = { value: { nested: true } };
+		const report = { status: "FAIL" };
+		const tool: AgentTool<typeof echoSchema> = {
+			...echo,
+			prepareArguments(input) {
+				if (stage === "prepare") throw new Error("PRIVATE_SENTINEL");
+				return input as { value: string };
+			},
+			formatPreparationError(error, input) {
+				expect(error).toBeInstanceOf(Error);
+				expect(input).toBe(args);
+				return { content: [{ type: "text", text: JSON.stringify(report) }], details: report,
+					structuredContent: report, isError: false };
+			},
+			async execute() { seen.push("execute"); return { content: [], details: {} }; },
+		};
+		const outcome = await runToolCall(call("reject", "echo", args), {
+			tools: [tool], assistantMessage, context: { messages: [] },
+			beforeToolCall: async () => { seen.push("before"); },
+			afterToolCall: async () => { seen.push("after"); },
+		});
+		expect(outcome.result).toEqual({ content: [{ type: "text", text: JSON.stringify(report) }],
+			details: report, structuredContent: report, isError: true });
+		expect(outcome.isError).toBe(true);
+		expect(outcome.durationMs).toBeUndefined();
+		expect(seen).toEqual([]);
+		expect(JSON.stringify(outcome)).not.toContain("PRIVATE_SENTINEL");
+	});
+
+	it.each(["absent", "undefined", "throw"])("keeps legacy preparation errors when formatter is %s", async (mode) => {
+		const tool: AgentTool = {
+			...echo,
+			prepareArguments() { throw new Error("original error"); },
+			...(mode === "absent" ? {} : { formatPreparationError() {
+				if (mode === "throw") throw new Error("formatter error");
+				return undefined;
+			} }),
+			async execute() { throw new Error("must not execute"); },
+		};
+		const outcome = await runToolCall(call("reject", "echo", {}), {
+			tools: [tool], assistantMessage, context: { messages: [] },
+		});
+		expect(outcome.isError).toBe(true);
+		expect(outcome.result).toEqual({ content: [{ type: "text", text: "original error" }], details: {} });
+	});
+
+	it.each(["sequential", "parallel"] as const)("emits structured preparation failures in %s agent loops", async (toolExecution) => {
+		let executions = 0;
+		const report = { status: "FAIL" };
+		const tool: AgentTool = {
+			...echo,
+			prepareArguments() { throw new Error("reject"); },
+			formatPreparationError() { return { content: [{ type: "text", text: "safe error" }],
+				details: report, structuredContent: report }; },
+			async execute() { executions++; return { content: [], details: {} }; },
+		};
+		let turn = 0;
+		const streamFn = () => {
+			const stream = createAssistantMessageEventStream();
+			queueMicrotask(() => {
+				const message = turn++ === 0
+					? createAssistantMessage([call("reject", "echo", {}), call("reject-2", "echo", {})], "toolUse")
+					: createAssistantMessage([{ type: "text", text: "done" }]);
+				stream.push({ type: "done", reason: message.stopReason as "stop" | "toolUse", message });
+			});
+			return stream;
+		};
+		const events: AgentEvent[] = [];
+		for await (const event of agentLoop([createUserMessage("test")], { messages: [], tools: [tool] },
+			{ model: createModel(), convertToLlm: identityConverter, toolExecution }, undefined, streamFn)) events.push(event);
+		const results = events.filter(event => event.type === "tool_execution_end");
+		expect(results).toHaveLength(2);
+		for (const event of results) {
+			expect(event.isError).toBe(true);
+			expect(event.result).toEqual({ content: [{ type: "text", text: "safe error" }],
+				details: report, structuredContent: report, isError: true });
+		}
+		expect(executions).toBe(0);
+	});
+
 	it("lets afterToolCall replace structured content and drops it when only content is replaced", async () => {
 		const redacted = [{ type: "text" as const, text: "redacted" }];
 		const results = [

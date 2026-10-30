@@ -55,7 +55,9 @@ public class DtoAdmin
         Dictionary<string, string[]?>? MatchPairs = null,
         IEnumerable<string>? OrderCorrects = null,
         IEnumerable<string>? ShortAnswerAcceptTexts = null,
-        IEnumerable<string>? ShortAnswerAcceptRegex = null);
+        IEnumerable<string>? ShortAnswerAcceptRegex = null,
+        Guid? GroupId = null,
+        List<string>? WordList = null);
 
     public record AdminQuestionUpdate(
         Guid SectionId,
@@ -71,7 +73,9 @@ public class DtoAdmin
         Dictionary<string, string[]?>? MatchPairs = null,
         IEnumerable<string>? OrderCorrects = null,
         IEnumerable<string>? ShortAnswerAcceptTexts = null,
-        IEnumerable<string>? ShortAnswerAcceptRegex = null);
+        IEnumerable<string>? ShortAnswerAcceptRegex = null,
+        Guid? GroupId = null,
+        List<string>? WordList = null);
 
 
     public record AdminOptionUpsert(Guid QuestionId, int? Idx, string ContentMd, bool IsCorrect, string? ImageUrl = null, string? AltText = null);

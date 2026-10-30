@@ -778,9 +778,17 @@ async function prepareToolCall(
 			args: validatedArgs,
 		};
 	} catch (error) {
+		let formatted: AgentToolResult<any> | undefined;
+		try {
+			formatted = tool.formatPreparationError?.(error, toolCall.arguments);
+		} catch {
+			// A formatter failure must not replace the original error or allow execution.
+		}
 		return {
 			kind: "immediate",
-			result: createErrorToolResult(error instanceof Error ? error.message : String(error)),
+			result: formatted
+				? { ...formatted, isError: true }
+				: createErrorToolResult(error instanceof Error ? error.message : String(error)),
 			isError: true,
 		};
 	}

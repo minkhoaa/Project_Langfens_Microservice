@@ -52,7 +52,10 @@ public class Dto_Public
         string? PromptMd,
         string? ImageUrl = null,
         IReadOnlyList<PublicOptionRecord>? Options = null,
-        List<string>? WordList = null);
+        List<string>? WordList = null,
+        IReadOnlyList<PublicFlowChartNode>? FlowChartNodes = null);
+
+    public record PublicFlowChartNode(string Key, string Label);
 
     public record PublicOptionRecord(int idx, string ContentMd, string? ImageUrl = null, string? AltText = null);
 }

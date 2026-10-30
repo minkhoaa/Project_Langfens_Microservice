@@ -6,10 +6,16 @@ import { readMatchingPresentation } from './rules/matching.ts';
 const privateField=/(?:["'](?:blankAcceptTexts|blankAcceptRegex|shortAnswerAcceptTexts|shortAnswerAcceptRegex|matchPairs|orderCorrects|isCorrect|explanationMd|modelAnswers|evidence|reviews?)["']\s*:)/i;
 const privateHeader=/(?:^|[\n.!?][ \t]*)(?:(?:\*\*|__|\*|_)[ \t]*)?(?<header>(?:the\s+)?(?:answer\s+keys?|answers?|keys?|correct\s+answers?|correct\s+order|teacher\s+notes?|solutions?))\s*(?:(?:\*\*|__|\*|_)\s*)?[:=]\s*(?:(?:\*\*|__|\*|_)\s*)?(?<value>[^\n]*)/gim;
 const benignTaskDirection=/^(?:write\s+no\s+more\s+than\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+words?(?:\s+only)?(?:\s+for\s+each\s+answer)?|use\s+(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+words?\s+only\s+for\s+each\s+answer|no\s+more\s+than\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+words?(?:\s+only)?(?:\s+for\s+each\s+answer)?)|respond\s+in\s+one\s+sentence|complete\s+the\s+sentences?\s+using\s+the\s+passage)\.?$/i;
-const stripPresentationPrefix=/^[ \t]*(?:>[ \t]*)*(?:#{1,6}[ \t]+)?(?:(?:[-*+]|[0-9]{1,9}[.)])[ \t]+)?[ \t]*/;
+// Consume one wrapper at a time so list/quote/heading composition cannot hide a header.
+const stripPresentationPrefix=/^[ \t]*(?:>[ \t]*|#{1,6}[ \t]+|(?:[-*+]|[0-9]{1,9}[.)])[ \t]+|[ \t]+)/;
+function normalizePresentation(line: string): string {
+ let previous: string;
+ do {previous=line;line=line.replace(stripPresentationPrefix,'');} while(line!==previous);
+ return line;
+}
 function privateAnnotation(text: string): boolean {
  if(privateField.test(text))return true;
- const normalized=text.split('\n').map(line=>line.replace(stripPresentationPrefix,'')).join('\n');
+ const normalized=text.split('\n').map(normalizePresentation).join('\n');
  for(const match of normalized.matchAll(privateHeader)){
   const header=match.groups?.header?.replace(/^the\s+/i,'').toLowerCase();
   if((header==='answer'||header==='answers')&&benignTaskDirection.test(match.groups?.value?.trim()??''))continue;

@@ -241,6 +241,52 @@ public class PaperWideNormalizerTests
     }
 
     [Fact]
+    public void NormalizeJsonElement_LegacySectionWithoutGroups_PreservesSectionPropertiesAndSource()
+    {
+        var json = """
+        {
+            "id": "legacy-exam",
+            "sections": [
+                {
+                    "id": "7a82a11e-a3d1-4b32-b041-538765fa14f2",
+                    "idx": 1,
+                    "title": "Section metadata",
+                    "passageMd": "Read this passage",
+                    "instructionsMd": "Answer all questions",
+                    "audioUrl": "https://example.invalid/audio.mp3",
+                    "transcriptMd": "Transcript",
+                    "legacyExtension": { "keep": true },
+                    "questions": [
+                        { "id": "q1", "idx": 1 },
+                        { "id": "q2", "idx": 2 }
+                    ]
+                }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var normalized = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);
+        var section = normalized.GetProperty("sections")[0];
+
+        Assert.Equal("7a82a11e-a3d1-4b32-b041-538765fa14f2", section.GetProperty("id").GetString());
+        Assert.Equal("Section metadata", section.GetProperty("title").GetString());
+        Assert.Equal("Read this passage", section.GetProperty("passageMd").GetString());
+        Assert.Equal("Answer all questions", section.GetProperty("instructionsMd").GetString());
+        Assert.Equal("https://example.invalid/audio.mp3", section.GetProperty("audioUrl").GetString());
+        Assert.Equal("Transcript", section.GetProperty("transcriptMd").GetString());
+        Assert.True(section.GetProperty("legacyExtension").GetProperty("keep").GetBoolean());
+        var group = section.GetProperty("questionGroups")[0];
+        Assert.Equal(2, group.GetProperty("questions").GetArrayLength());
+        Assert.True(Guid.TryParse(group.GetProperty("id").GetString(), out var groupId));
+        Assert.NotEqual(Guid.Empty, groupId);
+        Assert.Equal(groupId, PaperWideNormalizer.NormalizeJsonElement(doc.RootElement)
+            .GetProperty("sections")[0].GetProperty("questionGroups")[0].GetProperty("id").GetGuid());
+        Assert.False(section.TryGetProperty("questions", out _));
+        Assert.Equal("Section metadata", doc.RootElement.GetProperty("sections")[0].GetProperty("title").GetString());
+    }
+
+    [Fact]
     public void NormalizeJsonElement_LegacySectionWithoutGroups_SynthesizesImplicitGroup()
     {
         var json = """
@@ -282,5 +328,74 @@ public class PaperWideNormalizerTests
         Assert.Equal(5, sec2Group.GetProperty("endIdx").GetInt32());
         Assert.Equal(4, sec2Group.GetProperty("questions")[0].GetProperty("idx").GetInt32());
         Assert.Equal(5, sec2Group.GetProperty("questions")[1].GetProperty("idx").GetInt32());
+    }
+
+    [Fact]
+    public void Normalize_TypedLegacySectionQuestions_GroupsWithoutMutatingAndRetainsOptionalMetadata()
+    {
+        var sectionId = Guid.Parse("8f16390a-f355-48a2-a96c-d7ec19d7c51d");
+        var first = MakeQuestion(Guid.Parse("0b77926c-cbb0-443d-8195-af658e7467e2"), 2);
+        var second = MakeQuestion(Guid.Parse("6250bde0-3c7e-46e7-90a9-e723b84fbe3d"), 1);
+        var section = new InternalExamDto.InternalDeliverySection
+        {
+            Id = sectionId,
+            Idx = 1,
+            Title = "Legacy",
+            InstructionsMd = "Read carefully",
+            PassageMd = "Passage",
+            Questions = new[] { first, second },
+        };
+        var exam = new InternalExamDto.InternalDeliveryExam { Sections = new[] { section } };
+
+        var normalized = PaperWideNormalizer.Normalize(exam);
+        var normalizedSection = Assert.Single(normalized.Sections);
+        var group = Assert.Single(normalizedSection.QuestionGroups);
+
+        Assert.NotEqual(Guid.Empty, group.Id);
+        Assert.Equal(group.Id, PaperWideNormalizer.Normalize(exam).Sections[0].QuestionGroups[0].Id);
+        Assert.Equal(1, group.Idx);
+        Assert.Equal(1, group.StartIdx);
+        Assert.Equal(2, group.EndIdx);
+        Assert.Equal(second.Id, group.Questions[0].Id);
+        Assert.Equal(1, group.Questions[0].Idx);
+        Assert.Equal(first.Id, group.Questions[1].Id);
+        Assert.Equal(2, group.Questions[1].Idx);
+        Assert.Equal("Legacy", normalizedSection.Title);
+        Assert.Equal("Read carefully", normalizedSection.InstructionsMd);
+        Assert.Equal("Passage", normalizedSection.PassageMd);
+        Assert.Null(normalizedSection.Questions);
+        Assert.Equal(2, section.Questions!.Count);
+        Assert.Equal(2, first.Idx);
+
+        var json = JsonSerializer.Serialize(new InternalExamDto.InternalDeliveryExam
+        {
+            Sections = new[] { new InternalExamDto.InternalDeliverySection() },
+        });
+        Assert.DoesNotContain("\"questions\":null", json, StringComparison.Ordinal);
+        var optionJson = JsonSerializer.Serialize(new InternalExamDto.InternalDeliveryOption());
+        Assert.DoesNotContain("\"imageUrl\":null", optionJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"altText\":null", optionJson, StringComparison.Ordinal);
+
+        var enrichedQuestion = MakeQuestion(Guid.NewGuid(), 1) with
+        {
+            ImageUrl = "https://example.invalid/question.png",
+            Options = new[]
+            {
+                new InternalExamDto.InternalDeliveryOption
+                {
+                    ContentMd = "Option",
+                    ImageUrl = "https://example.invalid/option.png",
+                    AltText = "Option image",
+                },
+            },
+        };
+        var enrichedJson = JsonSerializer.Serialize(enrichedQuestion);
+        Assert.Contains("https://example.invalid/question.png", enrichedJson, StringComparison.Ordinal);
+        Assert.Contains("https://example.invalid/option.png", enrichedJson, StringComparison.Ordinal);
+        Assert.Contains("Option image", enrichedJson, StringComparison.Ordinal);
+        var roundTripped = JsonSerializer.Deserialize<InternalExamDto.InternalDeliveryQuestion>(enrichedJson);
+        Assert.Equal(enrichedQuestion.ImageUrl, roundTripped!.ImageUrl);
+        Assert.Equal(enrichedQuestion.Options[0].ImageUrl, roundTripped.Options[0].ImageUrl);
+        Assert.Equal(enrichedQuestion.Options[0].AltText, roundTripped.Options[0].AltText);
     }
 }

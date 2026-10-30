@@ -25,6 +25,7 @@ public interface IAttemptService
     Task<IResult> GetPreviousTurn(Guid examId, CancellationToken token);
     Task<IResult> Autosave(Guid attemptId, AutosaveRequest req, CancellationToken token);
     Task<IResult> Submit(Guid attemptId, CancellationToken token);
+    Task<IResult> Submit(Guid attemptId, SubmitRequest? request, CancellationToken token);
     Task<IResult> GetResult(Guid attemptId, CancellationToken token);
     Task<IResult> GetAttemptList(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
     Task<IResult> GetAllAttempts(int page, int pageSize, string? status, Guid? examId, CancellationToken token);
@@ -71,11 +72,10 @@ public class AttemptService(
             {
                 try
                 {
-                    var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
-                    var parsed =
-                        parser.Parse<InternalDeliveryExam>(existedStartedAttempt.PaperJson.RootElement.GetRawText());
-                    var safeJson = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
-                    using var parsedDoc = JsonDocument.Parse(safeJson!);
+                    var parsed = AttemptSnapshotReader.Read(existedStartedAttempt.PaperJson.RootElement);
+                    using var parsedDoc = parsed.Proto is not null
+                        ? JsonDocument.Parse(JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed.Proto))!)
+                        : JsonSerializer.SerializeToDocument(InternalExamDto.SnapshotSanitizer.Sanitize(parsed.Dto!));
                     var safeEl = PaperWideNormalizer.NormalizeJsonElement(parsedDoc.RootElement);
                     var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
                     var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
@@ -91,34 +91,7 @@ public class AttemptService(
                 }
                 catch
                 {
-                    try
-                    {
-                        var dto = existedStartedAttempt.PaperJson.RootElement
-                            .Deserialize<InternalExamDto.InternalDeliveryExam>(new JsonSerializerOptions
-                            { PropertyNameCaseInsensitive = true });
-                        if (dto == null) return Results.NotFound(new ApiResultDto(false, "Not found", null!));
-                        using var sanitized =
-                            JsonSerializer.SerializeToDocument(InternalExamDto.SnapshotSanitizer.Sanitize(dto),
-                                new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                        var safeEl = PaperWideNormalizer.NormalizeJsonElement(sanitized.RootElement);
-
-                        //time left
-                        var deadline = existedStartedAttempt.StartedAt.AddSeconds(existedStartedAttempt.DurationSec);
-                        var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-                        return Results.Ok(new ApiResultDto(true, "Continue your previous attempt",
-                            new AttemptStartResponse(
-                                existedStartedAttempt.Id,
-                                safeEl,
-                                existedStartedAttempt.StartedAt,
-                                existedStartedAttempt.DurationSec,
-                                timeLeft
-                                )
-                        ));
-                    }
-                    catch
-                    {
-                        return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
-                    }
+                    return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
                 }
             }
         }
@@ -174,10 +147,10 @@ public class AttemptService(
         try
         {
             // Parse snapshot đã lưu -> sanitize -> serialize lại thành JsonDocument
-            var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
-            var parsed = parser.Parse<InternalDeliveryExam>(attempts.PaperJson.RootElement.GetRawText());
-            var jsonFormatted = JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed!));
-            using var doc = JsonDocument.Parse(jsonFormatted!);
+            var parsed = AttemptSnapshotReader.Read(attempts.PaperJson.RootElement);
+            using var doc = parsed.Proto is not null
+                ? JsonDocument.Parse(JsonFormatter.Default!.Format(GrpcSnapshotSanitizer.Sanitize(parsed.Proto))!)
+                : JsonSerializer.SerializeToDocument(InternalExamDto.SnapshotSanitizer.Sanitize(parsed.Dto!));
             var safeEl = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);
 
             var answer = await context.AttemptAnswers.AsNoTracking()
@@ -197,33 +170,7 @@ public class AttemptService(
         }
         catch
         {
-            try
-            {
-                var dto = attempts.PaperJson.RootElement.Deserialize<InternalExamDto.InternalDeliveryExam>(
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
-                if (dto == null) return Results.NotFound(new ApiResultDto(false, "NOt found snapshot", null!));
-                var sanitized = InternalExamDto.SnapshotSanitizer.Sanitize(dto);
-                using var doc = JsonSerializer.SerializeToDocument(sanitized);
-                var safeEl = PaperWideNormalizer.NormalizeJsonElement(doc.RootElement);
-                var answer = await context.AttemptAnswers.AsNoTracking()
-                    .Where(x => x.AttemptId == attempts.Id)
-                    .Select(x => new AnswerItem(
-                        x.QuestionId,
-                        x.SectionId,
-                        x.SelectedOptionIds,
-                        x.TextAnswer
-                    )).ToListAsync(token);
-                var deadline = attempts.StartedAt.AddSeconds(attempts.DurationSec);
-                var timeLeft = (int)Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
-                return Results.Ok(new ApiResultDto(true, "Success", new
-                    AttemptGetResponse(attempts.Id, attempts.Status, safeEl, answer, attempts.StartedAt, timeLeft)
-                ));
-            }
-            catch (Exception e)
-            {
-                return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
-            }
+            return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -259,18 +206,14 @@ public class AttemptService(
         Dictionary<Guid, QMeta> index;
         try
         {
-            var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
-            var proto = parser.Parse<InternalDeliveryExam>(attempt.PaperJson.RootElement.GetRawText()) ??
-                        new InternalDeliveryExam();
-            index = indexBuilder.BuildIndexFromProto(proto);
+            var snapshot = AttemptSnapshotReader.Read(attempt.PaperJson.RootElement);
+            index = snapshot.Proto is not null
+                ? indexBuilder.BuildIndexFromProto(snapshot.Proto)
+                : indexBuilder.BuildIndexFromDto(snapshot.Dto!);
         }
         catch
         {
-            var dto = attempt.PaperJson.RootElement.Deserialize<InternalExamDto.InternalDeliveryExam>(
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (dto == null)
-                return Results.Problem("Bad snapshot scheme", statusCode: StatusCodes.Status500InternalServerError);
-            index = indexBuilder.BuildIndexFromDto(dto);
+            return Results.Problem("Bad snapshot scheme", statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // lay incoming answer
@@ -315,36 +258,8 @@ public class AttemptService(
                 existedAnswer[eachIncomingAnswer.QuestionId] = eachExistedAnswer;
             }
 
-            var changed = false;
-            if (eachIncomingAnswer.SelectedOptionIds is not null)
+            if (UpsertAnswer(eachExistedAnswer, eachIncomingAnswer, meta.SectionId))
             {
-                var newList = eachIncomingAnswer.SelectedOptionIds.Count == 0
-                    ? new List<Guid>()
-                    : eachIncomingAnswer.SelectedOptionIds.Distinct().OrderBy(x => x).ToList();
-                var oldList = (eachExistedAnswer.SelectedOptionIds
-                               ?? new List<Guid>()).OrderBy(x => x).ToList();
-                if (!oldList.SequenceEqual(newList))
-                {
-                    eachExistedAnswer.SelectedOptionIds = newList;
-                    changed = true;
-                }
-            }
-
-            if (eachIncomingAnswer.TextAnswer is not null)
-            {
-                if (!string.Equals(eachExistedAnswer.TextAnswer, eachIncomingAnswer.TextAnswer,
-                        StringComparison.Ordinal))
-                {
-                    eachExistedAnswer.TextAnswer = eachIncomingAnswer.TextAnswer;
-                    changed = true;
-                }
-            }
-
-            if (changed)
-            {
-                eachExistedAnswer.IsCorrect = null!;
-                eachExistedAnswer.AwardedPoints = null!;
-                eachExistedAnswer.SectionId = meta.SectionId;
                 saved++;
             }
             else
@@ -369,6 +284,34 @@ public class AttemptService(
 
     }
 
+    private static bool UpsertAnswer(AttemptAnswer saved, AnswerItem incoming, Guid sectionId)
+    {
+        var changed = false;
+        if (incoming.SelectedOptionIds is not null)
+        {
+            var selected = incoming.SelectedOptionIds.Distinct().OrderBy(id => id).ToList();
+            var previous = (saved.SelectedOptionIds ?? new List<Guid>()).OrderBy(id => id).ToList();
+            if (!previous.SequenceEqual(selected))
+            {
+                saved.SelectedOptionIds = selected;
+                changed = true;
+            }
+        }
+        if (incoming.IsTextAnswerSpecified
+            && !string.Equals(saved.TextAnswer, incoming.TextAnswer, StringComparison.Ordinal))
+        {
+            saved.TextAnswer = incoming.TextAnswer;
+            changed = true;
+        }
+        if (changed)
+        {
+            saved.SectionId = sectionId;
+            saved.IsCorrect = null!;
+            saved.AwardedPoints = null!;
+        }
+        return changed;
+    }
+
     private static string MapUserAnswerToText(AttemptAnswer ans, QMeta meta)
     {
         // For MCQ-style items, the FE typically stores the option UUID in
@@ -387,7 +330,10 @@ public class AttemptService(
         return ans.TextAnswer ?? string.Empty;
     }
 
-    public async Task<IResult> Submit(Guid attemptId, CancellationToken token)
+    public Task<IResult> Submit(Guid attemptId, CancellationToken token)
+        => Submit(attemptId, null, token);
+
+    public async Task<IResult> Submit(Guid attemptId, SubmitRequest? request, CancellationToken token)
     {
         var userId = user.UserId;
         var existedAttempt =
@@ -410,41 +356,38 @@ public class AttemptService(
                 finishedAt = existedAttempt.SubmittedAt
             }));
         }
+        var incoming = request?.Answers ?? new List<AnswerItem>();
+        if (isExpired && incoming.Count > 0)
+            return Results.Conflict(new ApiResultDto(false, "Expired inline answers are not accepted", null!));
 
-        InternalDeliveryExam? proto = null;
-        InternalExamDto.InternalDeliveryExam? dto = null;
+        AttemptSnapshot parsedSnapshot;
         try
         {
-            var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
-            proto = parser.Parse<InternalDeliveryExam>(existedAttempt.PaperJson.RootElement.GetRawText());
-
+            parsedSnapshot = AttemptSnapshotReader.Read(existedAttempt.PaperJson.RootElement);
         }
         catch
         {
-            dto = existedAttempt.PaperJson.RootElement
-                .Deserialize<InternalExamDto.InternalDeliveryExam>(
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (dto is null)
-                return Results.Problem("Bad snapshot",
-                    statusCode: StatusCodes.Status500InternalServerError);
+            return Results.Problem("Bad snapshot", statusCode: StatusCodes.Status500InternalServerError);
         }
-
-        Dictionary<Guid, QMeta> index;
-        AnswerKeyCompiled compiled;
-        if (proto is not null)
-        {
-            index = indexBuilder.BuildIndexFromProto(proto);
-            compiled = answerKeyBuilder.FromProto(proto);
-        }
-        else
-        {
-            index = indexBuilder.BuildIndexFromDto(dto!);
-            compiled = answerKeyBuilder.FromDto(dto!);
-        }
+        var proto = parsedSnapshot.Proto;
+        var dto = parsedSnapshot.Dto;
+        var index = proto is not null ? indexBuilder.BuildIndexFromProto(proto) : indexBuilder.BuildIndexFromDto(dto!);
+        var compiled = proto is not null ? answerKeyBuilder.FromProto(proto) : answerKeyBuilder.FromDto(dto!);
 
         if (index.Count == 0 || compiled.Keys.Count == 0)
             return Results.Problem("Snapshot index/keys empty",
                 statusCode: StatusCodes.Status500InternalServerError);
+        if (incoming.Any(answer => answer is null))
+            return Results.UnprocessableEntity(new ApiResultDto(false, "Invalid payload", null!));
+        if (incoming.Count > 0)
+        {
+            if (incoming.GroupBy(answer => answer.QuestionId).Any(group => group.Count() > 1))
+                return Results.UnprocessableEntity(new ApiResultDto(false, "Duplicate final answers", null!));
+            var rejected = incoming.Select(answer => answerValidator.Validate(answer, index))
+                .Where(error => error is not null).ToList();
+            if (rejected.Count > 0)
+                return Results.UnprocessableEntity(new ApiResultDto(false, "Invalid payload", rejected));
+        }
         var strategy = context.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
@@ -496,8 +439,26 @@ public class AttemptService(
                     }
                 }
 
-                // Map questionId -> existing AttemptAnswer (may be null for never-saved ones)
+                // Merge the final payload into the tracked answer set before grading.
+                // All entries were validated against this snapshot before the transaction began.
                 var answerByQid = answers.ToDictionary(x => x.QuestionId);
+                foreach (var finalAnswer in incoming)
+                {
+                    var meta = index[finalAnswer.QuestionId];
+                    if (!answerByQid.TryGetValue(finalAnswer.QuestionId, out var saved))
+                    {
+                        saved = new AttemptAnswer
+                        {
+                            AttemptId = attemptId,
+                            QuestionId = finalAnswer.QuestionId,
+                            SectionId = meta.SectionId
+                        };
+                        context.AttemptAnswers.Add(saved);
+                        answers.Add(saved);
+                        answerByQid.Add(finalAnswer.QuestionId, saved);
+                    }
+                    UpsertAnswer(saved, finalAnswer, meta.SectionId);
+                }
 
                 foreach (var (qid, key) in compiled.Keys)
                 {
@@ -731,26 +692,29 @@ public class AttemptService(
         if (existedAttempt.Status is not (AttemptStatus.Submitted or AttemptStatus.Graded))
             return Results.Conflict(new ApiResultDto(false, "Attempt not submitted", null!));
 
-        InternalDeliveryExam? proto = null;
-        InternalExamDto.InternalDeliveryExam? dto = null;
+        AttemptSnapshot parsedSnapshot;
         JsonElement fullSnapshot;
         try
         {
-            var parser = new JsonParser(JsonParser.Settings.Default!.WithIgnoreUnknownFields(true)!);
-            proto = parser.Parse<InternalDeliveryExam>(existedAttempt.PaperJson.RootElement.GetRawText());
-            var fullJson = JsonFormatter.Default!.Format(proto!);
-            using var fullDoc = JsonDocument.Parse(fullJson!);
-            fullSnapshot = PaperWideNormalizer.NormalizeJsonElement(fullDoc.RootElement);
+            parsedSnapshot = AttemptSnapshotReader.Read(existedAttempt.PaperJson.RootElement);
+            if (parsedSnapshot.Proto is not null)
+            {
+                var fullJson = JsonFormatter.Default!.Format(parsedSnapshot.Proto);
+                using var fullDoc = JsonDocument.Parse(fullJson!);
+                fullSnapshot = PaperWideNormalizer.NormalizeJsonElement(fullDoc.RootElement);
+            }
+            else
+            {
+                using var fullDoc = JsonSerializer.SerializeToDocument(parsedSnapshot.Dto);
+                fullSnapshot = PaperWideNormalizer.NormalizeJsonElement(fullDoc.RootElement);
+            }
         }
         catch
         {
-            dto = existedAttempt.PaperJson.RootElement.Deserialize<InternalExamDto.InternalDeliveryExam>(
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (dto == null)
-                return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
-            using var fullDoc = JsonSerializer.SerializeToDocument(dto);
-            fullSnapshot = PaperWideNormalizer.NormalizeJsonElement(fullDoc.RootElement);
+            return Results.Problem("Snapshot is bad", statusCode: StatusCodes.Status500InternalServerError);
         }
+        var proto = parsedSnapshot.Proto;
+        var dto = parsedSnapshot.Dto;
 
         // build lại theo question id và thông tin trong snapshot 
         var compiled = proto is not null

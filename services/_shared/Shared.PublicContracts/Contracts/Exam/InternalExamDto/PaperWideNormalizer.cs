@@ -1,4 +1,6 @@
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace Shared.ExamDto.Contracts.Exam.InternalExamDto;
@@ -53,7 +55,30 @@ public static class PaperWideNormalizer
 
     private static InternalExamDto.InternalDeliverySection StampSection(InternalExamDto.InternalDeliverySection section, ref int paperWide)
     {
-        if (section.QuestionGroups.Count == 0) return section;
+        if (section.QuestionGroups.Count == 0)
+        {
+            if (section.Questions is not { Count: > 0 }) return section;
+
+            var first = paperWide;
+            var questions = section.Questions.ToArray();
+            System.Array.Sort(questions, (a, b) => a.Idx.CompareTo(b.Idx));
+            var stampedQuestions = new InternalExamDto.InternalDeliveryQuestion[questions.Length];
+            for (int i = 0; i < questions.Length; i++)
+            {
+                stampedQuestions[i] = questions[i] with { Idx = paperWide++ };
+            }
+
+            var group = new InternalExamDto.InternalDeliveryQuestionGroup
+            {
+                Id = StableSyntheticGroupId(section.Id, section.Idx),
+                Idx = 1,
+                StartIdx = first,
+                EndIdx = paperWide - 1,
+                InstructionMd = section.InstructionsMd ?? string.Empty,
+                Questions = stampedQuestions,
+            };
+            return section with { QuestionGroups = new[] { group }, Questions = null };
+        }
 
         var groups = section.QuestionGroups.ToArray();
         System.Array.Sort(groups, (a, b) => a.Idx.CompareTo(b.Idx));
@@ -150,28 +175,34 @@ public static class PaperWideNormalizer
                 writer.WritePropertyName("questionGroups");
                 writer.WriteStartArray();
                 writer.WriteStartObject();
+                writer.WriteString("id", StableSyntheticGroupId(sec).ToString());
+                writer.WriteNumber("idx", 1);
                 int first = paperWide;
                 paperWide += secQsEl.GetArrayLength();
                 writer.WriteNumber("startIdx", first);
                 writer.WriteNumber("endIdx", paperWide - 1);
+                writer.WriteString("instructionMd", sec.TryGetProperty("instructionsMd", out var instruction)
+                    && instruction.ValueKind == JsonValueKind.String ? instruction.GetString() : string.Empty);
                 writer.WritePropertyName("questions");
                 WriteQuestions(writer, secQsEl, ref first);
                 writer.WriteEndObject();
                 writer.WriteEndArray();
             }
-            else
+            foreach (var p in sec.EnumerateObject())
             {
-                foreach (var p in sec.EnumerateObject())
+                if (p.NameEquals("questions") && hasSectionQuestions)
+                    continue;
+                if (p.NameEquals("questionGroups"))
                 {
-                    if (p.NameEquals("questionGroups"))
+                    if (hasGroups || !hasSectionQuestions)
                     {
                         writer.WritePropertyName(p.Name);
                         WriteGroups(writer, p.Value, ref paperWide);
                     }
-                    else
-                    {
-                        p.WriteTo(writer);
-                    }
+                }
+                else
+                {
+                    p.WriteTo(writer);
                 }
             }
             writer.WriteEndObject();
@@ -190,6 +221,7 @@ public static class PaperWideNormalizer
 
             foreach (var p in grp.EnumerateObject())
             {
+                if (p.NameEquals("startIdx") || p.NameEquals("endIdx")) continue;
                 if (p.NameEquals("questions"))
                 {
                     qs = p.Value;
@@ -217,6 +249,26 @@ public static class PaperWideNormalizer
         writer.WriteEndArray();
     }
 
+    private static Guid StableSyntheticGroupId(Guid sectionId, int sectionIdx) =>
+        CreateStableGuid($"legacy-question-group:{sectionId:D}:{sectionIdx}");
+
+    private static Guid StableSyntheticGroupId(JsonElement section)
+    {
+        var identity = section.TryGetProperty("id", out var id) ? id.GetRawText() : string.Empty;
+        var idx = section.TryGetProperty("idx", out var idxElement) ? idxElement.GetRawText() : string.Empty;
+        return CreateStableGuid($"legacy-question-group:{identity}:{idx}");
+    }
+
+    private static Guid CreateStableGuid(string value)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
+        Span<byte> guidBytes = stackalloc byte[16];
+        hash.AsSpan(0, 16).CopyTo(guidBytes);
+        guidBytes[7] = (byte)((guidBytes[7] & 0x0f) | 0x50);
+        guidBytes[8] = (byte)((guidBytes[8] & 0x3f) | 0x80);
+        return new Guid(guidBytes);
+    }
+
     private static void WriteQuestions(Utf8JsonWriter writer, JsonElement qs, ref int first)
     {
         writer.WriteStartArray();
@@ -224,16 +276,10 @@ public static class PaperWideNormalizer
         {
             int stampedIdx = first++;
             writer.WriteStartObject();
+            writer.WriteNumber("idx", stampedIdx);
             foreach (var p in q.EnumerateObject())
             {
-                if (p.NameEquals("idx"))
-                {
-                    writer.WriteNumber("idx", stampedIdx);
-                }
-                else
-                {
-                    p.WriteTo(writer);
-                }
+                if (!p.NameEquals("idx")) p.WriteTo(writer);
             }
             writer.WriteEndObject();
         }

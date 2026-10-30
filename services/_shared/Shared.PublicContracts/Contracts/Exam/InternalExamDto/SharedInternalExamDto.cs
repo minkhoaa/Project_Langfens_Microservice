@@ -17,6 +17,7 @@ public class InternalExamDto
         [JsonPropertyName("category")] public string Category { get; init; } = string.Empty;
         [JsonPropertyName("level")] public string Level { get; init; } = string.Empty;
         [JsonPropertyName("durationMin")] public int DurationMin { get; init; }
+        [JsonPropertyName("imageUrl"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ImageUrl { get; init; }
         [JsonPropertyName("sections")] public IReadOnlyList<InternalDeliverySection> Sections { get; init; } = [];
     }
 
@@ -30,6 +31,7 @@ public class InternalExamDto
         [JsonPropertyName("audioUrl")] public string? AudioUrl { get; init; }
         [JsonPropertyName("transcriptMd")] public string? TranscriptMd { get; init; }
         [JsonPropertyName("questionGroups")] public IReadOnlyList<InternalDeliveryQuestionGroup> QuestionGroups { get; init; } = [];
+        [JsonPropertyName("questions"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public IReadOnlyList<InternalDeliveryQuestion>? Questions { get; init; }
     }
 
     public record InternalDeliveryQuestionGroup
@@ -85,6 +87,8 @@ public class InternalExamDto
         [JsonPropertyName("idx")] public int Idx { get; init; }
         [JsonPropertyName("contentMd")] public string ContentMd { get; init; } = "";
         [JsonPropertyName("isCorrect")] public bool? IsCorrect { get; init; }
+        [JsonPropertyName("imageUrl"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ImageUrl { get; init; }
+        [JsonPropertyName("altText"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? AltText { get; init; }
     }
 
     public static class SnapshotSanitizer
@@ -93,22 +97,25 @@ public class InternalExamDto
         {
             Sections = exam.Sections.Select(sec => sec with
             {
+                Questions = sec.Questions?.Select(SanitizeQuestion).ToList(),
                 QuestionGroups = sec.QuestionGroups.Select(grp => grp with
                 {
-                    Questions = grp.Questions.Select(q => q with
-                    {
-                        ExplanationMd = null,
-                        ModelAnswers = null,
-                        Options = q.Options.Select(o => o with { IsCorrect = null }).ToList(),
-                        BlankAcceptTexts = q.BlankAcceptTexts.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
-                        BlankAcceptRegex = q.BlankAcceptRegex.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
-                        MatchPairs = q.MatchPairs.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
-                        OrderCorrects = Array.Empty<string>(),
-                        ShortAnswerAcceptTexts = Array.Empty<string>(),
-                        ShortAnswerAcceptRegex = Array.Empty<string>()
-                    }).ToList()
+                    Questions = grp.Questions.Select(SanitizeQuestion).ToList()
                 }).ToList()
             }).ToList()
+        };
+
+        private static InternalDeliveryQuestion SanitizeQuestion(InternalDeliveryQuestion question) => question with
+        {
+            ExplanationMd = null,
+            ModelAnswers = null,
+            Options = question.Options.Select(option => option with { IsCorrect = null }).ToList(),
+            BlankAcceptTexts = question.BlankAcceptTexts.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
+            BlankAcceptRegex = question.BlankAcceptRegex.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
+            MatchPairs = question.MatchPairs.ToDictionary(x => x.Key, _ => (string[]?)Array.Empty<string>()),
+            OrderCorrects = Array.Empty<string>(),
+            ShortAnswerAcceptTexts = Array.Empty<string>(),
+            ShortAnswerAcceptRegex = Array.Empty<string>()
         };
     }
 }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace attempt_service.Contracts.Attempt;
@@ -18,7 +19,52 @@ public record AttemptGetResponse(
     DateTime StartedAt,
     int TimeLeftSec);
 
-public record AnswerItem(Guid QuestionId, Guid? SectionId, List<Guid>? SelectedOptionIds, string? TextAnswer);
+public record AnswerItem
+{
+    private string? _textAnswer;
+
+    public Guid QuestionId { get; init; }
+    public Guid? SectionId { get; init; }
+    public List<Guid>? SelectedOptionIds { get; init; }
+
+    public string? TextAnswer
+    {
+        get => _textAnswer;
+        init
+        {
+            _textAnswer = value;
+            IsTextAnswerSpecified = true;
+        }
+    }
+
+    [JsonIgnore]
+    public bool IsTextAnswerSpecified { get; private set; }
+
+    [JsonConstructor]
+    public AnswerItem() { }
+
+    public AnswerItem(Guid QuestionId, Guid? SectionId, List<Guid>? SelectedOptionIds, string? TextAnswer)
+    {
+        this.QuestionId = QuestionId;
+        this.SectionId = SectionId;
+        this.SelectedOptionIds = SelectedOptionIds;
+        _textAnswer = TextAnswer;
+        // Preserve the historical constructor convention: null means no patch.
+        IsTextAnswerSpecified = TextAnswer is not null;
+    }
+
+    public void Deconstruct(
+        out Guid questionId,
+        out Guid? sectionId,
+        out List<Guid>? selectedOptionIds,
+        out string? textAnswer)
+    {
+        questionId = QuestionId;
+        sectionId = SectionId;
+        selectedOptionIds = SelectedOptionIds;
+        textAnswer = TextAnswer;
+    }
+}
 public record ResultAnswerItem(
     Guid QuestionId,
     Guid? SectionId,
@@ -32,6 +78,8 @@ public record ResultAnswerItem(
 );
 
 public record AutosaveRequest(List<AnswerItem> Answers, long? ClientRevision);
+
+public record SubmitRequest(List<AnswerItem>? Answers);
 
 public record SubmitResponse(Guid AttemptId, string Status, decimal ScoreRaw, decimal ScorePct, int Correct, int Total);
 

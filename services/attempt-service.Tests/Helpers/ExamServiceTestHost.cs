@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using exam_service.Domains.Entities;
 using exam_service.Features.Exams.InternalEndpoint;
+using exam_service.Features.Exams.PublicEndpoint;
 using exam_service.Features.QuestionBank;
 using exam_service.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
@@ -47,6 +48,7 @@ internal sealed class ExamServiceTestHost : IAsyncDisposable
         var database = Guid.NewGuid().ToString();
         builder.Services.AddScoped<ExamDbContext>(_ => new OfflineExamDbContext(OfflineExamDbContext.Options(database)));
         builder.Services.AddScoped<IInternalExamService, InternalExamService>();
+        builder.Services.AddScoped<IExamService, exam_service.Features.Exams.PublicEndpoint.ExamService>();
         builder.Services.AddScoped<IQuestionBankService, QuestionBankService>();
         builder.Services.AddGrpc();
         var signingKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
@@ -62,6 +64,7 @@ internal sealed class ExamServiceTestHost : IAsyncDisposable
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapInternalExamEndpoint();
+        app.MapPublicExamEndpoints();
         app.MapGrpcService<ExamInternalGrpcService>().RequireAuthorization(InternalExamAccess.Policy);
         app.MapQuestionBankEndpoints();
         var exam = Paper();

@@ -599,6 +599,9 @@ export interface ToolDefinition<TParams extends TSchema = TSchema, TDetails = un
 	/** Optional compatibility shim to prepare raw tool call arguments before schema validation. Must return an object conforming to TParams. */
 	prepareArguments?: (args: unknown) => Static<TParams>;
 
+	/** Optional sanitized result for preparation/validation exceptions; execution remains rejected. */
+	formatPreparationError?: AgentTool<TParams, TDetails>["formatPreparationError"];
+
 	/**
 	 * JSON Schema of `structuredContent` in successful results. Tools that declare it should always
 	 * set `structuredContent`; codemode scripts then receive it instead of the text content.

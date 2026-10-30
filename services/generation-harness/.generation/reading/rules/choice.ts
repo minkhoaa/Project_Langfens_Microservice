@@ -12,7 +12,7 @@ export function runChoiceRule(id: string,c: CanonicalContext,r: Report,q: Canoni
   });
   r.pending('CHOICE_NORMALIZATION_UNVERIFIED',at(path,'options'),'Full .NET Unicode trimming/case equivalence has not been executed.',id);
  }else if(id==='MULTIPLE_SELECTION_COUNT'){
-  const counts=[...q.promptMd.matchAll(/\b(?:choose|select|pick)\s+(?:exactly\s+)?(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:answers?|options?|letters?)\b/gi)].map(m=>numbers[m[1].toLowerCase()]??Number(m[1]));
+  const counts=[...q.promptMd.matchAll(/\b(?:choose|select|pick)\s+(?:exactly\s+)?(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:answers?|options?|letters?)\b/gi),...q.promptMd.matchAll(/\bwhich\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b(?=\s+\S)/gi)].map(m=>numbers[m[1].toLowerCase()]??Number(m[1]));
   if(counts.length===0 || new Set(counts).size!==1){r.pending('CHOICE_COUNT_INSTRUCTION_UNVERIFIED',at(path,'promptMd'),'Selection count is absent or ambiguous.',id,'State one unambiguous number of options to select.');}
   else if(counts[0]!==q.options.filter((o: CanonicalRecord)=>o.isCorrect).length)r.diagnostic('CHOICE_COUNT_INSTRUCTION_MISMATCH',at(path,'promptMd'),'Stated selection count differs from the correct-option count.','Make the instruction and private key cardinality agree.',undefined,'FAIL',id);
  }else{

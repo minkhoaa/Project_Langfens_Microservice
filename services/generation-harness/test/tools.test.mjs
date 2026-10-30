@@ -67,6 +67,21 @@ test("four core factories preserve real file and shell behavior", async (t) => {
 	assert.ok(imageResult.content.some((item) => item.type === "image"));
 });
 
+test("tool definition adapters preserve optional preparation error formatters in both directions", async () => {
+	const { wrapToolDefinition, createToolDefinitionFromAgentTool } = await import(
+		"../packages/generation-harness-core/dist/core/tools/tool-definition-wrapper.js"
+	);
+	const report = { status: "FAIL" };
+	const formatPreparationError = () => ({ content: [{ type: "text", text: "safe error" }], details: report, structuredContent: report });
+	const definition = {
+		name: "reject", label: "Reject", description: "Test", parameters: { type: "object" },
+		formatPreparationError, async execute() { throw new Error("must not execute"); },
+	};
+	const tool = wrapToolDefinition(definition);
+	assert.equal(tool.formatPreparationError, formatPreparationError);
+	assert.equal(createToolDefinitionFromAgentTool(tool).formatPreparationError, formatPreparationError);
+});
+
 test("session registers strictly 4 core tools by default, subagent adds exactly 1, auxiliary integrations are opt-in", async (t) => {
 	const cwd = mkdtempSync(join(tmpdir(), "generation-session-tools-"));
 	t.after(() => rmSync(cwd, { recursive: true, force: true }));

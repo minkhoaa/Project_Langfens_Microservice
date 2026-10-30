@@ -30,9 +30,9 @@ export function runMatchingRule(id: string,c: CanonicalContext,r: Report,q: Cano
    if(q.type!=='CLASSIFICATION' && !bank.some(b=>!assigned.includes(b.label)))fail('MATCH_DISTRACTOR_MISSING','options','A new matching exercise needs an unused distractor.');
    r.pending('MATCH_BANK_TRANSPORT_UNVERIFIED',path,'Actual bank transport and renderer behavior are unverified.',id);
   }else if(id==='HEADING'){
-   const marker=q.promptMd.indexOf('List of Headings:');
-   const visible=marker<0?[]:[...q.promptMd.slice(marker+'List of Headings:'.length).matchAll(/^([ivxlcdm]+)\.\s+([^\n]+)$/gm)].map(m=>`${m[1]}. ${m[2]}`);
-   if(!keysEqual(visible,bank.map(b=>`${b.label}. ${b.text}`)))fail('HEADING_BANK_MISSING','promptMd','The complete heading bank is not listed under List of Headings:.');
+   const marker=/List of Headings[ \t]*:|^[ \t]*List of Headings[ \t]*\r?$/mi.exec(q.promptMd);
+   const visible=marker===null?[]:[...q.promptMd.slice(marker.index+marker[0].length).matchAll(/^([ivxlcdm]+)\.\s+([^\n]+)$/gm)].map(m=>`${m[1]}. ${m[2]}`);
+   if(!keysEqual(visible,bank.map(b=>`${b.label}. ${b.text}`)))fail('HEADING_BANK_MISSING','promptMd','The complete heading bank is not listed under List of Headings (optional colon).');
    if(reused)fail('HEADING_REUSED','matchPairs','A heading is assigned to multiple targets.');
    r.pending('HEADING_SEMANTICS_UNVERIFIED',path,'Passage-to-heading suitability and instructions require independent review.',id);
   }else if(id==='INFORMATION'){

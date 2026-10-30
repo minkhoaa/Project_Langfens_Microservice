@@ -147,9 +147,11 @@ public class AdminQuestionService : IAdminQuestionService
         [FromBody] DtoAdmin.AdminQuestionUpsert dto
     )
     {
-        var existedSection =
-            _context.ExamSections.AsNoTracking().FirstOrDefault(section => section.Id == dto.SectionId);
+        var existedSection = await _context.ExamSections.AsNoTracking()
+            .FirstOrDefaultAsync(section => section.Id == dto.SectionId, token);
         if (existedSection == null) return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
+        if (!await ValidGroup(dto.SectionId, dto.GroupId, token))
+            return Results.BadRequest(new ApiResultDto(false, "Group must belong to the question section", null!));
         await using var transaction = await _context.Database.BeginTransactionAsync(token);
         try
         {
@@ -181,6 +183,8 @@ public class AdminQuestionService : IAdminQuestionService
                 ExplanationMd = dto.ExplanationMd,
                 Idx = desired,
                 SectionId = dto.SectionId,
+                GroupId = dto.GroupId,
+                WordList = dto.WordList,
                 Type = dto.Type,
                 Skill = dto.Skill,
                 PromptMd = dto.PromptMd,
@@ -213,18 +217,13 @@ public class AdminQuestionService : IAdminQuestionService
     {
         try
         {
+            var section = await _context.ExamSections.AsNoTracking().FirstOrDefaultAsync(x => x.Id == dto.SectionId, token);
+            if (section == null) return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
+            if (!await ValidGroup(dto.SectionId, dto.GroupId, token))
+                return Results.BadRequest(new ApiResultDto(false, "Group must belong to the question section", null!));
             var requiresAudio = string.Equals(dto.Skill, QuestionSkill.Listening, StringComparison.OrdinalIgnoreCase);
-            if (requiresAudio)
-            {
-                var section = await _context.ExamSections.AsNoTracking()
-                    .Where(x => x.Id == dto.SectionId)
-                    .Select(x => new { x.AudioUrl })
-                    .FirstOrDefaultAsync(token);
-                if (section == null)
-                    return Results.BadRequest(new ApiResultDto(false, "Not found section", null!));
-                if (string.IsNullOrWhiteSpace(section.AudioUrl))
-                    return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
-            }
+            if (requiresAudio && string.IsNullOrWhiteSpace(section.AudioUrl))
+                return Results.BadRequest(new ApiResultDto(false, "Listening section is missing audioUrl", null!));
 
             var validationError = ValidatePayload(
                 dto.Type, dto.PromptMd, dto.BlankAcceptTexts, dto.MatchPairs,
@@ -234,23 +233,29 @@ public class AdminQuestionService : IAdminQuestionService
             var orderCorrects = dto.OrderCorrects?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortTexts = dto.ShortAnswerAcceptTexts?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             var shortRegex = dto.ShortAnswerAcceptRegex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            var affectedRow = await _context.ExamQuestions.Where(x => x.Id == id)
-                .ExecuteUpdateAsync(question => question
-                        .SetProperty(x => x.SectionId, dto.SectionId)
-                        .SetProperty(x => x.Idx, dto.Idx)
-                        .SetProperty(x => x.Type, dto.Type)
-                        .SetProperty(x => x.Skill, dto.Skill)
-                        .SetProperty(x => x.Difficulty, dto.Difficulty)
-                        .SetProperty(x => x.PromptMd, dto.PromptMd)
-                        .SetProperty(x => x.ExplanationMd, dto.ExplanationMd)
-                        .SetProperty(x => x.ImageUrl, dto.ImageUrl)
-                        .SetProperty(x => x.BlankAcceptTexts, dto.BlankAcceptTexts)
-                        .SetProperty(x => x.BlankAcceptRegex, dto.BlankAcceptRegex)
-                        .SetProperty(x => x.MatchPairs, dto.MatchPairs)
-                        .SetProperty(x => x.OrderCorrects, orderCorrects)
-                        .SetProperty(x => x.ShortAnswerAcceptTexts, shortTexts)
-                        .SetProperty(x => x.ShortAnswerAcceptRegex, shortRegex)
-                    , token);
+            var question = await _context.ExamQuestions.FirstOrDefaultAsync(x => x.Id == id, token);
+            var affectedRow = 0;
+            if (question != null)
+            {
+                question.SectionId = dto.SectionId;
+                question.GroupId = dto.GroupId;
+                question.WordList = dto.WordList;
+                question.Idx = dto.Idx ?? question.Idx;
+                question.Type = dto.Type;
+                question.Skill = dto.Skill;
+                question.Difficulty = dto.Difficulty;
+                question.PromptMd = dto.PromptMd;
+                question.ExplanationMd = dto.ExplanationMd;
+                question.ImageUrl = dto.ImageUrl;
+                question.BlankAcceptTexts = dto.BlankAcceptTexts;
+                question.BlankAcceptRegex = dto.BlankAcceptRegex;
+                question.MatchPairs = dto.MatchPairs;
+                question.OrderCorrects = orderCorrects;
+                question.ShortAnswerAcceptTexts = shortTexts;
+                question.ShortAnswerAcceptRegex = shortRegex;
+                await _context.SaveChangesAsync(token);
+                affectedRow = 1;
+            }
             return Results.Ok(new ApiResultDto(true, $"Updated {affectedRow} row", null!));
         }
         catch (Exception e)
@@ -258,6 +263,10 @@ public class AdminQuestionService : IAdminQuestionService
             return Results.BadRequest(new ApiResultDto(false, e.Message, null!));
         }
     }
+
+    private Task<bool> ValidGroup(Guid sectionId, Guid? groupId, CancellationToken token) =>
+        groupId == null ? Task.FromResult(true) : _context.ExamQuestionGroups.AsNoTracking()
+            .AnyAsync(g => g.Id == groupId && g.SectionId == sectionId, token);
 
     public async Task<IResult> DeleteAsync(
         CancellationToken token,

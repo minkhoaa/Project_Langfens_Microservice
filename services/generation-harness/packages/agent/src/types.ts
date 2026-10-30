@@ -472,6 +472,12 @@ export interface AgentTool<TParameters extends TSchema = TSchema, TDetails = any
 	 */
 	prepareArguments?: (args: unknown) => Static<TParameters>;
 	/**
+	 * Optionally format a preparation/validation exception as a structured error result.
+	 * Execution stays rejected and hooks are not re-entered. Returning undefined or throwing
+	 * preserves the original text-only error. The formatter must sanitize untrusted args/errors.
+	 */
+	formatPreparationError?: (error: unknown, args: unknown) => AgentToolResult<TDetails> | undefined;
+	/**
 	 * JSON Schema of `structuredContent` in successful results. Tools that declare it should always
 	 * set `structuredContent`.
 	 */

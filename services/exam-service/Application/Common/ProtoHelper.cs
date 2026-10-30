@@ -37,9 +37,10 @@ public static class ProtoHelper
             };
 
             // Map QuestionGroups (questions are only inside groups now)
-            if (sec.QuestionGroups != null && sec.QuestionGroups.Any())
+            var deliveryGroups = ExamDeliveryLayout.Groups(sec);
+            if (deliveryGroups.Count > 0)
             {
-                foreach (var grp in sec.QuestionGroups.OrderBy(g => g.Idx))
+                foreach (var grp in deliveryGroups)
                 {
                     var pGrp = new InternalDeliveryQuestionGroup
                     {
@@ -50,10 +51,7 @@ public static class ProtoHelper
                         InstructionMd = grp.InstructionMd ?? string.Empty
                     };
                     
-                    // Get questions for this group from section.Questions by Idx range
-                    var groupQuestions = sec.Questions
-                        .Where(q => q.Idx >= grp.StartIdx && q.Idx <= grp.EndIdx)
-                        .OrderBy(q => q.Idx);
+                    var groupQuestions = grp.Questions.OrderBy(q => q.Idx);
                     
                     foreach (var q in groupQuestions)
                     {
@@ -62,29 +60,6 @@ public static class ProtoHelper
                     }
                     
                     pSec.QuestionGroups.Add(pGrp);
-                }
-            }
-            else
-            {
-                // Fallback: If no QuestionGroups, create one default group with all questions
-                var defaultGrp = new InternalDeliveryQuestionGroup
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Idx = 1,
-                    StartIdx = 1,
-                    EndIdx = sec.Questions.Any() ? sec.Questions.Max(q => q.Idx) : 0,
-                    InstructionMd = sec.InstructionsMd ?? string.Empty
-                };
-
-                foreach (var q in sec.Questions.OrderBy(q => q.Idx))
-                {
-                    var pQ = MapQuestionToProto(q, showAnswers);
-                    defaultGrp.Questions.Add(pQ);
-                }
-                
-                if (defaultGrp.Questions.Count > 0)
-                {
-                    pSec.QuestionGroups.Add(defaultGrp);
                 }
             }
 
@@ -165,9 +140,7 @@ public static class ProtoHelper
     {
         if (orderCorrects is not { Count: > 0 }) return new List<FlowChartNode>();
 
-        var nodes = orderCorrects
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+        var nodes = ExamDeliveryLayout.FlowKeys(orderCorrects)
             .Select(key => new FlowChartNode
             {
                 Key = key,
@@ -175,6 +148,6 @@ public static class ProtoHelper
             })
             .ToList();
 
-        return nodes.OrderBy(_ => Guid.NewGuid()).ToList();
+        return nodes;
     }
 }

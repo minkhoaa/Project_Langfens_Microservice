@@ -35,8 +35,9 @@ public static class AttemptHandler
     public static Task<IResult> AttemptSubmit(
         [FromRoute] Guid attemptId,
         CancellationToken token,
-        IAttemptService service)
-        => service.Submit(attemptId, token);
+        IAttemptService service,
+        [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)] SubmitRequest? request = null)
+        => service.Submit(attemptId, request, token);
 
     public static Task<IResult> AttemptGetResult(
         [FromRoute] Guid attemptId,

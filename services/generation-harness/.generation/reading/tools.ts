@@ -12,7 +12,7 @@ const declarations: [string,string[],string][]=[
  ['check_grading_parity',['question','submission'],'Check answer serialization and source-derived compatibility; actual .NET parity remains unverified.'],
  ['inspect_delivery_projection',['question'],'Build an allowlisted public Question, preserving inputs/media and diagnosing privacy risks.'],
 ];
-const outputSchema: TSchema={type:'object',required:['status','contractVersion','checks','diagnostics'],properties:{status:{enum:['PASS','FAIL','UNVERIFIED','ERROR']},contractVersion:{type:'string'},checks:{type:'array'},diagnostics:{type:'array'}},additionalProperties:true};
+const outputSchema: TSchema={type:'object',required:['status','contractVersion','checks','diagnostics'],properties:{status:{enum:['PASS','FAIL','UNVERIFIED','ERROR']},contractVersion:{type:'string'},checks:{type:'array'},diagnostics:{type:'array'},data:{type:'object',additionalProperties:true}},additionalProperties:true};
 const adapt=(result: ReadingResult)=>({content:[{type:'text' as const,text:JSON.stringify(result)}],details:result,structuredContent:result as unknown as JsonValue,isError:result.status==='FAIL'||result.status==='ERROR'});
 export function createReadingTools(): ToolDefinition<TSchema,ReadingResult>[] {
  let pending: Promise<Domain> | undefined;
@@ -28,6 +28,7 @@ export function createReadingTools(): ToolDefinition<TSchema,ReadingResult>[] {
   parameters:{type:'object',properties:Object.fromEntries(names.map(k=>[k,{}])),required:[...names],additionalProperties:false},
   outputSchema,
   prepareArguments(args: unknown){const invalid=checkArguments(args,names);if(invalid)throw new Error(JSON.stringify(invalid));return args;},
+  formatPreparationError(_error: unknown,args: unknown){const invalid=checkArguments(args,names);return invalid?adapt(invalid):undefined;},
   async execute(_id: string,args: unknown,signal?: AbortSignal){
    const aborted=()=>{const r=createReport();r.diagnostic('EXECUTION_ABORTED','/','Reading execution was cancelled.','Retry only when the operator intends to continue.',undefined,'ERROR');return adapt(r.finish());};
    try{

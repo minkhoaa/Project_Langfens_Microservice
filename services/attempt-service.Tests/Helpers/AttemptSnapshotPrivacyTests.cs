@@ -44,8 +44,10 @@ public class AttemptSnapshotPrivacyTests
             Id = Guid.NewGuid(), Title = "Public title",
             Sections = [new Dto.InternalDeliverySection
             {
+                Id = Guid.NewGuid(),
                 QuestionGroups = [new Dto.InternalDeliveryQuestionGroup
                 {
+                    Id = Guid.NewGuid(),
                     Questions = [new Dto.InternalDeliveryQuestion
                     {
                         Id = Guid.NewGuid(), PromptMd = "Public prompt", ExplanationMd = "private-explanation",
