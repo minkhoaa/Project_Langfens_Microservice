@@ -23,7 +23,7 @@ test('native arguments preserve wrong primitive types nulls and unknown fields',
 test('registration is inert and declarations expose only shallow required outer keys',()=>{
  const registered=[],api={registerTool:d=>registered.push(d)}; // factory is also checked by real loader above
  const defs=createReadingTools();assert.equal(defs.length,7);
- for(const d of defs){assert.equal(d.promptSnippet,undefined);assert.equal(d.promptGuidelines,undefined);assert.equal(d.parameters.type,'object');for(const k of d.parameters.required)assert.deepEqual(d.parameters.properties[k],{});}
+ for(const d of defs){assert.equal(d.promptSnippet,undefined);assert.equal(d.promptGuidelines,undefined);assert.equal(d.parameters.type,'object');assert.equal(d.parameters.additionalProperties,false);for(const k of d.parameters.required)assert.deepEqual(d.parameters.properties[k],{});}
  assert.ok(Buffer.byteLength(JSON.stringify(defs))<16384);
 });
 test('concurrent first calls are deterministic and native cancellation returns explicit error',async()=>{

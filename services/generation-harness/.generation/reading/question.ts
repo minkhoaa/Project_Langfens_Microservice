@@ -4,7 +4,7 @@ import { runChoiceRule } from './rules/choice.ts';
 import { runCompletionRule } from './rules/completion.ts';
 import { runMatchingRule } from './rules/matching.ts';
 
-export function validateQuestion(c: CanonicalContext,r: Report,q: unknown,path='/question'): QuestionSummary {
+export function validateQuestion(c: CanonicalContext,r: Report,q: unknown,path='/question',instructionContext?: {texts: string[]; complete: boolean}): QuestionSummary {
  const empty={structuralValid:false,answerSlots:null,scoringUnits:null};
  if(!object(q)){r.diagnostic('OBJECT_REQUIRED',path,'Question must be an object.');return empty;}
  if(typeof q.type!=='string'||!own(c.meta.registry,q.type)){
@@ -34,7 +34,7 @@ export function validateQuestion(c: CanonicalContext,r: Report,q: unknown,path='
    if(valid)ruleShape=runChoiceRule(id,c,r,q,path);
    else {r.check(id,'UNVERIFIED',provenance,path);r.pending('CHECK_BLOCKED_BY_INVALID_INPUT',path,'Rule prerequisites are structurally invalid.',id);}
   }else if(['BLANKS','COMPLETION_LAYOUT','REGEX','SHORT_INPUT','MEDIA','LABEL_ALIGNMENT'].includes(id)){
-   if(valid)ruleShape=runCompletionRule(id,c,r,q,path);
+   if(valid)ruleShape=runCompletionRule(id,c,r,q,path,instructionContext);
    else {r.check(id,'UNVERIFIED',provenance,path);r.pending('CHECK_BLOCKED_BY_INVALID_INPUT',path,'Rule prerequisites are structurally invalid.',id);}
   }else if(['MATCHING_TARGETS','MATCHING_BANK','HEADING','INFORMATION','FEATURES','ENDINGS','CLASSIFICATION_KEYS','FLOW_ORDERING'].includes(id)){
    if(valid)ruleShape=runMatchingRule(id,c,r,q,path);

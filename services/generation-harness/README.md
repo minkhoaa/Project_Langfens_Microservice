@@ -15,9 +15,9 @@ Independent Node.js harness with a native agent loop, terminal UI, JSON-lines RP
 | `generation-codemode` | Optional sandboxed JavaScript execution |
 | `generation-mcp` | Optional Model Context Protocol integration |
 
-`scripts/run.mjs` launches the local Core bundle and native Subagents extension. Auxiliary integrations are opt-in; they are not additional default Core tools. See [Subagents documentation](packages/generation-subagents/README.md) for delegation and configuration.
+`scripts/run.mjs` launches the local Core bundle, native Subagents and the `/config` command extension. Auxiliary integrations are opt-in; they are not additional default Core tools. See [Subagents documentation](packages/generation-subagents/README.md) for delegation and configuration.
 
-IELTS specifications and passive test vectors live in [`.generation/contracts/`](.generation/contracts/README.md). They do not install a Reading extension, tools or policy. Schema validity alone does not establish semantic correctness or consumer compatibility.
+IELTS specifications and passive test vectors live in [`.generation/contracts/`](.generation/contracts/README.md). The independent [Reading extension](.generation/reading/README.md) is loaded by `npm run start:reading`; it adds seven native domain tools, not a Reading policy or coordinator. Schema validity alone does not establish semantic correctness or consumer compatibility.
 
 ## Commands
 
@@ -32,6 +32,8 @@ GENERATION_HARNESS_OFFLINE=1 npm run smoke
 
 npm run start:tui
 npm run start:rpc
+npm run start:reading
+npm run config
 npm run dev
 ```
 
@@ -52,6 +54,10 @@ Configuration, credentials, sessions, installed packages and scratch workspaces 
 The shell tool retains the system `PATH` for local commands. Runtime path/configuration isolation is not a filesystem or process sandbox for tools or explicitly loaded extensions.
 
 ## Provider & Model Configuration
+
+`npm run config` restores the standalone configuration TUI: F1 Resources, F2 Config, F3 Roles/Agents and F4 Tools. Use Tab to switch User/Project scope; resource toggles persist native filters without executing or installing resources. `/config` opens the same manager inside the harness. See [configuration usage](.generation/config/README.md) for CLI edits, variable metadata, paths and safety boundaries.
+
+`npm run start:reading` uses the harness project CWD and loads Reading explicitly while retaining native tools/Subagents and `/config`; it does not auto-approve project trust or start generation. Normal `npm start` keeps the scratch-workspace CWD.
 
 Provider credentials can be supplied through environment variables or configured interactively with `/login`. Local credentials are stored under `.runtime/agent/auth.json` in the default runtime.
 

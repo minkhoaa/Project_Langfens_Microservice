@@ -4,7 +4,9 @@ Seven independent native tools, backed by the unchanged canonical contract at `.
 
 ## Loading
 
-From `services/generation-harness/`, use native project discovery (`.generation/extensions/reading.ts`) or pass its absolute path with native `--extension`. The launcher's default CWD is `.runtime/workspace`, not this project, so launcher startup alone is not assumed to discover this file. No launcher/settings changes are installed.
+From `services/generation-harness/`, run `npm run start:reading` for native TUI, or `npm run start:reading -- --mode rpc` for RPC. The operator-requested alias selects this project CWD and explicitly loads `.generation/extensions/reading.ts`, retaining native Subagents and `/config` without `--approve` or any Reading workflow.
+
+Native project discovery or an absolute `--extension` path still works. Ordinary `npm start` retains `.runtime/workspace` as its default CWD and does not implicitly load Reading. No native/Core package or automatic project-settings override is changed.
 
 ## Tools
 
@@ -33,7 +35,7 @@ Question/Option shapes remain solely canonical. There is no authoritative Group/
 ] }
 ```
 
-Known descriptive source fields are optional. Group `sectionId`, `startIdx`, `endIdx`, `instructionMd` are optional. Legacy Section-level `questions` is recognized without synthesizing a group; simultaneous nonempty grouped/ungrouped collections fail rather than silently discard content. Groups may mix types and sizes. Draft coverage is unverified; only `exam.complete:true` requests full paper-wide coverage. Optional `exam.expectedQuestionCount:N` counts Question records, not slots. No implied 13/40 Questions or type rotation. Typed .NET delivery sorts by idx while JSON snapshot delivery preserves supplied traversal; no transport equivalence is claimed.
+Known descriptive source fields are optional. Group `sectionId`, `startIdx`, `endIdx`, `instructionMd` are optional. Completion word-limit validation checks the Question prompt plus supplied containing Group `instructionMd` and Section `instructionsMd`. Without supplied external ancestry, a standalone Question/Group cannot establish that no limit exists; a complete-requested Exam with supplied ancestry and no recognizable limit reports the missing limit. Conflicting recognizable instructions remain `UNVERIFIED`; word-count profile and precedence are not inferred. Legacy Section-level `questions` is recognized without synthesizing a group; simultaneous nonempty grouped/ungrouped collections fail rather than silently discard content. Groups may mix types and sizes. Draft coverage is unverified; only `exam.complete:true` requests full paper-wide coverage. Optional `exam.expectedQuestionCount:N` counts Question records, not slots. No implied 13/40 Questions or type rotation. Typed .NET delivery sorts by idx while JSON snapshot delivery preserves supplied traversal; no transport equivalence is claimed.
 
 ### Evidence and answers
 
@@ -45,7 +47,7 @@ One backend Question is one all-or-nothing scoring unit. Multi-blank/target Ques
 
 ### Public-only projection and blind solving
 
-Projection builds fresh objects from canonical StudentQuestion/PublicOption allowlists. It preserves public media, membership, banks and input identities; private keys, correctness, explanations and reviews never become student fields. Known leakage/invalid content withholds the projection. Natural occurrence of an answer word is not automatically leakage; encoded/semantic hints remain unverified.
+Projection builds fresh objects from canonical StudentQuestion/PublicOption allowlists. It preserves public media, membership, banks and input identities; private keys, correctness, explanations and reviews never become student fields. Known leakage/invalid content withholds the projection. Explicit answer-key/correct-answer/solution/teacher-note headers are screened at line and sentence boundaries, including common blockquote, list, indentation and emphasis wrappers. Only finite generic Answer(s) response-direction forms are treated as benign; stronger private headers are never exempted by direction-shaped values. Natural occurrence of an answer word is not automatically leakage; encoded/semantic hints remain unverified.
 
 FLOW_CHART remains process ordering. Public labels must already exist in prompt lines `- key: label`; unsupported presentations remain unverified, not platform-invalid. Nodes display in deterministic key order independent of private solution order. Missing public labels never come from private keys or examples.
 
@@ -53,7 +55,7 @@ Only the returned `data.studentQuestion` is a candidate public input, not full r
 
 ## Native error/result boundary
 
-Normal execution returns equal JSON text, `details` and `structuredContent` in the native execution event. The existing native tool-result **transcript** drops `structuredContent` while retaining text/details; no Core patch is made. Invalid outer calls fail through the public argument hook as sanitized JSON text; pre-execution details/structuredContent are not guaranteed. Provider/RPC JSON parsing and cancellation before this hook retain native behavior. A consumer requiring uniform structured pre-execution/transcript results needs a separately scoped SDK capability, not fabricated evidence.
+Normal execution returns equal JSON text, `details` and `structuredContent` in the native execution event. The existing native tool-result **transcript** drops `structuredContent` while retaining text/details; no Core patch is made. Invalid outer calls fail through the public argument hook as sanitized JSON text; pre-execution details/structuredContent are not guaranteed. Provider/RPC JSON parsing and cancellation before this hook retain native behavior. Cancellation is checked again after lazy domain initialization, before domain execution; rejected lazy imports are cleared for a later explicit call, without automatic retry loops, while concurrent initialization remains shared. A consumer requiring uniform structured pre-execution/transcript results needs a separately scoped SDK capability, not fabricated evidence.
 
 ## Resource limits
 
@@ -73,6 +75,6 @@ GENERATION_HARNESS_OFFLINE=1 npm run smoke
 GENERATION_HARNESS_OFFLINE=1 node .generation/reading/bench/overhead.mjs
 ```
 
-Every executable test/benchmark imports the existing network/credential guard. Native fixtures use disposable directories and in-memory credentials/faux provider. Root `npm test` does not include the new domain suite; report them separately. No live inference, production data, publishing, commits or pushes are authorized.
+Every executable test/benchmark imports the existing network/credential guard. Native fixtures use disposable directories and in-memory credentials/faux provider. Root `npm test` runs the Reading domain suite after the existing harness tests and before the Subagents workspace suite. No live inference, production data, publishing, commits or pushes are authorized.
 
 The finite benchmark measures declaration bytes, canonical read/parse/compile counts in a fresh instrumented subprocess, registration deltas and warm calls (five warmups, twenty samples). Instrumentation is test-only, not a runtime telemetry framework. Mock first-attempt tool-call acceptance is not live-model reliability or IELTS output quality. See `PROGRESS.md` for executed evidence and rulings.

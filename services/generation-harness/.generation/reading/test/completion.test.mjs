@@ -15,7 +15,7 @@ test('blank Int64 limits accepted texts regex subset and word-limit uncertainty'
  assert.notEqual(inspect(validateQuestion,x).status,'FAIL');
  x.blankAcceptTexts={'9223372036854775808':['wide']};x.promptMd='ONE WORD ONLY. [9223372036854775808].';assert.ok(hasCode(inspect(validateQuestion,x),'BLANK_KEY_OVERFLOW'));
  x.blankAcceptTexts={'23':['very wide river']};x.promptMd='River [23].';x.blankAcceptRegex={'25':['(']};
- const r=inspect(validateQuestion,x);for(const code of ['WORD_LIMIT_MISSING','REGEX_KEY_WITHOUT_TEXT','DOTNET_REGEX_PARITY_UNVERIFIED'])assert.ok(hasCode(r,code),code);
+ const r=inspect(validateQuestion,x);for(const code of ['WORD_LIMIT_CONTEXT_UNAVAILABLE','REGEX_KEY_WITHOUT_TEXT','DOTNET_REGEX_PARITY_UNVERIFIED'])assert.ok(hasCode(r,code),code);
  x.promptMd='ONE WORD ONLY. [23].';delete x.blankAcceptRegex;assert.ok(hasCode(inspect(validateQuestion,x),'WORD_LIMIT_PROFILE_UNVERIFIED'));
 });
 test('layout checks recognize table note form without certifying Markdown rendering',()=>{

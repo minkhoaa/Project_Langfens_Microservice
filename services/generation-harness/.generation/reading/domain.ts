@@ -17,15 +17,14 @@ const handlers: Record<string,{names: string[]; run(c: CanonicalContext,r: Repor
 };
 const infraCodes=new Set(['CONTRACT_UNAVAILABLE','CONTRACT_INVALID','CONTRACT_VERSION_UNSUPPORTED','CONTRACT_RESOURCE_LIMIT','VALIDATOR_CAPABILITY_UNAVAILABLE','EXAMPLE_UNAVAILABLE']);
 export function createDomain({contractUrl=canonicalUrl}: {contractUrl?: URL | string}={}): Domain {
- let context: CanonicalContext | undefined,loadFailure: unknown;
+ let context: CanonicalContext | undefined;
  return {call(name,args){
   let r=createReport();
   try{
    const h=Object.hasOwn(handlers,name)?handlers[name]:null;
    if(!h){r.diagnostic('TOOL_UNSUPPORTED','/','Unsupported domain capability.','Call one of the seven registered Reading tools.');return r.finish();}
    const invalid=checkArguments(args,h.names);if(invalid)return invalid;
-   if(loadFailure)throw loadFailure;
-   if(!context){try{context=loadCanonical(contractUrl);}catch(e){loadFailure=e;throw e;}}
+   if(!context)context=loadCanonical(contractUrl);
    r=createReport(context);return r.finish(h.run(context,r,args as CanonicalRecord));
   }catch(error){const e=error as {code?: string};const code=infraCodes.has(e?.code??'')?e.code!:'INTERNAL_ERROR';r.diagnostic(code,'/','Reading capability could not execute safely.','Check the pinned contract and local installation; no input was modified.',undefined,'ERROR');return r.finish();}
  }};

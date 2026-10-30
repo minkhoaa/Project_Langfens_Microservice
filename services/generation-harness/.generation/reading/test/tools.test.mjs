@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { callTool, createDomain } from '../domain.ts';
+import { createReadingTools } from '../tools.ts';
 
 const vectors = JSON.parse(readFileSync(new URL('../../contracts/test-vectors/canonical-questions.v1.json', import.meta.url)));
 const clone = x => structuredClone(x);
@@ -54,6 +56,39 @@ test('all tools return recoverable diagnostics for absent/null/primitive/unknown
   }
 });
 
+test('cancellation is rechecked after cold and warm domain initialization without cancelling shared work', () => {
+ const script=`const {createReadingTools}=await import('./.generation/reading/tools.ts');const tool=()=>createReadingTools().find(t=>t.name==='get_question_spec');
+ const cold=tool(),coldAbort=new AbortController(),coldPending=cold.execute('cold',{type:'SHORT_ANSWER'},coldAbort.signal);coldAbort.abort();const coldResult=await coldPending;
+ const warm=tool(),healthy=await warm.execute('healthy',{type:'SHORT_ANSWER'}),warmAbort=new AbortController(),warmPending=warm.execute('warm',{type:'SHORT_ANSWER'},warmAbort.signal);warmAbort.abort();const warmResult=await warmPending;
+ const shared=tool(),cancel=new AbortController(),healthyPending=shared.execute('healthy',{type:'SHORT_ANSWER'}),cancelPending=shared.execute('cancel',{type:'SHORT_ANSWER'},cancel.signal);cancel.abort();const [parallelHealthy,parallelCancelled]=await Promise.all([healthyPending,cancelPending]);
+ const pre=new AbortController();pre.abort();const preResult=await shared.execute('pre',{type:'SHORT_ANSWER'},pre.signal);
+ console.log(JSON.stringify({cold:coldResult.structuredContent.diagnostics[0]?.code,warm: warmResult.structuredContent.diagnostics[0]?.code,healthy:healthy.structuredContent.status,parallelHealthy:parallelHealthy.structuredContent.status,parallelCancelled:parallelCancelled.structuredContent.diagnostics[0]?.code,pre:preResult.structuredContent.diagnostics[0]?.code}));`;
+ const run=spawnSync(process.execPath,['--import','./test/offline.mjs','--input-type=module','-e',script],{cwd:process.cwd(),env:{...process.env,GENERATION_HARNESS_OFFLINE:'1'},encoding:'utf8'});
+ assert.equal(run.status,0,run.stderr);assert.deepEqual(JSON.parse(run.stdout.trim()),{cold:'EXECUTION_ABORTED',warm:'EXECUTION_ABORTED',healthy:'PASS',parallelHealthy:'PASS',parallelCancelled:'EXECUTION_ABORTED',pre:'EXECUTION_ABORTED'});
+});
+
+test('transient lazy Reading import resolution failure recovers on same factory in a fresh subprocess',()=>{
+ const script=`import {registerHooks} from 'node:module';
+ let attempts=0;registerHooks({resolve(specifier,context,nextResolve){if(specifier==='\\./domain.ts'&&context.parentURL?.endsWith('/.generation/reading/tools.ts')){attempts++;if(attempts===1){const e=new Error('one-shot test failure');e.code='ERR_TRANSIENT_READING_RESOLUTION';throw e;}}return nextResolve(specifier,context);}});
+ const {createReadingTools}=await import('./.generation/reading/tools.ts');const make=()=>createReadingTools().find(t=>t.name==='get_question_spec');
+ const same=make(),args={type:'SHORT_ANSWER'},first=await same.execute('first',args),second=await same.execute('second',args),fresh=await make().execute('fresh',args);
+ const shared=make(),parallel=await Promise.all([shared.execute('parallel-a',args),shared.execute('parallel-b',args)]);
+ console.log(JSON.stringify({first:first.structuredContent.status,firstCode:first.structuredContent.diagnostics[0]?.code,second:second.structuredContent.status,fresh:fresh.structuredContent.status,parallel:parallel.map(x=>x.structuredContent.status),attempts}));`;
+ const run=spawnSync(process.execPath,['--import','./test/offline.mjs','--input-type=module','-e',script],{cwd:process.cwd(),env:{...process.env,GENERATION_HARNESS_OFFLINE:'1'},encoding:'utf8'});
+ assert.equal(run.status,0,run.stderr);const result=JSON.parse(run.stdout.trim());assert.equal(result.first,'ERROR');assert.equal(result.firstCode,'INTERNAL_ERROR');assert.equal(result.second,'PASS',run.stdout);assert.equal(result.fresh,'PASS',run.stdout);assert.deepEqual(result.parallel,['PASS','PASS'],run.stdout);assert.equal(result.attempts,4,run.stdout);
+});
+
+test('failed contract initialization can recover after exact restoration and tool schemas match strict keys', () => {
+ const dir=mkdtempSync(join(tmpdir(),'reading-recover-'));
+ try {
+  const file=join(dir,'contract.json'),source=new URL('../../contracts/question-types.v1.schema.json',import.meta.url);
+  const domain=createDomain({contractUrl:file});assert.equal(domain.call('validate_question',{question:q('SHORT_ANSWER')}).status,'ERROR');
+  writeFileSync(file,readFileSync(source));assert.equal(domain.call('validate_question',{question:q('SHORT_ANSWER')}).status,'UNVERIFIED');
+  const tools=createReadingTools();assert.ok(tools.every(t=>t.parameters.additionalProperties===false));
+  const validate=tools.find(t=>t.name==='validate_question');assert.throws(()=>validate.prepareArguments({question:q('SHORT_ANSWER'),reasoning:'x'}),/FIELD_UNKNOWN/);
+ } finally {rmSync(dir,{recursive:true,force:true});}
+});
+
 test('input bounds and corrupt/unreadable contracts fail safely', () => {
   let deep={}; let p=deep; for(let i=0;i<80;i++) p=p.child={};
   for(const args of [{question:deep},{question:'x'.repeat(2_100_000)}]) assert.ok(has(run('validate_question',args),'INPUT_LIMIT'));
@@ -84,7 +119,7 @@ test('completion exact marker identities independent of question ordinal and Int
   let question=q('SENTENCE_COMPLETION'); question.idx=7; question.promptMd='NO MORE THAN TWO WORDS. The river is [23].'; question.blankAcceptTexts={'23':['wide']}; delete question.blankAcceptRegex;
   let r=run('validate_question',{question}); assert.notEqual(r.status,'FAIL');
   question.promptMd+=' Again [23].'; assert.ok(has(run('validate_question',{question}),'BLANK_MARKER_DUPLICATE'));
-  question.promptMd='The river is [24].'; r=run('validate_question',{question}); assert.ok(has(r,'BLANK_MARKER_KEY_MISMATCH')); assert.ok(has(r,'WORD_LIMIT_MISSING'));
+  question.promptMd='The river is [24].'; r=run('validate_question',{question}); assert.ok(has(r,'BLANK_MARKER_KEY_MISMATCH')); assert.ok(has(r,'WORD_LIMIT_CONTEXT_UNAVAILABLE'));
   question.blankAcceptRegex={'25':['(']}; r=run('validate_question',{question}); assert.ok(has(r,'REGEX_KEY_WITHOUT_TEXT')); assert.ok(has(r,'DOTNET_REGEX_PARITY_UNVERIFIED'));
   question.blankAcceptTexts={'9223372036854775808':['wide']}; assert.ok(has(run('validate_question',{question}),'BLANK_KEY_OVERFLOW'));
   question.blankAcceptTexts={'23':['very wide river']}; question.promptMd='ONE WORD ONLY. River [23].';

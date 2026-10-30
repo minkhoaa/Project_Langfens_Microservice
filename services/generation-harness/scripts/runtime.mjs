@@ -21,7 +21,7 @@ export function ownedCoreEntry(source = false) {
 }
 
 /** Root application wiring loads the vendored extension without a core package dependency cycle. */
-function ownedSubagentEntry(source) {
+export function ownedSubagentEntry(source = false) {
 	const expected = join(harnessRoot, "packages/generation-subagents");
 	const canonical = realpathSync(expected);
 	if (canonical !== expected) throw new Error("Foreign local subagent package root");
@@ -81,7 +81,9 @@ export function runtimeLaunch(args = [], inherited = process.env) {
 	const entry = ownedCoreEntry(source);
 	const forwarded = [];
 	let explicitCwd;
-	const input = source ? args.slice(1) : args;
+	const rawInput = source ? args.slice(1) : args;
+	const readingMode = rawInput.includes('--reading');
+	const input = rawInput.filter(arg => arg !== '--reading');
 	for (let i = 0; i < input.length; i++) {
 		if (input[i] === "--cwd") {
 			if (!input[i + 1] || input[i + 1].startsWith("--")) throw new Error("--cwd requires a directory");
@@ -91,10 +93,20 @@ export function runtimeLaunch(args = [], inherited = process.env) {
 	if (!forwarded.includes("--no-extensions")) {
 		const extension = ownedSubagentEntry(source);
 		if (!forwarded.includes(extension)) forwarded.unshift("--extension", extension);
+		const configExtension = join(harnessRoot, 'scripts/config-extension.mjs');
+		if (!forwarded.includes(configExtension)) forwarded.push('--extension', configExtension);
+		if (readingMode) {
+			const readingExtension = realpathSync(join(harnessRoot, '.generation/extensions/reading.ts'));
+			if (!readingExtension.startsWith(harnessRoot + sep)) throw new Error('Foreign Reading extension');
+			if (!forwarded.includes(readingExtension)) forwarded.push('--extension', readingExtension);
+		}
 	}
 	const runtime = runtimeEnvironment(inherited);
-	const cwd = explicitCwd || (inherited.GENERATION_HARNESS_ISOLATED === "1" && inherited.GENERATION_HARNESS_WORKING_DIR) || runtime.workspace;
+	const cwd = explicitCwd || (readingMode ? harnessRoot : undefined) || (inherited.GENERATION_HARNESS_ISOLATED === "1" && inherited.GENERATION_HARNESS_WORKING_DIR) || runtime.workspace;
 	if (!statSync(cwd).isDirectory()) throw new Error(`Harness cwd is not a directory: ${cwd}`);
+	runtime.env.GENERATION_HARNESS_CONFIG_ROOT = harnessRoot;
+	// Display launcher-pinned resources truthfully in /config; this is metadata, not a tool/workflow parameter.
+	runtime.env.GENERATION_HARNESS_LAUNCHER_EXTENSIONS = JSON.stringify(forwarded.flatMap((arg, i) => arg === '--extension' || arg === '-e' ? [resolve(cwd, forwarded[i + 1])] : []));
 	runtime.env.GENERATION_HARNESS_WORKING_DIR = cwd;
 	runtime.env.GENERATION_HARNESS_WORKSPACE_DIR = cwd;
 	return {

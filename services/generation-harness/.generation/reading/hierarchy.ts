@@ -25,14 +25,14 @@ function locatedIdentities(r: Report,items: {value: CanonicalRecord; path: strin
 }
 function duplicateIndices(r: Report,items: CanonicalRecord[],path: string,code: string){const seen=new Set();items.forEach((v,i)=>{if(object(v)&&ints(v.idx)){if(seen.has(v.idx))fail(r,code,at(at(path,i),'idx'),'Index is duplicated in this scope.');seen.add(v.idx);}});}
 function totals(summaries: QuestionSummary[]){return {questionCount:summaries.length,answerSlots:summaries.every(x=>x.answerSlots!==null)?summaries.reduce((n,x)=>n+x.answerSlots!,0):null,scoringUnits:summaries.every(x=>x.scoringUnits!==null)?summaries.reduce((n,x)=>n+x.scoringUnits!,0):null};}
-function groupDetails(c: CanonicalContext,r: Report,g: unknown,path: string,sectionId?: string,complete=false){
+function groupDetails(c: CanonicalContext,r: Report,g: unknown,path: string,sectionId?: string,complete=false,sectionInstructions?: string[]){
  const summaries: QuestionSummary[]=[],nodes: QuestionNode[]=[];
  if(!container(r,g,path,['id','idx','questions','sectionId','startIdx','endIdx','instructionMd'],['id','idx','questions']))return {summaries,nodes};
  if(own(g,'idx')&&!positive(g.idx))fail(r,'INDEX_INVALID',at(path,'idx'),'Group index must be positive int32.');
  join(r,g.sectionId,sectionId,at(path,'sectionId'));
  const questions=collection(r,g,'questions',path,true);identities(r,questions,at(path,'questions'));duplicateIndices(r,questions,at(path,'questions'),'QUESTION_INDEX_COVERAGE');
  const options: {value: CanonicalRecord; path: string}[]=[];
- questions.forEach((q,i)=>{const p=at(at(path,'questions'),i),summary=validateQuestion(c,r,q,p);summaries.push(summary);nodes.push({q,path:p});
+ questions.forEach((q,i)=>{const p=at(at(path,'questions'),i),texts=[...(sectionInstructions??[]),...(typeof g.instructionMd==='string'?[g.instructionMd]:[])],summary=validateQuestion(c,r,q,p,{texts,complete});summaries.push(summary);nodes.push({q,path:p});
   if(object(q)){join(r,q.groupId,g.id,at(p,'groupId'));join(r,q.sectionId,sectionId??g.sectionId,at(p,'sectionId'));if(Array.isArray(q.options))q.options.forEach((value: CanonicalRecord,j: number)=>options.push({value,path:at(at(p,'options'),j)}));}
  });
  locatedIdentities(r,options,true);
@@ -80,10 +80,10 @@ export function validateExam(c: CanonicalContext,r: Report,e: unknown,path='/exa
   if(!keysEqual(gs.map(g=>g?.idx),gs.map((_,j)=>j+1)))fail(r,'GROUP_INDEX_COVERAGE',at(p,'questionGroups'),'Group indices must uniquely cover 1..N within the Section.');
   for(const {v:g,i:j} of ordered(gs)){
    const gp=at(at(p,'questionGroups'),j);groupCount++;groups.push({value:g,path:gp});
-   const d=groupDetails(c,r,g,gp,s.id,complete);summaries.push(...d.summaries);nodes.push(...ordered(d.nodes.map(n=>({...n,idx:n.q?.idx}))).map(n=>n.v));
+   const d=groupDetails(c,r,g,gp,s.id,complete,typeof s.instructionsMd==='string'?[s.instructionsMd]:[]);summaries.push(...d.summaries);nodes.push(...ordered(d.nodes.map(n=>({...n,idx:n.q?.idx}))).map(n=>n.v));
   }
   for(const {v:q,i:j} of ordered(qs)){
-   const qp=at(at(p,'questions'),j);summaries.push(validateQuestion(c,r,q,qp));nodes.push({q,path:qp});
+   const qp=at(at(p,'questions'),j);summaries.push(validateQuestion(c,r,q,qp,{texts:typeof s.instructionsMd==='string'?[s.instructionsMd]:[],complete}));nodes.push({q,path:qp});
    if(object(q)){join(r,q.sectionId,s.id,at(qp,'sectionId'));if(q.groupId!==undefined)fail(r,'MEMBERSHIP_INVALID',at(qp,'groupId'),'Ungrouped Question has an unresolved group reference.');}
   }
  }

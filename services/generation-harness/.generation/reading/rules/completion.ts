@@ -5,7 +5,7 @@ export function readBlankMarkers(promptMd: string): {ids: string[]; duplicateIds
  const seen=new Set(),duplicateIds=[];for(const id of ids){if(seen.has(id))duplicateIds.push(id);seen.add(id);}
  return {ids,duplicateIds,malformed:/_{2,}|\[\s+[0-9]+\s*\]|\[[0-9]+\s+\]|\[0[0-9]*\]|\[blank-q[^\]]*\]|\[[1-9][0-9]*\]\s*(?:to|[-–—])\s*\[[1-9][0-9]*\]/i.test(promptMd)};
 }
-export function runCompletionRule(id: string,c: CanonicalContext,r: Report,q: CanonicalRecord,path: string): Status {
+export function runCompletionRule(id: string,c: CanonicalContext,r: Report,q: CanonicalRecord,path: string,instructionContext?: {texts: string[]; complete: boolean}): Status {
  const provenance=`${c.schema.$id}#/x-langfens/semanticRules/${id}`,start=r.mark();
  let shape: Status='PASS';
  if(id==='BLANKS'){
@@ -14,7 +14,14 @@ export function runCompletionRule(id: string,c: CanonicalContext,r: Report,q: Ca
   if(markers.malformed || !keysEqual(markers.ids,keys))r.diagnostic('BLANK_MARKER_KEY_MISMATCH',at(path,'promptMd'),'Explicit markers and accepted-text keys do not agree.','Author each [N] marker once; preserve independent blank IDs.',undefined,'FAIL',id);
   for(const k of new Set([...keys,...Object.keys(q.blankAcceptRegex??{})]))if(BigInt(k)>9223372036854775807n)r.diagnostic('BLANK_KEY_OVERFLOW',at(path,'blankAcceptTexts'),'A blank ID exceeds positive signed Int64.','Use a positive decimal identity within signed Int64.', '9223372036854775807','FAIL',id);
   for(const k of Object.keys(q.blankAcceptRegex??{}))if(!Object.hasOwn(q.blankAcceptTexts,k))r.diagnostic('REGEX_KEY_WITHOUT_TEXT',at(at(path,'blankAcceptRegex'),k),'Regex-bearing blank has no accepted text.','Supply accepted text for this exact blank ID.',undefined,'FAIL',id);
-  if(!/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:words?|numbers?)\b/i.test(q.promptMd))r.diagnostic('WORD_LIMIT_MISSING',at(path,'promptMd'),'No explicit word/number limit is recognizable.','State an explicit answer word/number limit.',undefined,'FAIL',id);
+  const limit=/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:words?|numbers?)\b/ig;
+  const texts=[q.promptMd,...(instructionContext?.texts??[])],found=texts.flatMap(text=>[...text.matchAll(limit)].map(m=>m[0].toLowerCase().replace(/\s+/g,' ')));
+  const distinct=[...new Set(found)];
+  if(distinct.length>1){r.pending('WORD_LIMIT_CONTEXT_AMBIGUOUS',path,'Supplied instructions contain conflicting recognizable answer limits; precedence is undefined.',id);}
+  else if(!distinct.length){
+   if(instructionContext?.complete)r.diagnostic('WORD_LIMIT_MISSING',at(path,'promptMd'),'No explicit word/number limit is recognizable in the complete supplied instruction context.','State an explicit answer word/number limit.',undefined,'FAIL',id);
+   else r.pending('WORD_LIMIT_CONTEXT_UNAVAILABLE',path,'A containing instruction context was not supplied, so absence of a word/number limit cannot be established.',id);
+  }
   r.pending('WORD_LIMIT_PROFILE_UNVERIFIED',path,'Accepted-answer word counting requires an independently tested counting convention.',id);
  }else if(id==='COMPLETION_LAYOUT'){
   const p=q.promptMd;

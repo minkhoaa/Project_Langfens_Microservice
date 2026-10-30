@@ -2,6 +2,7 @@ import '../../../test/offline.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateGroup,validateExam } from '../hierarchy.ts';
+import { validateQuestion } from '../question.ts';
 import { initialize,inspect,q,group,exam,hasCode } from './helpers.mjs';
 await initialize();
 test('draft completeness and scoring counts never assume forty Questions',()=>{
@@ -23,6 +24,16 @@ test('legacy ungrouped Questions are accepted without silently dropping competin
  const x={...q('SHORT_ANSWER'),idx:1};delete x.groupId;
  const e={id:'e',sections:[{id:'s1',idx:1,questions:[x]}]};assert.notEqual(inspect(validateExam,e).status,'FAIL');
  e.sections[0].questionGroups=[group()];assert.ok(hasCode(inspect(validateExam,e),'SECTION_MEMBERSHIP_CONFLICT'));
+});
+test('word limits account for supplied Section and Group instructions without inferring missing ancestry',()=>{
+ const completion=q('DIAGRAM_LABEL');completion.idx=1;completion.promptMd='Label the diagram. [1].';
+ const standalone=inspect(validateQuestion,completion);assert.equal(standalone.status,'UNVERIFIED');assert.ok(!hasCode(standalone,'WORD_LIMIT_MISSING'));
+ const missingGroup=group([completion]);const missingGroupResult=inspect(validateGroup,missingGroup);assert.equal(missingGroupResult.status,'UNVERIFIED');assert.ok(!hasCode(missingGroupResult,'WORD_LIMIT_MISSING'));
+ const g=group([completion]);g.instructionMd='Write NO MORE THAN TWO WORDS.';assert.ok(!hasCode(inspect(validateGroup,g),'WORD_LIMIT_MISSING'));
+ const e=exam([g]);e.sections[0].instructionsMd='Write NO MORE THAN TWO WORDS.';assert.ok(!hasCode(inspect(validateExam,e),'WORD_LIMIT_MISSING'));
+ const legacy={id:'e1',complete:true,sections:[{id:'s1',idx:1,instructionsMd:'ONE WORD ONLY.',questions:[completion]}]};assert.ok(!hasCode(inspect(validateExam,legacy),'WORD_LIMIT_MISSING'));
+ const noLimit=exam([group([completion])]);noLimit.complete=true;assert.ok(hasCode(inspect(validateExam,noLimit),'WORD_LIMIT_MISSING'));
+ const conflict=exam([Object.assign(group([completion]),{instructionMd:'ONE WORD ONLY.'})]);conflict.sections[0].instructionsMd='NO MORE THAN TWO WORDS.';const r=inspect(validateExam,conflict);assert.equal(r.status,'UNVERIFIED');assert.ok(!hasCode(r,'WORD_LIMIT_MISSING'));
 });
 test('unsorted arrays are not silently mutated and Section index policy is not invented',()=>{
  const a={...q('SHORT_ANSWER'),idx:1,id:'a'},b={...q('SHORT_ANSWER'),idx:2,id:'b'};const e=exam([group([b,a])]);e.complete=true;const before=structuredClone(e);
