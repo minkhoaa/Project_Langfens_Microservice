@@ -10,7 +10,7 @@ const handlers: Record<string,{names: string[]; run(c: CanonicalContext,r: Repor
  get_question_spec:{names:['type'],run:(c,r,a)=>getQuestionSpec(c,r,a.type)},
  validate_question:{names:['question'],run:(c,r,a)=>validateQuestion(c,r,a.question)},
  validate_group:{names:['group'],run:(c,r,a)=>validateGroup(c,r,a.group)},
- validate_exam:{names:['exam'],run:(c,r,a)=>validateExam(c,r,a.exam)},
+ validate_exam:{names:['exam'],run:(c,r,a)=>validateExam(c,r,a.exam,undefined,a.pilot)},
  verify_evidence:{names:['question','passage','evidence'],run:(c,r,a)=>verifyEvidence(c,r,a.question,a.passage,a.evidence)},
  check_grading_parity:{names:['question','submission'],run:(c,r,a)=>checkGradingParity(c,r,a.question,a.submission)},
  inspect_delivery_projection:{names:['question'],run:(c,r,a)=>inspectProjection(c,r,a.question)},
@@ -23,7 +23,7 @@ export function createDomain({contractUrl=canonicalUrl}: {contractUrl?: URL | st
   try{
    const h=Object.hasOwn(handlers,name)?handlers[name]:null;
    if(!h){r.diagnostic('TOOL_UNSUPPORTED','/','Unsupported domain capability.','Call one of the seven registered Reading tools.');return r.finish();}
-   const invalid=checkArguments(args,h.names);if(invalid)return invalid;
+   const invalid=checkArguments(args,h.names,name==='validate_exam'?['pilot']:[]);if(invalid)return invalid;
    if(!context)context=loadCanonical(contractUrl);
    r=createReport(context);return r.finish(h.run(context,r,args as CanonicalRecord));
   }catch(error){const e=error as {code?: string};const code=infraCodes.has(e?.code??'')?e.code!:'INTERNAL_ERROR';r.diagnostic(code,'/','Reading capability could not execute safely.','Check the pinned contract and local installation; no input was modified.',undefined,'ERROR');return r.finish();}

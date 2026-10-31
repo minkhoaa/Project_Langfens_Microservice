@@ -1,0 +1,88 @@
+{
+  "q01": {
+    "start": 374,
+    "end": 446,
+    "quote": "Urbanisation has reduced the availability of arable land close to cities",
+    "additionalSpans": [
+      {
+        "start": 330,
+        "end": 372,
+        "quote": "CEA has developed for four related reasons"
+      }
+    ]
+  },
+  "q02": {
+    "start": 2260,
+    "end": 2380,
+    "quote": "Aeroponic systems dispense with both soil and substrate: roots hang in air and are sprayed with a fine mist of nutrients"
+  },
+  "q03": {
+    "start": 4555,
+    "end": 4716,
+    "quote": "Nutritional comparisons have found that hydroponically grown leafy vegetables can contain lower concentrations of some micronutrients, including calcium and iron"
+  },
+  "q04": {
+    "start": 5588,
+    "end": 5667,
+    "quote": "Robotic systems now handle transplanting, pruning and harvesting of leafy crops",
+    "additionalSpans": [
+      {
+        "start": 5789,
+        "end": 5870,
+        "quote": "Computer vision has been demonstrated to grade harvested produce and count plants"
+      }
+    ]
+  },
+  "q05": {
+    "start": 264,
+    "end": 328,
+    "quote": "with vertical farms adding a further and expanding enclosed area"
+  },
+  "q06": {
+    "start": 1744,
+    "end": 1995,
+    "quote": "After 1945, heated glasshouses expanded rapidly in the Netherlands and the United Kingdom under food-security and export-drive policies, and the sector was later reshaped by the oil crises of the 1970s, which penalised the most energy-intensive firms."
+  },
+  "q07": {
+    "start": 5070,
+    "end": 5224,
+    "quote": "once fertiliser production, land degradation, transport and refrigeration are counted, field farming is more energy-efficient per kilogram in most regions"
+  },
+  "q08": {
+    "start": 1885,
+    "end": 1994,
+    "quote": "the sector was later reshaped by the oil crises of the 1970s, which penalised the most energy-intensive firms",
+    "additionalSpans": [
+      {
+        "start": 4093,
+        "end": 4166,
+        "quote": "Dutch greenhouse firms were cutting energy use per kilogram substantially"
+      }
+    ]
+  },
+  "q09": {
+    "start": 2122,
+    "end": 2184,
+    "quote": "the roots are irrigated with a recirculating nutrient solution"
+  },
+  "q10": {
+    "start": 3338,
+    "end": 3413,
+    "quote": "The same crop can be harvested up to 18 times a year in a heated greenhouse"
+  },
+  "q11": {
+    "start": 3738,
+    "end": 3834,
+    "quote": "Energy and labour together account for about 70 per cent of the operating cost of an indoor farm"
+  },
+  "q12": {
+    "start": 192,
+    "end": 262,
+    "quote": "an estimated 600,000 hectares of greenhouses and glasshouses worldwide"
+  },
+  "q13": {
+    "start": 3562,
+    "end": 3688,
+    "quote": "lighting and temperature control raise the electricity needed for leafy greens to roughly 15 to 20 kilowatt-hours per kilogram"
+  }
+}

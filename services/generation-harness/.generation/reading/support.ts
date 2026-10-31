@@ -89,11 +89,11 @@ export function fields(r: Report,value: unknown,allowed: string[],required: stri
   Object.keys(value).forEach((k,i)=>{if(!allowed.includes(k)) r.diagnostic('FIELD_UNKNOWN',path,'An unknown field is present.','Remove the unknown field at the reported property index.',undefined,'FAIL',undefined,{propertyIndex:i});});
   return true;
 }
-export function checkArguments(raw: unknown,requiredNames: string[]): ReadingResult | null {
+export function checkArguments(raw: unknown,requiredNames: string[],optionalNames: string[]=[]): ReadingResult | null {
   const r=createReport(), p=inputProblem(raw);
   if(p) {r.diagnostic(p.code,'/','Input is non-JSON or exceeds deterministic resource limits.','Supply plain bounded JSON values.',p.code==='INPUT_LIMIT'?LIMITS:undefined);return r.finish();}
   if(!object(raw)) {r.diagnostic('ARGUMENTS_OBJECT_REQUIRED','/','Tool arguments must be an object.','Supply the documented outer argument object.');return r.finish();}
-  fields(r,raw,requiredNames,requiredNames,'/');return r.result.status==='PASS'?null:r.finish();
+  fields(r,raw,[...requiredNames,...optionalNames],requiredNames,'/');return r.result.status==='PASS'?null:r.finish();
 }
 export function identities(r: Report,items: unknown[],path: string,key='id',caseInsensitive=false): void {
   const seen=new Set();items.forEach((x,i)=>{if(!object(x)||typeof x[key]!=='string')return;const k=caseInsensitive?x[key].toLowerCase():identity(x[key]);if(seen.has(k))r.diagnostic('IDENTITY_DUPLICATE',at(at(path,i),key),'Identity is duplicated in this scope.','Use a unique stable identity.',undefined,'FAIL','COMMON');seen.add(k);});

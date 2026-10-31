@@ -11,8 +11,8 @@ test('root npm test includes all offline Reading regressions without replacing e
  const scripts=JSON.parse(readFileSync(new URL('../../../package.json',import.meta.url))).scripts;
  assert.match(scripts.test,/test\/config\.test\.mjs/);assert.match(scripts.test,/test\/config-resources\.test\.mjs/);assert.match(scripts.test,/test\/config-restoration\.test\.mjs/);assert.match(scripts.test,/\.generation\/reading\/test\/\*\.test\.mjs/);assert.match(scripts.test,/npm run test -w generation-subagents/);
 });
-test('native explicit discovery and combined loading register exactly seven tools once',async t=>{
- for(const loading of ['explicit','discovery','both']){const f=await createNativeFixture(t,{loading});const all=f.session.getAllTools().map(d=>d.name);assert.equal(new Set(all).size,11,loading);assert.equal(f.definitions.length,7,loading);for(const name of ['read','bash','edit','write'])assert.ok(all.includes(name));const r=JSON.parse((await f.invoke('get_question_spec',{type:'SHORT_ANSWER'})).content[0].text);assert.equal(r.status,'PASS');}
+test('native explicit discovery and combined loading register exactly 13 tools once',async t=>{
+ for(const loading of ['explicit','discovery','both']){const f=await createNativeFixture(t,{loading});const all=f.session.getAllTools().map(d=>d.name);assert.equal(new Set(all).size,17,loading);assert.equal(f.definitions.length,13,loading);for(const name of ['read','bash','edit','write'])assert.ok(all.includes(name));const r=JSON.parse((await f.invoke('get_question_spec',{type:'SHORT_ANSWER'})).content[0].text);assert.equal(r.status,'PASS');}
 });
 test('native agent discovery is identical with and without Reading',async t=>{
  const baseline=await createNativeFixture(t,{withReading:false}),reading=await createNativeFixture(t);

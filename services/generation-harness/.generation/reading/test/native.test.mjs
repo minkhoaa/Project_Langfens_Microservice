@@ -7,7 +7,7 @@ import { createNativeFixture } from './native-helpers.mjs';
 import { q,group,exam } from './helpers.mjs';
 const names=['get_question_spec','validate_question','validate_group','validate_exam','verify_evidence','check_grading_parity','inspect_delivery_projection'];
 test('seven first-attempt native calls return consistent structured and text channels',async t=>{
- const f=await createNativeFixture(t);assert.deepEqual(f.definitions.map(d=>d.name),names);
+ const f=await createNativeFixture(t);assert.deepEqual(f.definitions.filter(d=>names.includes(d.name)).map(d=>d.name),names);
  const x=q('MULTIPLE_CHOICE_SINGLE');x.sectionId='11111111-1111-1111-1111-111111111111';
  const args=[{type:x.type},{question:x},{group:group()},{exam:exam()},{question:x,passage:{id:'p',text:'river'},evidence:{start:0,end:5,quote:'river',sourceId:'p'}},{question:x,submission:{questionId:x.id,sectionId:x.sectionId,selectedOptionIds:[x.options[0].id]}},{question:x}];
  for(let i=0;i<names.length;i++){const native=await f.invoke(names[i],args[i]),r=JSON.parse(native.content[0].text);assert.notEqual(r.status,'FAIL',names[i]);assert.notEqual(r.status,'ERROR',names[i]);assert.deepEqual(native.structuredContent,r);assert.deepEqual(native.details,r);assert.equal(native.isError,false);}
@@ -39,7 +39,7 @@ test('all native output schemas explicitly allow optional data and validate repo
   assert.deepEqual(d.outputSchema.required,required,d.name);
   assert.deepEqual(d.outputSchema.properties.data,{type:'object',additionalProperties:true},d.name);
   assert.equal(d.outputSchema.additionalProperties,true,d.name);
-  assert.ok(Buffer.byteLength(JSON.stringify(defs))<16384);
+  assert.ok(Buffer.byteLength(JSON.stringify(defs))<32768);
  }
  const withData=await defs.find(d=>d.name==='get_question_spec').execute('schema-with-data',{type:'MULTIPLE_CHOICE_SINGLE'});
  const withoutData=await defs.find(d=>d.name==='validate_question').execute('schema-without-data',{});
@@ -49,11 +49,11 @@ test('all native output schemas explicitly allow optional data and validate repo
  assert.equal(Value.Check(schema,withData.structuredContent),true);
  assert.equal(Value.Check(schema,withoutData.structuredContent),true);
 });
-test('registration is inert and declarations expose only shallow required outer keys',()=>{
+test('registration is inert and declarations describe shallow required wire shapes',()=>{
  const registered=[],api={registerTool:d=>registered.push(d)}; // factory is also checked by real loader above
  const defs=createReadingTools();assert.equal(defs.length,7);
- for(const d of defs){assert.equal(d.promptSnippet,undefined);assert.equal(d.promptGuidelines,undefined);assert.equal(d.parameters.type,'object');assert.equal(d.parameters.additionalProperties,false);for(const k of d.parameters.required)assert.deepEqual(d.parameters.properties[k],{});}
- assert.ok(Buffer.byteLength(JSON.stringify(defs))<16384);
+ for(const d of defs){assert.equal(d.promptSnippet,undefined);assert.equal(d.promptGuidelines,undefined);assert.equal(d.parameters.type,'object');assert.equal(d.parameters.additionalProperties,false);for(const k of d.parameters.required)assert.ok(d.parameters.properties[k].description);}
+ assert.ok(Buffer.byteLength(JSON.stringify(defs))<32768);
 });
 test('concurrent first calls are deterministic and native cancellation returns explicit error',async()=>{
  const defs=createReadingTools(),d=defs.find(d=>d.name==='validate_question'),args={question:q('SHORT_ANSWER')};

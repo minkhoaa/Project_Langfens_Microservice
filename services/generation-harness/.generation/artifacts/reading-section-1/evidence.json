@@ -1,0 +1,123 @@
+{
+  "passageId": "b1000000-0000-4000-8000-000000000001",
+  "passage": "The Urban Heat Island\n\nA. For more than a century, observers have noticed that large cities are warmer than the countryside around them. The difference is known as the urban heat island, and it is most pronounced on calm, clear nights. In compact metropolitan areas the temperature gap between the city and the surrounding countryside can reach six degrees Celsius, while in small towns it may be barely measurable. The effect was described systematically in the early twentieth century, when researchers in several countries began recording temperature differences between built-up districts and nearby reference stations.\n\nB. Several human activities create the effect. Dark roofs and paved surfaces absorb solar radiation during the day and release it slowly afterwards. Cities also contain far less vegetation than the countryside, so less energy is used in evaporation, the process by which plants cool the air. Waste heat from vehicles, factories, air conditioners and street lighting is released directly into the open air. Narrow streets lined with tall buildings slow the wind, so warm air is not carried away and replaced by cooler air from outside.\n\nC. The most dangerous part of the effect happens after sunset. Concrete, brick and asphalt store heat throughout the day and release it slowly overnight, so cities cool far more slowly than the countryside. Rural areas, by contrast, lose their heat quickly once the sun goes down. It is this difference in the rate of cooling, rather than the daytime peak itself, that explains why most heat-related deaths in cities occur in the small hours of the morning.\n\nD. The health effects are well documented. Heat raises the risk of cardiovascular illness, kidney failure and respiratory problems, and it places the greatest strain on elderly people, on young children and on those who work outdoors. People who live in the hottest neighbourhoods, often the poorest parts of a city, are the least able to escape the heat, because those districts have little green space and few air-conditioned homes.\n\nE. Measuring the effect requires care. Satellites record the temperature of surfaces rather than the air that people experience at street level, so an image of a hot city taken at noon may say little about the conditions on the pavement. Air temperature is normally measured at a height of two metres inside a shaded screen, following a long-established international standard. One international comparison covered fifty cities and reported average surface temperatures that were between two and four degrees higher in the city centres than in the surrounding countryside.\n\nF. A number of responses have been tried. Green roofs, planted with low-growing species such as sedum, can lower the temperature of a roof surface considerably, though their effect on air temperature at street level is much smaller. Roofs painted with reflective material are cheaper to install and can be applied to buildings that already exist. Street trees provide shade and cool the surrounding air by evaporation, but they need space, water and many years to mature. Some cities have begun to require reflective surfaces in new commercial developments, and a few have offered grants to householders who paint their roofs white.\n\nG. None of these measures is without criticism. Critics point out that most have been tested on individual buildings rather than across whole cities, and that planting trees in the hottest districts can consume scarce water. Others argue that adaptation of this kind simply allows a city to grow larger, since pleasant temperatures attract further development. There is no consensus on how quickly these measures should be adopted, and researchers continue to disagree about which combinations of interventions work best in different climates.",
+  "evidence": {
+    "1": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000001",
+        "start": 416,
+        "end": 486,
+        "quote": "The effect was described systematically in the early twentieth century"
+      }
+    ],
+    "2": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000002",
+        "start": 1368,
+        "end": 1441,
+        "quote": "Rural areas, by contrast, lose their heat quickly once the sun goes down."
+      }
+    ],
+    "3": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000003",
+        "start": 2095,
+        "end": 2199,
+        "quote": "Satellites record the temperature of surfaces rather than the air that people experience at street level"
+      }
+    ],
+    "4": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000004",
+        "start": 137,
+        "end": 185,
+        "quote": "The difference is known as the urban heat island"
+      }
+    ],
+    "5": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000005",
+        "start": 1543,
+        "end": 1617,
+        "quote": "most heat-related deaths in cities occur in the small hours of the morning"
+      }
+    ],
+    "6": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000006",
+        "start": 3102,
+        "end": 3186,
+        "quote": "Some cities have begun to require reflective surfaces in new commercial developments"
+      }
+    ],
+    "7": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000007",
+        "start": 917,
+        "end": 1030,
+        "quote": "Waste heat from vehicles, factories, air conditioners and street lighting is released directly into the open air."
+      }
+    ],
+    "8": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000008",
+        "start": 1315,
+        "end": 1366,
+        "quote": "so cities cool far more slowly than the countryside"
+      }
+    ],
+    "9": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000009",
+        "start": 2294,
+        "end": 2379,
+        "quote": "Air temperature is normally measured at a height of two metres inside a shaded screen"
+      }
+    ],
+    "10": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000010",
+        "start": 2672,
+        "end": 2789,
+        "quote": "Green roofs, planted with low-growing species such as sedum, can lower the temperature of a roof surface considerably"
+      }
+    ],
+    "11": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000011",
+        "start": 2863,
+        "end": 2976,
+        "quote": "Roofs painted with reflective material are cheaper to install and can be applied to buildings that already exist."
+      }
+    ],
+    "12": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000012",
+        "start": 3053,
+        "end": 3100,
+        "quote": "they need space, water and many years to mature"
+      }
+    ],
+    "13": [
+      {
+        "sourceId": "b1000000-0000-4000-8000-000000000001",
+        "questionId": "d0000000-0000-4000-8000-000000000013",
+        "start": 3335,
+        "end": 3412,
+        "quote": "most have been tested on individual buildings rather than across whole cities"
+      }
+    ]
+  }
+}

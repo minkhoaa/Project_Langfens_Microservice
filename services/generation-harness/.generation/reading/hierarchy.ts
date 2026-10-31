@@ -62,11 +62,12 @@ export function validateGroup(c: CanonicalContext,r: Report,g: unknown,path='/gr
  r.check('GROUP_HIERARCHY',invalid?'FAIL':'UNVERIFIED',`${c.schema.$id}#/x-langfens/indexing`,path,'hierarchy');
  return {...counts,...(invalid?{scoringUnits:null}:{}),observedQuestionIndices:nodes.map(n=>n.q?.idx).filter(positive),sectionConsistency:invalid?'FAIL':'PASS',parentMembership:'UNVERIFIED'};
 }
-export function validateExam(c: CanonicalContext,r: Report,e: unknown,path='/exam'): CanonicalRecord {
+export function validateExam(c: CanonicalContext,r: Report,e: unknown,path='/exam',pilot?: unknown): CanonicalRecord {
  const summaries: QuestionSummary[]=[],nodes: QuestionNode[]=[],groups: {value: CanonicalRecord; path: string}[]=[],sections: CanonicalRecord[]=[],options: CanonicalRecord[]=[];let groupCount=0;
  if(!container(r,e,path,['id','sections','complete','expectedQuestionCount','slug','title','descriptionMd','category','level','durationMin','imageUrl'],['id','sections']))return {sectionCount:0,groupCount:0,questionCount:0,answerSlots:null,scoringUnits:null};
  if(own(e,'complete')&&typeof e.complete!=='boolean')fail(r,'FIELD_TYPE',at(path,'complete'),'Completeness qualifier must be boolean.');
  if(own(e,'expectedQuestionCount')&&!positive(e.expectedQuestionCount))fail(r,'FIELD_TYPE',at(path,'expectedQuestionCount'),'Expected Question count must be positive int32.');
+ if(pilot!==undefined&&typeof pilot!=='boolean')fail(r,'FIELD_TYPE','/pilot','Pilot qualifier must be boolean.');
  const complete=e.complete===true, supplied=collection(r,e,'sections',path,true);identities(r,supplied,at(path,'sections'));duplicateIndices(r,supplied,at(path,'sections'),'ORDERING_CONFLICT');
  for(const {v:s,i} of ordered(supplied)){
   const p=at(at(path,'sections'),i);sections.push(s);
@@ -107,6 +108,16 @@ export function validateExam(c: CanonicalContext,r: Report,e: unknown,path='/exa
  if(!complete||nodes.length===0)r.pending('EXAM_COMPLETENESS_UNVERIFIED',path,'Draft or empty content cannot establish complete paper coverage.','COMMON');
  r.pending('TRANSPORT_ORDER_UNVERIFIED',path,'Typed delivery sorts by idx; JSON snapshot delivery traverses supplied arrays. No transport execution is claimed.','COMPATIBILITY');
  const counts=totals(summaries),invalid=r.result.status==='FAIL'||r.result.status==='ERROR';
+ let pilotStatus: 'PASS'|'FAIL'|undefined;
+ if(pilot===true){
+  // Explicit workflow qualifier, not a change to the canonical Question/scoring contract.
+  if(!complete)fail(r,'PILOT_COMPLETENESS_REQUIRED',path,'A 13-mark pilot must request complete validation.');
+  for(let i=0;i<supplied.length;i++)if(!nonblank(supplied[i]?.passageMd))fail(r,'PILOT_PASSAGE_REQUIRED',at(at(at(path,'sections'),i),'passageMd'),'Resolve and embed the exact passage before pilot validation/review.');
+  if(counts.questionCount!==13||counts.answerSlots!==13||counts.scoringUnits!==13)fail(r,'PILOT_MARK_COUNT',path,'A 13-mark pilot requires exactly 13 Questions, 13 answer slots and 13 scoring units.');
+  summaries.forEach(s=>{if(s.answerSlots!==1||s.scoringUnits!==1)fail(r,'PILOT_UNSUPPORTED_SCORING_STRUCTURE',path,'Each pilot Question must have one independently scored answer slot; multi-target matching, multiple selection, multi-blank and process ordering cannot supply independent IELTS marks.');});
+  pilotStatus=r.result.status==='FAIL'||r.result.status==='ERROR'?'FAIL':'PASS';
+  r.check('PILOT_13_MARKS',pilotStatus,[],path,'compatibility');
+ }
  r.check('EXAM_HIERARCHY',invalid?'FAIL':'PASS',`${c.schema.$id}#/x-langfens/indexing`,path,'hierarchy');
- return {sectionCount:supplied.length,groupCount,...counts,...(ownership||invalid?{scoringUnits:null}:{}),completeness:complete?'complete-requested':'draft',...(positive(e.expectedQuestionCount)?{expectedQuestionCount:e.expectedQuestionCount}:{}),claims:{hierarchy:invalid?'FAIL':'PASS',structure:invalid?'FAIL':'PASS',semanticShape:'UNVERIFIED',ieltsSemantics:'UNVERIFIED',consumerCompatibility:'UNVERIFIED'}};
+ return {sectionCount:supplied.length,groupCount,...counts,...(pilotStatus?{pilot:{status:pilotStatus,marks:13,scope:'Mechanical passage/completeness/scoring checks only; independent semantic and IELTS reports are still required.'}}:{}),...(ownership||invalid?{scoringUnits:null}:{}),completeness:complete?'complete-requested':'draft',...(positive(e.expectedQuestionCount)?{expectedQuestionCount:e.expectedQuestionCount}:{}),claims:{hierarchy:invalid?'FAIL':'PASS',structure:invalid?'FAIL':'PASS',semanticShape:'UNVERIFIED',ieltsSemantics:'UNVERIFIED',consumerCompatibility:'UNVERIFIED'}};
 }

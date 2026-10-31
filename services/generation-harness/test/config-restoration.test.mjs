@@ -14,13 +14,16 @@ import { resourceConfigurationPanel } from '../scripts/configuration-resources-u
 import { inspectResources,resourceRows,toggleResource } from '../scripts/configuration-resources.mjs';
 
 function fixture(t){const root=mkdtempSync(join(tmpdir(),'config-restore-'));t.after(()=>rmSync(root,{recursive:true,force:true}));mkdirSync(join(root,'.generation','agents'),{recursive:true});const env={GENERATION_HARNESS_RUNTIME_DIR:join(root,'runtime')};return {root,env,controller:configuration({root,env,scope:'project'})};}
-test('Reading alias loads only native extensions, uses project cwd and preserves default cwd',t=>{
+test('Reading alias loads explicit native extensions in its own profile and preserves coding cwd',t=>{
  const {root,env}=fixture(t),launch=runtimeLaunch(['--reading','--mode','rpc'],env);
- assert.equal(launch.cwd,harnessRoot);assert.equal(launch.args.includes('--reading'),false);assert.equal(launch.args.includes('--approve'),false);
+ assert.equal(launch.cwd,join(root,'runtime/reading/workspace'));assert.equal(launch.args.includes('--reading'),false);assert.equal(launch.args.includes('--approve'),false);
  assert.ok(launch.args.includes(join(harnessRoot,'.generation/extensions/reading.ts')));assert.ok(launch.args.includes(join(harnessRoot,'scripts/config-extension.mjs')));
  assert.equal(runtimeLaunch([],env).cwd,join(root,'runtime','workspace'));
  assert.equal(runtimeLaunch(['--reading','--cwd',root],env).cwd,root);
- assert.equal(runtimeLaunch(['--reading','--no-extensions'],env).args.includes(join(harnessRoot,'.generation/extensions/reading.ts')),false);
+ assert.equal(runtimeLaunch(['--reading','--no-extensions'],env).args.includes(join(harnessRoot,'.generation/extensions/reading.ts')),true);
+ assert.ok(launch.args.includes('--no-context-files'));assert.ok(launch.args.includes('--no-approve'));
+ const allowlist=launch.args[launch.args.indexOf('--tools')+1].split(',');
+ for(const name of ['create_single_choice','create_multiple_choice','create_completion','create_matching','create_short_answer','create_flow_chart'])assert.ok(allowlist.includes(name),name);
 });
 test('config shows launcher-pinned Reading and config extensions as locked, not editable filters',async t=>{
  const {env}=fixture(t),launch=runtimeLaunch(['--reading'],env),controller=configuration({root:harnessRoot,env:launch.env,scope:'project'});
@@ -30,7 +33,7 @@ test('config shows launcher-pinned Reading and config extensions as locked, not 
 test('restored inventory derives tools and agents without reviving fixed Reading policy',t=>{
  const {root,controller}=fixture(t);writeFileSync(join(root,'.generation/agents/custom.md'),'---\nname: custom-author\ntools: [read, write]\n---\nUse model-directed tools.');
  const agents=getHarnessAgents(root,controller.runtime);assert.deepEqual(agents.map(a=>a.name),['custom-author']);assert.deepEqual(agents[0].tools,['read','write']);
- const categories=getHarnessTools(root),reading=categories.find(c=>c.category==='IELTS Reading Domain Tools');assert.equal(reading.items.length,7);
+ const categories=getHarnessTools(root),reading=categories.find(c=>c.category==='IELTS Reading Domain Tools');assert.equal(reading.items.length,13);
  assert.match(reading.items.find(t=>t.name==='check_grading_parity').parameters,/submission/);
  assert.doesNotMatch(JSON.stringify([...getHarnessRoles(),...categories]),/13[–-]14|40 scoring|Multi-Agent Pipeline|Verifies \.NET backend parity|Fails closed on symlink escape/);
 });
@@ -56,13 +59,13 @@ test('Reading launcher actually loads native tools and /config with isolated SDK
  const {createAgentSession,DefaultResourceLoader,ModelRuntime,SessionManager,SettingsManager}=await import('generation-harness-core');
  const {InMemoryCredentialStore}=await import('generation-ai');
  const modelRuntime=await ModelRuntime.create({credentials:new InMemoryCredentialStore(),modelsPath:null,refreshOnCreate:false});
- const settingsManager=SettingsManager.inMemory({cacheWarming:'off',retry:{enabled:false}});
+ const settingsManager=SettingsManager.create(launch.cwd,launch.env.GENERATION_HARNESS_AGENT_DIR,{projectTrusted:false});
  const paths=launch.args.flatMap((arg,i)=>arg==='--extension'?[launch.args[i+1]]:[]);
  const loader=new DefaultResourceLoader({cwd:launch.cwd,agentDir:launch.env.GENERATION_HARNESS_AGENT_DIR,settingsManager,noExtensions:true,noSkills:true,noThemes:true,noPromptTemplates:true,noContextFiles:true,additionalExtensionPaths:paths});
  await loader.reload();assert.deepEqual(loader.getExtensions().errors,[]);
  const {session}=await createAgentSession({cwd:launch.cwd,agentDir:launch.env.GENERATION_HARNESS_AGENT_DIR,modelRuntime,settingsManager,resourceLoader:loader,sessionManager:SessionManager.inMemory(launch.cwd)});
  t.after(async()=>{try{await session.extensionRunner.emit({type:'session_shutdown',reason:'quit'});}finally{session.dispose();}});await session.bindExtensions({mode:'rpc'});
- const tools=session.getAllTools().map(tool=>tool.name);for(const name of ['read','bash','edit','write','get_question_spec','validate_question','validate_group','validate_exam','verify_evidence','check_grading_parity','inspect_delivery_projection'])assert.ok(tools.includes(name),name);
+ const tools=session.getAllTools().map(tool=>tool.name);for(const name of ['read','bash','edit','write','get_question_spec','validate_question','validate_group','validate_exam','verify_evidence','check_grading_parity','inspect_delivery_projection','create_single_choice','create_multiple_choice','create_completion','create_matching','create_short_answer','create_flow_chart'])assert.ok(tools.includes(name),name);
  assert.ok(session.extensionRunner.getRegisteredCommands().some(command=>command.name==='config'));
 });
 

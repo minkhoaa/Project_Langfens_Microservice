@@ -3,10 +3,11 @@ import { join } from 'node:path';
 import { createAllToolDefinitions } from 'generation-harness-core/tools';
 import { discoverAgents,createSubagentExtension } from 'generation-subagents';
 import { createReadingTools } from '../.generation/reading/tools.ts';
+import { createCreationTools } from '../.generation/reading/creation.ts';
 import { harnessRoot } from './runtime.mjs';
 
 export function getHarnessRoles() {
-  return [{id:'reading',name:'IELTS Reading Tools',status:'Available',scope:'Seven independent domain tools; no prescribed workflow or fixed Question count',description:'Canonical validation, evidence mechanics, serialization checks and public projection. Generation and delegation remain model-directed.',contracts:'Canonical v1; actual consumer parity, semantic quality and independent blindness remain UNVERIFIED.'}];
+  return [{id:'reading',name:'IELTS Reading Tools',status:'Available',scope:'13 independent domain tools; no prescribed workflow or fixed Question count',description:'Canonical creation, validation, evidence mechanics, serialization checks and public projection. Generation and delegation remain model-directed.',contracts:'Canonical v1; actual consumer parity, semantic quality and independent blindness remain UNVERIFIED.'}];
 }
 
 export function getHarnessAgents(root=harnessRoot,runtime=join(root,'.runtime')) {
@@ -24,7 +25,7 @@ function describe(definition,scope,policy) {
 
 export function getHarnessTools(root=harnessRoot,{runtimeTools,activeTools=[]}={}) {
   const core=Object.values(createAllToolDefinitions(root)).map(tool=>describe(tool,'Built-in','Native tool behavior; CWD separation is not a filesystem sandbox.'));
-  const reading=createReadingTools().map(tool=>describe(tool,'Reading extension (available; requires loading)','Deterministic canonical checks; unsupported consumer/semantic capabilities remain UNVERIFIED.'));
+  const reading=[...createReadingTools(),...createCreationTools()].map(tool=>describe(tool,'Reading extension (available; requires loading)','Deterministic canonical checks; unsupported consumer/semantic capabilities remain UNVERIFIED.'));
   // Public foreground SDK declarations are safe to inspect without invoking a child.
   const delegation=[];
   createSubagentExtension({agents:[],disabledFeatures:['workflow-scripts']})({on(){},registerTool(tool){delegation.push(describe(tool,'Native foreground SDK declaration','Runtime native Subagents may expose additional tools; no agent is launched by this inventory.'));}});

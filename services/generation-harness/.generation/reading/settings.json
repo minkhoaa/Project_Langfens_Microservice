@@ -1,0 +1,11 @@
+{
+  "subagents": {
+    "disableBuiltins": true
+  },
+  "retry": {
+    "enabled": false
+  },
+  "skills": [
+    "./skills"
+  ]
+}

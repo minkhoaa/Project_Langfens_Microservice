@@ -15,6 +15,7 @@ export function validateQuestion(c: CanonicalContext,r: Report,q: unknown,path='
  if(valid){
   summary.answerSlots=entry.family==='multiple'?q.options.filter((o: CanonicalRecord)=>o.isCorrect).length:entry.family==='completion'?new Set([...Object.keys(q.blankAcceptTexts),...Object.keys(q.blankAcceptRegex??{})]).size:entry.family==='matching'?Object.keys(q.matchPairs).length:entry.family==='flow'?q.orderCorrects.length:1;
  }
+ if(summary.answerSlots!==null && summary.answerSlots>1)r.pending('IELTS_SCORING_CONFLICT',path,'This Question has multiple answer slots but only one all-or-nothing backend scoring unit; separate IELTS marks are not supported.','COMPATIBILITY','Reconcile the requested IELTS marks with supported Question scoring before claiming readiness.');
  const shapes: Status[]=[];
  for(const id of entry.rules){
   let ruleShape: Status | undefined;

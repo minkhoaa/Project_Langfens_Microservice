@@ -1,0 +1,481 @@
+{
+  "id": "exam-ielts-academic-reading-01",
+  "complete": true,
+  "expectedQuestionCount": 13,
+  "title": "IELTS Academic Reading Test",
+  "slug": "ielts-academic-reading-controlled-environment-agriculture",
+  "descriptionMd": "One Academic Reading section: 13 questions, each with a single answer, worth one mark each.",
+  "level": "B2-C1",
+  "category": "IELTS_ACADEMIC_READING",
+  "durationMin": 60,
+  "sections": [
+    {
+      "id": "section-1",
+      "idx": 1,
+      "examId": "exam-ielts-academic-reading-01",
+      "title": "Controlled-Environment Agriculture",
+      "instructionsMd": "Read the passage below and answer Questions 1-13.",
+      "passageMd": "**A** Controlled-environment agriculture (CEA) is the cultivation of crops under conditions that are deliberately modified and partly or wholly enclosed by the grower. The sector now occupies an estimated 600,000 hectares of greenhouses and glasshouses worldwide, with vertical farms adding a further and expanding enclosed area. CEA has developed for four related reasons. Urbanisation has reduced the availability of arable land close to cities, while the share of people living in urban areas is projected to rise above two thirds of the world total by 2050. Production must also cope with erratic weather, which damages crops and disrupts supply chains, and water scarcity is a further pressure in arid regions, since CEA permits the reuse of nearly all irrigation water. Advocates argue that such conditions make CEA capable of using roughly 90 per cent less water and far less land per kilogram than field agriculture.\n\n**B** The systematic use of heated glasshouses for food production began in the Netherlands. Records from Leiden in the seventeenth century describe hothouses in which soil beds were warmed by flues fed with peat or dung, allowing tomatoes, cucumbers and other crops to be grown out of season. By the nineteenth century, glasshouse horticulture had consolidated into specialised districts, notably the Westland region near The Hague, where thousands of small heated greenhouses supplied nearby cities. The Lea Valley north of London developed a comparable concentration in the early nineteenth century. The two world wars transformed the motivation for such cultivation: food-saving campaigns in Britain and Germany sought to reduce pressure on imports, and glasshouses supplied vegetables to armed forces and cities. After 1945, heated glasshouses expanded rapidly in the Netherlands and the United Kingdom under food-security and export-drive policies, and the sector was later reshaped by the oil crises of the 1970s, which penalised the most energy-intensive firms.\n\n**C** The central technical distinction in CEA lies in how rooting medium, if any, supports the plant. In hydroponic systems the roots are irrigated with a recirculating nutrient solution whose composition is monitored and adjusted by automated dosing equipment. Aeroponic systems dispense with both soil and substrate: roots hang in air and are sprayed with a fine mist of nutrients, giving high oxygen availability and rapid uptake. A third family of systems uses an inert substrate such as rockwool, coir or perlite, which anchors the plant while the nutrient solution drains through and is collected. Closed-loop irrigation has replaced much single-pass watering. Above the crop, light-emitting diode fixtures allow the intensity and spectral composition of radiation to be specified, with red and blue wavelengths emphasised to promote vegetative growth. Temperature, humidity and carbon dioxide concentration are likewise regulated within narrow bands, and because many crops depend on wind pollination or vibration, hives of commercially reared bumblebees are introduced to set fruit.\n\n**D** Quantified comparisons between CEA and field production have become more common. Lettuce raised in recirculating hydroponic systems is reported to need about 5 litres of water per kilogram, against roughly 250 litres for field-grown lettuce. The same crop can be harvested up to 18 times a year in a heated greenhouse, against four to six outdoor harvests, and a hydroponic lettuce cycle may be completed in 30 to 35 days. These savings are offset by energy demand: lighting and temperature control raise the electricity needed for leafy greens to roughly 15 to 20 kilowatt-hours per kilogram, whereas field production requires about 2 to 3. Energy and labour together account for about 70 per cent of the operating cost of an indoor farm, energy alone frequently exceeding 40 per cent. Controlled crops also keep longer: hydroponic lettuce retains acceptable quality for 21 to 30 days against 7 to 10 days for field produce. A 2019 analysis by researchers at Wageningen University concluded that Dutch greenhouse firms were cutting energy use per kilogram substantially, while an Arizona study of the mid-2010s reported that lighting and water treatment were the largest cost centres for indoor farms in arid regions. Among commercial operators, the California company Plenty opened its first large vertical farm in 2015, and the Singapore firm Sky Greens, founded in 2012, has operated stacked towers of rotating beds.\n\n**E** The case for CEA is contested. Nutritional comparisons have found that hydroponically grown leafy vegetables can contain lower concentrations of some micronutrients, including calcium and iron, and of certain carotenoid antioxidants, though results vary with cultivar. Consumer testing has proved uneven: a Cornell University study of the mid-2010s found that blind tasters often could not distinguish hydroponic from field-grown lettuce, although a minority consistently preferred the field-grown sample for flavour. Broader analyses argue that once fertiliser production, land degradation, transport and refrigeration are counted, field farming is more energy-efficient per kilogram in most regions. The strongest criticism holds that indoor cultivation changes little in aggregate unless it is supplied with decarbonised electricity, since lighting dominates its energy budget; proponents respond that the case is strongest in countries with abundant low-carbon hydroelectricity.\n\n**F** Current research in CEA is directed at automating and scaling production. Robotic systems now handle transplanting, pruning and harvesting of leafy crops, and machine-learning models trained on time-lapse imagery estimate growth, detect disease and optimise nutrient dosing. Computer vision has been demonstrated to grade harvested produce and count plants, a prerequisite for much larger operations. Multi-storey facilities extend the growing area of a given footprint, and developers have begun to incorporate such buildings into mixed-use developments. One obstacle remains central to the sector's long-term viability: there is not yet an agreed method for producing leafy vegetables at a cost that competes with field agriculture when the price of electricity and carbon is uncertain. Whether automation lowers that cost faster than energy prices rise remains an open question.\n",
+      "questionGroups": [
+        {
+          "id": "g1",
+          "idx": 1,
+          "sectionId": "section-1",
+          "startIdx": 1,
+          "endIdx": 4,
+          "instructionMd": "Choose the correct letter, A, B, C, D, E or F.",
+          "questions": [
+            {
+              "id": "q01",
+              "sectionId": "section-1",
+              "groupId": "g1",
+              "idx": 1,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "difficulty": 2,
+              "promptMd": "Which paragraph mentions that expanding cities have eaten into the amount of farmland available near them?",
+              "explanationMd": "Paragraph A lists urbanisation as one of the four reasons for the development of CEA and states that urbanisation has reduced the availability of arable land close to cities.",
+              "options": [
+                {
+                  "contentMd": "A. Paragraph A",
+                  "isCorrect": true,
+                  "id": "q01:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "B. Paragraph B",
+                  "isCorrect": false,
+                  "id": "q01:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "C. Paragraph C",
+                  "isCorrect": false,
+                  "id": "q01:option:3",
+                  "idx": 3
+                },
+                {
+                  "contentMd": "D. Paragraph D",
+                  "isCorrect": false,
+                  "id": "q01:option:4",
+                  "idx": 4
+                },
+                {
+                  "contentMd": "E. Paragraph E",
+                  "isCorrect": false,
+                  "id": "q01:option:5",
+                  "idx": 5
+                },
+                {
+                  "contentMd": "F. Paragraph F",
+                  "isCorrect": false,
+                  "id": "q01:option:6",
+                  "idx": 6
+                }
+              ],
+              "skill": "READING"
+            },
+            {
+              "id": "q02",
+              "sectionId": "section-1",
+              "groupId": "g1",
+              "idx": 2,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "difficulty": 2,
+              "promptMd": "Which paragraph mentions a method in which the roots of a plant are held in mid-air and fed by a fine spray, with no soil or growing medium used at all?",
+              "explanationMd": "Paragraph C explains that aeroponic systems dispense with both soil and substrate: roots hang in air and are sprayed with a fine mist of nutrients.",
+              "options": [
+                {
+                  "contentMd": "A. Paragraph A",
+                  "isCorrect": false,
+                  "id": "q02:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "B. Paragraph B",
+                  "isCorrect": false,
+                  "id": "q02:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "C. Paragraph C",
+                  "isCorrect": true,
+                  "id": "q02:option:3",
+                  "idx": 3
+                },
+                {
+                  "contentMd": "D. Paragraph D",
+                  "isCorrect": false,
+                  "id": "q02:option:4",
+                  "idx": 4
+                },
+                {
+                  "contentMd": "E. Paragraph E",
+                  "isCorrect": false,
+                  "id": "q02:option:5",
+                  "idx": 5
+                },
+                {
+                  "contentMd": "F. Paragraph F",
+                  "isCorrect": false,
+                  "id": "q02:option:6",
+                  "idx": 6
+                }
+              ],
+              "skill": "READING"
+            },
+            {
+              "id": "q03",
+              "sectionId": "section-1",
+              "groupId": "g1",
+              "idx": 3,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "difficulty": 3,
+              "promptMd": "Which paragraph mentions findings that leafy vegetables grown without soil sometimes contain less calcium and iron?",
+              "explanationMd": "Paragraph E reports that nutritional comparisons have found hydroponically grown leafy vegetables can contain lower concentrations of some micronutrients, including calcium and iron.",
+              "options": [
+                {
+                  "contentMd": "A. Paragraph A",
+                  "isCorrect": false,
+                  "id": "q03:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "B. Paragraph B",
+                  "isCorrect": false,
+                  "id": "q03:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "C. Paragraph C",
+                  "isCorrect": false,
+                  "id": "q03:option:3",
+                  "idx": 3
+                },
+                {
+                  "contentMd": "D. Paragraph D",
+                  "isCorrect": false,
+                  "id": "q03:option:4",
+                  "idx": 4
+                },
+                {
+                  "contentMd": "E. Paragraph E",
+                  "isCorrect": true,
+                  "id": "q03:option:5",
+                  "idx": 5
+                },
+                {
+                  "contentMd": "F. Paragraph F",
+                  "isCorrect": false,
+                  "id": "q03:option:6",
+                  "idx": 6
+                }
+              ],
+              "skill": "READING"
+            },
+            {
+              "id": "q04",
+              "sectionId": "section-1",
+              "groupId": "g1",
+              "idx": 4,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "difficulty": 3,
+              "promptMd": "Which paragraph mentions computer-controlled machines that now do the transplanting, trimming and picking of crops and can also sort and judge what has been harvested?",
+              "explanationMd": "Paragraph F states that robotic systems now handle transplanting, pruning and harvesting of leafy crops, and that computer vision has been demonstrated to grade harvested produce and count plants.",
+              "options": [
+                {
+                  "contentMd": "A. Paragraph A",
+                  "isCorrect": false,
+                  "id": "q04:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "B. Paragraph B",
+                  "isCorrect": false,
+                  "id": "q04:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "C. Paragraph C",
+                  "isCorrect": false,
+                  "id": "q04:option:3",
+                  "idx": 3
+                },
+                {
+                  "contentMd": "D. Paragraph D",
+                  "isCorrect": false,
+                  "id": "q04:option:4",
+                  "idx": 4
+                },
+                {
+                  "contentMd": "E. Paragraph E",
+                  "isCorrect": false,
+                  "id": "q04:option:5",
+                  "idx": 5
+                },
+                {
+                  "contentMd": "F. Paragraph F",
+                  "isCorrect": true,
+                  "id": "q04:option:6",
+                  "idx": 6
+                }
+              ],
+              "skill": "READING"
+            }
+          ]
+        },
+        {
+          "id": "g2",
+          "idx": 2,
+          "sectionId": "section-1",
+          "startIdx": 5,
+          "endIdx": 8,
+          "instructionMd": "Do the following statements agree with the information given in the passage? Write True, False or Not Given on the answer sheet.",
+          "questions": [
+            {
+              "id": "q05",
+              "sectionId": "section-1",
+              "groupId": "g2",
+              "idx": 5,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "difficulty": 3,
+              "promptMd": "Vertical farms contribute extra enclosed growing space that is continuing to expand.",
+              "explanationMd": "Paragraph A states that the sector occupies an estimated 600,000 hectares of greenhouses and glasshouses worldwide, with vertical farms adding a further and expanding enclosed area.",
+              "options": [
+                {
+                  "contentMd": "True",
+                  "isCorrect": true,
+                  "id": "q05:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "False",
+                  "isCorrect": false,
+                  "id": "q05:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "Not Given",
+                  "isCorrect": false,
+                  "id": "q05:option:3",
+                  "idx": 3
+                }
+              ],
+              "skill": "READING"
+            },
+            {
+              "id": "q06",
+              "sectionId": "section-1",
+              "groupId": "g2",
+              "idx": 6,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "difficulty": 3,
+              "promptMd": "The rapid post-1945 expansion of heated glasshouses was caused by the oil crises of the 1970s.",
+              "explanationMd": "Paragraph B attributes the post-1945 expansion of heated glasshouses to food-security and export-drive policies, and says the sector was later reshaped by the oil crises of the 1970s, which penalised the most energy-intensive firms. The statement reverses this cause and effect.",
+              "options": [
+                {
+                  "contentMd": "True",
+                  "isCorrect": false,
+                  "id": "q06:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "False",
+                  "isCorrect": true,
+                  "id": "q06:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "Not Given",
+                  "isCorrect": false,
+                  "id": "q06:option:3",
+                  "idx": 3
+                }
+              ],
+              "skill": "READING"
+            },
+            {
+              "id": "q07",
+              "sectionId": "section-1",
+              "groupId": "g2",
+              "idx": 7,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "difficulty": 3,
+              "promptMd": "Once the cost of fertiliser production, land degradation, transport and refrigeration is included, field farming is more energy-efficient per kilogram than indoor farming in every region.",
+              "explanationMd": "Paragraph E states that once fertiliser production, land degradation, transport and refrigeration are counted, field farming is more energy-efficient per kilogram in most regions, so the claim that this holds in every region is contradicted.",
+              "options": [
+                {
+                  "contentMd": "True",
+                  "isCorrect": false,
+                  "id": "q07:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "False",
+                  "isCorrect": true,
+                  "id": "q07:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "Not Given",
+                  "isCorrect": false,
+                  "id": "q07:option:3",
+                  "idx": 3
+                }
+              ],
+              "skill": "READING"
+            },
+            {
+              "id": "q08",
+              "sectionId": "section-1",
+              "groupId": "g2",
+              "idx": 8,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "difficulty": 3,
+              "promptMd": "The Dutch government has prohibited the use of coal-fired heating in Dutch greenhouses.",
+              "explanationMd": "The passage discusses the Dutch sector's energy costs and its response to the oil crises but says nothing about any government prohibition of coal-fired heating in greenhouses, so the proposition is neither stated nor contradicted.",
+              "options": [
+                {
+                  "contentMd": "True",
+                  "isCorrect": false,
+                  "id": "q08:option:1",
+                  "idx": 1
+                },
+                {
+                  "contentMd": "False",
+                  "isCorrect": false,
+                  "id": "q08:option:2",
+                  "idx": 2
+                },
+                {
+                  "contentMd": "Not Given",
+                  "isCorrect": true,
+                  "id": "q08:option:3",
+                  "idx": 3
+                }
+              ],
+              "skill": "READING"
+            }
+          ]
+        },
+        {
+          "id": "g3",
+          "idx": 3,
+          "sectionId": "section-1",
+          "startIdx": 9,
+          "endIdx": 11,
+          "instructionMd": "Complete the sentences below. Write NO MORE THAN THREE WORDS for each answer.",
+          "questions": [
+            {
+              "id": "q09",
+              "sectionId": "section-1",
+              "groupId": "g3",
+              "idx": 9,
+              "type": "SENTENCE_COMPLETION",
+              "difficulty": 3,
+              "promptMd": "Write NO MORE THAN THREE WORDS for each answer.\nIn hydroponic systems the roots are irrigated with a recirculating [9] solution.",
+              "explanationMd": "Paragraph C states that in hydroponic systems the roots are irrigated with a recirculating nutrient solution whose composition is monitored and adjusted by automated dosing equipment.",
+              "blankAcceptTexts": {
+                "9": [
+                  "nutrient"
+                ]
+              },
+              "skill": "READING",
+              "options": []
+            },
+            {
+              "id": "q10",
+              "sectionId": "section-1",
+              "groupId": "g3",
+              "idx": 10,
+              "type": "SENTENCE_COMPLETION",
+              "difficulty": 3,
+              "promptMd": "Write NO MORE THAN THREE WORDS for each answer.\nIn a heated greenhouse the same crop can be harvested up to [10] a year.",
+              "explanationMd": "Paragraph D states that the same crop can be harvested up to 18 times a year in a heated greenhouse, against four to six outdoor harvests.",
+              "blankAcceptTexts": {
+                "10": [
+                  "18 times",
+                  "eighteen times"
+                ]
+              },
+              "skill": "READING",
+              "options": []
+            },
+            {
+              "id": "q11",
+              "sectionId": "section-1",
+              "groupId": "g3",
+              "idx": 11,
+              "type": "SENTENCE_COMPLETION",
+              "difficulty": 3,
+              "promptMd": "Write NO MORE THAN THREE WORDS for each answer.\nEnergy and labour together account for about [11] of the operating cost of an indoor farm.",
+              "explanationMd": "Paragraph D states that energy and labour together account for about 70 per cent of the operating cost of an indoor farm, with energy alone frequently exceeding 40 per cent.",
+              "blankAcceptTexts": {
+                "11": [
+                  "70 per cent",
+                  "70%",
+                  "seventy per cent"
+                ]
+              },
+              "skill": "READING",
+              "options": []
+            }
+          ]
+        },
+        {
+          "id": "g4",
+          "idx": 4,
+          "sectionId": "section-1",
+          "startIdx": 12,
+          "endIdx": 13,
+          "instructionMd": "Answer the questions below. Write NO MORE THAN FOUR WORDS AND/OR A NUMBER for each answer.",
+          "questions": [
+            {
+              "id": "q12",
+              "sectionId": "section-1",
+              "groupId": "g4",
+              "idx": 12,
+              "type": "SHORT_ANSWER",
+              "difficulty": 3,
+              "promptMd": "Write NO MORE THAN FOUR WORDS AND/OR A NUMBER for each answer.\nHow many hectares of greenhouses and glasshouses does the sector occupy worldwide?",
+              "explanationMd": "Paragraph A states that the sector now occupies an estimated 600,000 hectares of greenhouses and glasshouses worldwide, with vertical farms adding a further and expanding enclosed area.",
+              "shortAnswerAcceptTexts": [
+                "600,000",
+                "600000",
+                "600,000 hectares",
+                "600000 hectares",
+                "600,000 ha",
+                "600000 ha",
+                "six hundred thousand"
+              ],
+              "skill": "READING",
+              "options": []
+            },
+            {
+              "id": "q13",
+              "sectionId": "section-1",
+              "groupId": "g4",
+              "idx": 13,
+              "type": "SHORT_ANSWER",
+              "difficulty": 3,
+              "promptMd": "Write NO MORE THAN FOUR WORDS AND/OR A NUMBER for each answer.\nApproximately how many kilowatt-hours per kilogram do lighting and temperature control require for leafy greens?",
+              "explanationMd": "Paragraph D states that lighting and temperature control raise the electricity needed for leafy greens to roughly 15 to 20 kilowatt-hours per kilogram, whereas field production requires about 2 to 3.",
+              "shortAnswerAcceptTexts": [
+                "15 to 20",
+                "15-20",
+                "15 to 20 kilowatt-hours",
+                "15-20 kilowatt-hours",
+                "15 to 20 kWh",
+                "15-20 kWh",
+                "15 to 20 kWh/kg",
+                "15-20 kWh/kg"
+              ],
+              "skill": "READING",
+              "options": []
+            }
+          ]
+        }
+      ],
+      "questions": []
+    }
+  ]
+}

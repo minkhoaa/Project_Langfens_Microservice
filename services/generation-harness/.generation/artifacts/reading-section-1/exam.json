@@ -1,0 +1,393 @@
+{
+  "id": "a0000000-0000-4000-8000-000000000001",
+  "title": "IELTS Academic Reading - Section 1: The Urban Heat Island",
+  "slug": "ielts-academic-reading-section-1-urban-heat-island",
+  "category": "IELTS_ACADEMIC_READING",
+  "level": "B2_C1",
+  "complete": true,
+  "expectedQuestionCount": 13,
+  "sections": [
+    {
+      "id": "b0000000-0000-4000-8000-000000000001",
+      "idx": 1,
+      "examId": "a0000000-0000-4000-8000-000000000001",
+      "title": "The Urban Heat Island",
+      "instructionsMd": "The passage below is about the urban heat island. Read it carefully and answer Questions 1-13.",
+      "passageMd": "The Urban Heat Island\n\nA. For more than a century, observers have noticed that large cities are warmer than the countryside around them. The difference is known as the urban heat island, and it is most pronounced on calm, clear nights. In compact metropolitan areas the temperature gap between the city and the surrounding countryside can reach six degrees Celsius, while in small towns it may be barely measurable. The effect was described systematically in the early twentieth century, when researchers in several countries began recording temperature differences between built-up districts and nearby reference stations.\n\nB. Several human activities create the effect. Dark roofs and paved surfaces absorb solar radiation during the day and release it slowly afterwards. Cities also contain far less vegetation than the countryside, so less energy is used in evaporation, the process by which plants cool the air. Waste heat from vehicles, factories, air conditioners and street lighting is released directly into the open air. Narrow streets lined with tall buildings slow the wind, so warm air is not carried away and replaced by cooler air from outside.\n\nC. The most dangerous part of the effect happens after sunset. Concrete, brick and asphalt store heat throughout the day and release it slowly overnight, so cities cool far more slowly than the countryside. Rural areas, by contrast, lose their heat quickly once the sun goes down. It is this difference in the rate of cooling, rather than the daytime peak itself, that explains why most heat-related deaths in cities occur in the small hours of the morning.\n\nD. The health effects are well documented. Heat raises the risk of cardiovascular illness, kidney failure and respiratory problems, and it places the greatest strain on elderly people, on young children and on those who work outdoors. People who live in the hottest neighbourhoods, often the poorest parts of a city, are the least able to escape the heat, because those districts have little green space and few air-conditioned homes.\n\nE. Measuring the effect requires care. Satellites record the temperature of surfaces rather than the air that people experience at street level, so an image of a hot city taken at noon may say little about the conditions on the pavement. Air temperature is normally measured at a height of two metres inside a shaded screen, following a long-established international standard. One international comparison covered fifty cities and reported average surface temperatures that were between two and four degrees higher in the city centres than in the surrounding countryside.\n\nF. A number of responses have been tried. Green roofs, planted with low-growing species such as sedum, can lower the temperature of a roof surface considerably, though their effect on air temperature at street level is much smaller. Roofs painted with reflective material are cheaper to install and can be applied to buildings that already exist. Street trees provide shade and cool the surrounding air by evaporation, but they need space, water and many years to mature. Some cities have begun to require reflective surfaces in new commercial developments, and a few have offered grants to householders who paint their roofs white.\n\nG. None of these measures is without criticism. Critics point out that most have been tested on individual buildings rather than across whole cities, and that planting trees in the hottest districts can consume scarce water. Others argue that adaptation of this kind simply allows a city to grow larger, since pleasant temperatures attract further development. There is no consensus on how quickly these measures should be adopted, and researchers continue to disagree about which combinations of interventions work best in different climates.",
+      "questionGroups": [
+        {
+          "id": "c0000000-0000-4000-8000-000000000001",
+          "idx": 1,
+          "sectionId": "b0000000-0000-4000-8000-000000000001",
+          "startIdx": 1,
+          "endIdx": 6,
+          "instructionMd": "Do the following statements agree with the information given in the passage? Write True, False or Not Given.",
+          "questions": [
+            {
+              "id": "d0000000-0000-4000-8000-000000000001",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000001",
+              "idx": 1,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "The urban heat island effect was first described systematically in the early twentieth century.",
+              "explanationMd": "Paragraph A: \"The effect was described systematically in the early twentieth century\". The statement agrees with the passage.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000001",
+                  "idx": 1,
+                  "contentMd": "True",
+                  "isCorrect": true
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000002",
+                  "idx": 2,
+                  "contentMd": "False",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000003",
+                  "idx": 3,
+                  "contentMd": "Not Given",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000002",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000001",
+              "idx": 2,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Rural areas sometimes have higher temperatures than the cities immediately next to them.",
+              "explanationMd": "Paragraph C states that rural areas lose heat quickly while cities cool slowly, and paragraph A reports a city-rural temperature gap. The statement contradicts the passage.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000004",
+                  "idx": 1,
+                  "contentMd": "True",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000005",
+                  "idx": 2,
+                  "contentMd": "False",
+                  "isCorrect": true
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000006",
+                  "idx": 3,
+                  "contentMd": "Not Given",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000003",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000001",
+              "idx": 3,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Satellite measurements record surface temperatures rather than air temperatures at street level.",
+              "explanationMd": "Paragraph E: \"Satellites record the temperature of surfaces rather than the air that people experience at street level\". The statement agrees with the passage.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000007",
+                  "idx": 1,
+                  "contentMd": "True",
+                  "isCorrect": true
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000008",
+                  "idx": 2,
+                  "contentMd": "False",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000009",
+                  "idx": 3,
+                  "contentMd": "Not Given",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000004",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000001",
+              "idx": 4,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Researchers have agreed on a single definition of the urban heat island.",
+              "explanationMd": "Paragraph A introduces the term but the passage never reports agreement or disagreement about definitions, so the statement is not given.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000010",
+                  "idx": 1,
+                  "contentMd": "True",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000011",
+                  "idx": 2,
+                  "contentMd": "False",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000012",
+                  "idx": 3,
+                  "contentMd": "Not Given",
+                  "isCorrect": true
+                }
+              ]
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000005",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000001",
+              "idx": 5,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "The greatest health risks associated with urban heat occur during the daytime.",
+              "explanationMd": "Paragraph C: \"most heat-related deaths in cities occur in the small hours of the morning\". The statement contradicts the passage.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000013",
+                  "idx": 1,
+                  "contentMd": "True",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000014",
+                  "idx": 2,
+                  "contentMd": "False",
+                  "isCorrect": true
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000015",
+                  "idx": 3,
+                  "contentMd": "Not Given",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000006",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000001",
+              "idx": 6,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Some cities have begun to require reflective surfaces in new commercial developments.",
+              "explanationMd": "Paragraph F: \"Some cities have begun to require reflective surfaces in new commercial developments\". The statement agrees with the passage.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000016",
+                  "idx": 1,
+                  "contentMd": "True",
+                  "isCorrect": true
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000017",
+                  "idx": 2,
+                  "contentMd": "False",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000018",
+                  "idx": 3,
+                  "contentMd": "Not Given",
+                  "isCorrect": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "c0000000-0000-4000-8000-000000000002",
+          "idx": 2,
+          "sectionId": "b0000000-0000-4000-8000-000000000001",
+          "startIdx": 7,
+          "endIdx": 9,
+          "instructionMd": "The passage has seven paragraphs, A-G. Choose the correct heading for paragraphs B, C and E from the List of Headings below. Each heading may be used only once; one heading is not needed.",
+          "questions": [
+            {
+              "id": "d0000000-0000-4000-8000-000000000007",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000002",
+              "idx": 7,
+              "type": "MATCHING_HEADING",
+              "skill": "READING",
+              "difficulty": 3,
+              "promptMd": "Choose the correct heading for each paragraph from the List of Headings below.\n\nList of Headings:\ni. What the satellites can and cannot see\nii. Living with the heat after sunset\niii. Why cities are warmer than farmland\niv. The long history of a modern problem\n\n7. Paragraph B",
+              "explanationMd": "Paragraph B is best summarised by heading iii. Why cities are warmer than farmland.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000019",
+                  "idx": 1,
+                  "contentMd": "i. What the satellites can and cannot see",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000020",
+                  "idx": 2,
+                  "contentMd": "ii. Living with the heat after sunset",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000021",
+                  "idx": 3,
+                  "contentMd": "iii. Why cities are warmer than farmland",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000022",
+                  "idx": 4,
+                  "contentMd": "iv. The long history of a modern problem",
+                  "isCorrect": false
+                }
+              ],
+              "matchPairs": {
+                "7": [
+                  "iii",
+                  "Why cities are warmer than farmland"
+                ]
+              }
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000008",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000002",
+              "idx": 8,
+              "type": "MATCHING_HEADING",
+              "skill": "READING",
+              "difficulty": 3,
+              "promptMd": "Choose the correct heading for each paragraph from the List of Headings below.\n\nList of Headings:\ni. What the satellites can and cannot see\nii. Living with the heat after sunset\niii. Why cities are warmer than farmland\niv. The long history of a modern problem\n\n8. Paragraph C",
+              "explanationMd": "Paragraph C is best summarised by heading ii. Living with the heat after sunset.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000023",
+                  "idx": 1,
+                  "contentMd": "i. What the satellites can and cannot see",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000024",
+                  "idx": 2,
+                  "contentMd": "ii. Living with the heat after sunset",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000025",
+                  "idx": 3,
+                  "contentMd": "iii. Why cities are warmer than farmland",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000026",
+                  "idx": 4,
+                  "contentMd": "iv. The long history of a modern problem",
+                  "isCorrect": false
+                }
+              ],
+              "matchPairs": {
+                "8": [
+                  "ii",
+                  "Living with the heat after sunset"
+                ]
+              }
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000009",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000002",
+              "idx": 9,
+              "type": "MATCHING_HEADING",
+              "skill": "READING",
+              "difficulty": 3,
+              "promptMd": "Choose the correct heading for each paragraph from the List of Headings below.\n\nList of Headings:\ni. What the satellites can and cannot see\nii. Living with the heat after sunset\niii. Why cities are warmer than farmland\niv. The long history of a modern problem\n\n9. Paragraph E",
+              "explanationMd": "Paragraph E is best summarised by heading i. What the satellites can and cannot see.",
+              "options": [
+                {
+                  "id": "e0000000-0000-4000-8000-000000000027",
+                  "idx": 1,
+                  "contentMd": "i. What the satellites can and cannot see",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000028",
+                  "idx": 2,
+                  "contentMd": "ii. Living with the heat after sunset",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000029",
+                  "idx": 3,
+                  "contentMd": "iii. Why cities are warmer than farmland",
+                  "isCorrect": false
+                },
+                {
+                  "id": "e0000000-0000-4000-8000-000000000030",
+                  "idx": 4,
+                  "contentMd": "iv. The long history of a modern problem",
+                  "isCorrect": false
+                }
+              ],
+              "matchPairs": {
+                "9": [
+                  "i",
+                  "What the satellites can and cannot see"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "c0000000-0000-4000-8000-000000000003",
+          "idx": 3,
+          "sectionId": "b0000000-0000-4000-8000-000000000001",
+          "startIdx": 10,
+          "endIdx": 13,
+          "instructionMd": "Write no more than two words for each answer.",
+          "questions": [
+            {
+              "id": "d0000000-0000-4000-8000-000000000010",
+              "sectionId": "b0000000-0000-4000-8000-000000000001",
+              "groupId": "c0000000-0000-4000-8000-000000000003",
+              "idx": 10,
+              "type": "SUMMARY_COMPLETION",
+              "skill": "READING",
+              "difficulty": 3,
+              "promptMd": "Complete the summary below.\n\nCities have tried a number of ways of reducing urban heat. Green roofs lower the temperature of the [1] surface, but they have only a small effect on air temperature at street level. Roofs painted with reflective material are [2] to install and can be used on buildings that already exist. Street trees provide shade and cool the surrounding air, but they need space, water and many years to [3]. Critics argue that most of these measures have been tested on individual buildings rather than across [4].",
+              "explanationMd": "The summary is drawn from paragraph F (green roofs, reflective roofs, street trees) and paragraph G (critics testing measures on individual buildings rather than across whole cities).",
+              "options": [],
+              "blankAcceptTexts": {
+                "1": [
+                  "roof"
+                ],
+                "2": [
+                  "cheaper"
+                ],
+                "3": [
+                  "mature"
+                ],
+                "4": [
+                  "whole cities",
+                  "entire cities"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

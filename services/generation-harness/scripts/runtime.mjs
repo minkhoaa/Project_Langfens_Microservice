@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, realpathSync, statSync, symlinkSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -90,7 +90,7 @@ export function runtimeLaunch(args = [], inherited = process.env) {
 			explicitCwd = resolve(input[++i]);
 		} else forwarded.push(input[i]);
 	}
-	if (!forwarded.includes("--no-extensions")) {
+	if (!forwarded.includes("--no-extensions") || readingMode) {
 		const extension = ownedSubagentEntry(source);
 		if (!forwarded.includes(extension)) forwarded.unshift("--extension", extension);
 		const configExtension = join(harnessRoot, 'scripts/config-extension.mjs');
@@ -101,8 +101,44 @@ export function runtimeLaunch(args = [], inherited = process.env) {
 			if (!forwarded.includes(readingExtension)) forwarded.push('--extension', readingExtension);
 		}
 	}
-	const runtime = runtimeEnvironment(inherited);
-	const cwd = explicitCwd || (readingMode ? harnessRoot : undefined) || (inherited.GENERATION_HARNESS_ISOLATED === "1" && inherited.GENERATION_HARNESS_WORKING_DIR) || runtime.workspace;
+	const runtime = runtimeEnvironment(readingMode ? {
+		...inherited,
+		GENERATION_HARNESS_RUNTIME_DIR: join(resolve(inherited.GENERATION_HARNESS_RUNTIME_DIR || join(harnessRoot, '.runtime')), 'reading'),
+	} : inherited);
+	if (readingMode) {
+		const profile = join(harnessRoot, '.generation/reading');
+		const settings = join(runtime.env.GENERATION_HARNESS_AGENT_DIR, 'settings.json');
+		const skillsDir = join(profile, 'skills');
+		// Seed ordinary native user settings once; /config remains the editor for this profile.
+		if (!existsSync(settings)) {
+			const defaults = JSON.parse(readFileSync(join(profile, 'settings.json'), 'utf8'));
+			defaults.subagents.agentScanDirs = [join(profile, 'agents')];
+			defaults.skills = [skillsDir];
+			writeFileSync(settings, JSON.stringify(defaults, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+		} else {
+			try {
+				const existing = JSON.parse(readFileSync(settings, 'utf8'));
+				let modified = false;
+				if (!existing.subagents?.agentScanDirs) {
+					existing.subagents = existing.subagents || {};
+					existing.subagents.agentScanDirs = [join(profile, 'agents')];
+					modified = true;
+				}
+				if (!existing.skills || !Array.isArray(existing.skills) || !existing.skills.includes(skillsDir)) {
+					existing.skills = [skillsDir];
+					modified = true;
+				}
+				if (modified) writeFileSync(settings, JSON.stringify(existing, null, 2) + '\n', { mode: 0o600 });
+			} catch {}
+		}
+		for (const skill of ['using-reading-superpowers', 'reading-authoring', 'reading-quality-review', 'reading-verification']) {
+			forwarded.push('--skill', join(skillsDir, skill));
+		}
+		forwarded.unshift('--no-extensions', '--no-context-files', '--no-skills', '--no-prompt-templates', '--no-mcp', '--no-approve',
+			'--system-prompt', join(profile, 'SYSTEM.md'), '--tools',
+			'read,bash,edit,write,subagent,subagents_enable,bg_wait,subagent_supervisor,get_question_spec,validate_question,validate_group,validate_exam,verify_evidence,check_grading_parity,inspect_delivery_projection,create_single_choice,create_multiple_choice,create_completion,create_matching,create_short_answer,create_flow_chart');
+	}
+	const cwd = explicitCwd || (!readingMode && inherited.GENERATION_HARNESS_ISOLATED === "1" && inherited.GENERATION_HARNESS_WORKING_DIR) || runtime.workspace;
 	if (!statSync(cwd).isDirectory()) throw new Error(`Harness cwd is not a directory: ${cwd}`);
 	runtime.env.GENERATION_HARNESS_CONFIG_ROOT = harnessRoot;
 	// Display launcher-pinned resources truthfully in /config; this is metadata, not a tool/workflow parameter.

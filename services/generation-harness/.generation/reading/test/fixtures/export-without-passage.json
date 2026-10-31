@@ -1,0 +1,242 @@
+{
+  "id": "e1",
+  "complete": true,
+  "expectedQuestionCount": 13,
+  "sections": [
+    {
+      "id": "b1000000-0000-4000-8000-000000000001",
+      "idx": 1,
+      "questionGroups": [
+        {
+          "id": "c1000000-0000-4000-8000-000000000001",
+          "idx": 1,
+          "instructionMd": "Read the passage and decide whether the following statements agree with the information given in the passage.\n\nChoose True, False or Not Given for each statement.\nTrue means the statement agrees with the information given in the passage.\nFalse means the statement contradicts the information given in the passage.\nNot Given means the passage gives no information about the statement.",
+          "questions": [
+            {
+              "id": "a1000000-0000-4000-8000-000000000001",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000001",
+              "idx": 1,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 1,
+              "promptMd": "Roughly three per cent of the world's land area consists of peatland.",
+              "explanationMd": "True/False/Not Given item. Section A: peatlands cover roughly three per cent of the world's land area, so the statement agrees with the passage. Re-rated from 2 to 1 (direct numeric lookup) after the first independent examiner review, and re-typed from generic single-choice to the contract's TRUE_FALSE_NOT_GIVEN type after the second examiner review.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000101", "idx": 1, "contentMd": "True", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000102", "idx": 2, "contentMd": "False", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000103", "idx": 3, "contentMd": "Not Given", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000002",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000001",
+              "idx": 2,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Peatlands hold more than half of the carbon found in the world's soils.",
+              "explanationMd": "True/False/Not Given item. Section A gives about thirty per cent of the carbon stored in the world's soils, which contradicts the claim of more than half. Re-typed from generic single-choice to the contract's TRUE_FALSE_NOT_GIVEN type after the second examiner review.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000201", "idx": 1, "contentMd": "True", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000202", "idx": 2, "contentMd": "False", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000203", "idx": 3, "contentMd": "Not Given", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000003",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000001",
+              "idx": 3,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Draining peatland can cause the land surface to sink.",
+              "explanationMd": "True/False/Not Given item. Section A: the ground itself sinks as the peat compacts, a process known as subsidence, so the statement agrees with the passage. Difficulty 2 confirmed by the first independent examiner review (requires transfer from subsidence to sink). Re-typed from generic single-choice to the contract's TRUE_FALSE_NOT_GIVEN type after the second examiner review.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000301", "idx": 1, "contentMd": "True", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000302", "idx": 2, "contentMd": "False", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000303", "idx": 3, "contentMd": "Not Given", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000004",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000001",
+              "idx": 4,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 4,
+              "promptMd": "Peatland drainage in northern Europe was mainly intended to improve the grazing of sheep and cattle.",
+              "explanationMd": "True/False/Not Given item. Section B lists the purposes of drainage (fuel, grazing, conifers, forestry, cropping, access) but never ranks them, so the claim that grazing was the MAIN purpose is neither stated nor contradicted. NOT GIVEN. Re-typed from generic single-choice to the contract's TRUE_FALSE_NOT_GIVEN type so that the type-level TRUTH_EVIDENCE absence gate applies to this item.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000401", "idx": 1, "contentMd": "True", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000402", "idx": 2, "contentMd": "False", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000403", "idx": 3, "contentMd": "Not Given", "isCorrect": true }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000005",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000001",
+              "idx": 5,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Peat can still be sold commercially after a peatland has been rewetted.",
+              "explanationMd": "True/False/Not Given item. Section C: rewetting also removes peat from the marketplace, so commercial peat cutting stops after rewetting and the statement is False. Re-rated from 3 to 2 after the first independent examiner review: the item turns on one polarity flip. Re-typed from generic single-choice to the contract's TRUE_FALSE_NOT_GIVEN type after the second examiner review.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000501", "idx": 1, "contentMd": "True", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000502", "idx": 2, "contentMd": "False", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000503", "idx": 3, "contentMd": "Not Given", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000006",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000001",
+              "idx": 6,
+              "type": "TRUE_FALSE_NOT_GIVEN",
+              "skill": "READING",
+              "difficulty": 3,
+              "promptMd": "Compensation for canal maintenance in Southeast Asia is more expensive than the subsidies paid to European landowners.",
+              "explanationMd": "True/False/Not Given item. Section E links Southeast Asian compensation to restoring and maintaining the canals, and Section D describes European subsidies paid per hectare each year, but neither section states an amount and the passage makes no comparison, so the answer is Not Given. Re-rated from 4 to 3 after the second examiner review: a 'no comparison given' Not Given is standard task practice rather than top-band difficulty. Re-typed from generic single-choice to the contract's TRUE_FALSE_NOT_GIVEN type so that the type-level TRUTH_EVIDENCE absence gate applies.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000601", "idx": 1, "contentMd": "True", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000602", "idx": 2, "contentMd": "False", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000603", "idx": 3, "contentMd": "Not Given", "isCorrect": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "c1000000-0000-4000-8000-000000000002",
+          "idx": 2,
+          "instructionMd": "Choose the correct letter, A, B, C or D.",
+          "questions": [
+            {
+              "id": "a1000000-0000-4000-8000-000000000007",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 7,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 3,
+              "promptMd": "According to the passage, what is identified as the most common reason that restoration projects stall?",
+              "explanationMd": "Section D: the absence of long-term funding agreements, rather than a shortage of money in principle, is the most common reason restoration projects stall. That is option B. Option D rewritten after the first independent examiner review: the previous distractor was an implausible material shortage; the new one is a plausible-sounding but unstated obstacle. Stem rewritten after the second examiner review: it no longer names the section heading, because an authentic multiple-choice stem points to content rather than to a heading in the passage.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000701", "idx": 1, "contentMd": "The cost of compensating farmers for peat that can no longer be harvested", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000702", "idx": 2, "contentMd": "The absence of long-term funding agreements", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000703", "idx": 3, "contentMd": "Disagreement between scientists and landowners about which sites to restore", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000704", "idx": 4, "contentMd": "The difficulty of persuading owners to accept restoration on their land", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000008",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 8,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Why does the author discuss fen grassland?",
+              "explanationMd": "Section F describes fen grassland as land that was never peat but was drained for arable farming, and notes that rewetting it would remove some of the region's most productive farmland, so the reference shows what restoration would cost (option C). Options rewritten after the first independent examiner review: the previous bank contained three strawmen that could be eliminated from the author's stance alone. Stem rewritten after the second examiner review to remove the locator phrase 'in the final section of the passage'.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000801", "idx": 1, "contentMd": "To suggest that subsidies should be extended to all drained farmland", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000802", "idx": 2, "contentMd": "To warn that restoring fen grassland takes longer than restoring deep peat", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000803", "idx": 3, "contentMd": "To give an example of drained land where rewetting would destroy existing agricultural value", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000804", "idx": 4, "contentMd": "To show that schemes which ignore local knowledge rarely survive the first decade", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000009",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 9,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "What does the author state about the outcome in the district described in the passage?",
+              "explanationMd": "Section E ends: a fall in fire-related haze and a measurable increase in the area of peatland under active restoration, achieved without moving a single farmer off the land. That is option A. Option C rewritten after the second examiner review: the previous distractor (haze reduced by replanting with native vegetation) was semi-supported by the Section E mechanism. The new distractor swaps the two stated outcomes and is clearly contradicted by the passage. Stem rewritten to remove the locator phrase 'in the section on Southeast Asia'.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000000901", "idx": 1, "contentMd": "Fire-related haze fell while farming continued on the same land", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000000902", "idx": 2, "contentMd": "Farmers were compensated for leaving large areas of land idle", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000903", "idx": 3, "contentMd": "The area of peatland under restoration increased, but fire-related haze did not fall", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000000904", "idx": 4, "contentMd": "The scheme depended on farmers leaving the district altogether", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000010",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 10,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "Which of the following does the passage identify as a consequence of draining peatland?",
+              "explanationMd": "Section B: a drained peatland no longer holds water, so rainfall runs off quickly and flood risk in downstream towns rises. That is option D. Option A rewritten after the second examiner review: the previous distractor (the disappearance of cotton grass) was inferable as true from Section C's claim that cotton grass returns after rewetting; the new distractor contradicts the passage's counterintuitive flood-risk consequence. Options reordered after the first independent examiner review so that the correct answer is not always B.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000001001", "idx": 1, "contentMd": "A reduction in flood risk in downstream towns", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001002", "idx": 2, "contentMd": "A shortage of fuel for domestic heating", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001003", "idx": 3, "contentMd": "An increase in the carbon stored in the soil", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001004", "idx": 4, "contentMd": "Downstream towns face a greater risk of flooding", "isCorrect": true }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000011",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 11,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "What does the passage say about methane and carbon dioxide?",
+              "explanationMd": "Section C: the trade-off nevertheless favours restoration over continued drainage, because methane is short-lived whereas carbon dioxide persists for centuries. That is option B. Option D rewritten after the first independent examiner review: the previous distractor inverted the chemistry of the passage; the new one is a plausible-sounding but unstated absorption claim. Re-rated from 3 to 2 after the second examiner review: the key is a near-verbatim clause.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000001101", "idx": 1, "contentMd": "Methane stays in the atmosphere longer than carbon dioxide", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001102", "idx": 2, "contentMd": "Methane is short-lived, whereas carbon dioxide persists for centuries", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000001103", "idx": 3, "contentMd": "Both gases remain in the atmosphere for roughly twelve years", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001104", "idx": 4, "contentMd": "Carbon dioxide is absorbed more quickly once peat has been rewetted", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000012",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 12,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 4,
+              "promptMd": "What does the passage identify as the main difficulty of funding restoration?",
+              "explanationMd": "Section D: subsidies are typically paid per hectare each year, while the decision to drain or to rewet concerns a single choice taken once in a generation, and the commitment has to last decades. That is option C. Options rewritten after the first independent examiner review so that the distractors are all defensible-sounding but unsupported; option B was sharpened again after the second examiner review, because the previous wording was a near re-phrasing of the key and therefore inferable. Re-rated from 3 to 4: the item requires matching the payment period against the commitment period across two sentences.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000001201", "idx": 1, "contentMd": "Restoration schemes are too expensive to be funded at all", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001202", "idx": 2, "contentMd": "Much of the money intended for restoration is spent on monitoring the sites", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001203", "idx": 3, "contentMd": "The money is paid each year, while the decision to rewet has to last for decades", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000001204", "idx": 4, "contentMd": "Scientists are divided about which sites can be restored", "isCorrect": false }
+              ]
+            },
+            {
+              "id": "a1000000-0000-4000-8000-000000000013",
+              "sectionId": "b1000000-0000-4000-8000-000000000001",
+              "groupId": "c1000000-0000-4000-8000-000000000002",
+              "idx": 13,
+              "type": "MULTIPLE_CHOICE_SINGLE",
+              "skill": "READING",
+              "difficulty": 2,
+              "promptMd": "What does the author conclude about the way drained land should be treated?",
+              "explanationMd": "Section F closes: careful assessment of each site, rather than a blanket commitment to restore all drained peat, is what the available evidence supports. That is option A. Options rewritten after the first independent examiner review so that the distractors are plausible but wrong rather than absurd. Re-rated from 3 to 2.",
+              "options": [
+                { "id": "a2000000-0000-4000-8000-000000001301", "idx": 1, "contentMd": "Each site should be assessed before it is decided whether to restore it", "isCorrect": true },
+                { "id": "a2000000-0000-4000-8000-000000001302", "idx": 2, "contentMd": "Restoration should be prioritised where peat is still being drained for fuel", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001303", "idx": 3, "contentMd": "All drained peat should be restored, provided buildings are not threatened", "isCorrect": false },
+                { "id": "a2000000-0000-4000-8000-000000001304", "idx": 4, "contentMd": "Schemes work better when they are designed without local knowledge", "isCorrect": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

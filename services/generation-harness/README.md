@@ -17,7 +17,7 @@ Independent Node.js harness with a native agent loop, terminal UI, JSON-lines RP
 
 `scripts/run.mjs` launches the local Core bundle, native Subagents and the `/config` command extension. Auxiliary integrations are opt-in; they are not additional default Core tools. See [Subagents documentation](packages/generation-subagents/README.md) for delegation and configuration.
 
-IELTS specifications and passive test vectors live in [`.generation/contracts/`](.generation/contracts/README.md). The independent [Reading extension](.generation/reading/README.md) is loaded by `npm run start:reading`; it adds seven native domain tools, not a Reading policy or coordinator. Schema validity alone does not establish semantic correctness or consumer compatibility.
+IELTS specifications and passive test vectors live in [`.generation/contracts/`](.generation/contracts/README.md). The independent [Reading extension](.generation/reading/README.md) is loaded by `npm run start:reading`; it selects a minimal Academic Reading author profile with seven native domain tools and two native review specialists, not a coordinator. Schema validity alone does not establish semantic correctness or consumer compatibility.
 
 ## Commands
 
@@ -57,7 +57,7 @@ The shell tool retains the system `PATH` for local commands. Runtime path/config
 
 `npm run config` restores the standalone configuration TUI: F1 Resources, F2 Config, F3 Roles/Agents and F4 Tools. Use Tab to switch User/Project scope; resource toggles persist native filters without executing or installing resources. `/config` opens the same manager inside the harness. See [configuration usage](.generation/config/README.md) for CLI edits, variable metadata, paths and safety boundaries.
 
-`npm run start:reading` uses the harness project CWD and loads Reading explicitly while retaining native tools/Subagents and `/config`; it does not auto-approve project trust or start generation. Normal `npm start` keeps the scratch-workspace CWD.
+`npm run start:reading` uses separate `.runtime/reading/` state/workspace, a Reading system prompt and tool allowlist, and Reading-only native specialist discovery. It loads Reading/Subagents and `/config` explicitly, disables ambient coding context and project trust, and does not start generation automatically. Configure this profile's credentials/model in its own `/config`. Normal `npm start` keeps the existing coding profile and scratch workspace. See the [Reading guide](.generation/reading/README.md) for verification limits.
 
 Provider credentials can be supplied through environment variables or configured interactively with `/login`. Local credentials are stored under `.runtime/agent/auth.json` in the default runtime.
 
